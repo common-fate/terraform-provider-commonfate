@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     commonfate = {
-      source = "registry.terraform.io/example/commonfate"
+      source = "commonfate.com/commonfate/commonfate"
       version = "~> 1.0.0"
 
     }

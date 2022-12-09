@@ -168,12 +168,27 @@ func (r AccessRuleResource) Create(ctx context.Context, req resource.CreateReque
 		ProviderId: data.Target.Provider.ID.ValueString(),
 	}
 
+	createRequest := governance.GovCreateAccessRuleJSONRequestBody{
+		Name:            data.Name.ValueString(),
+		Description:     data.Description.ValueString(),
+		Target:          target,
+		TimeConstraints: cf_types.TimeConstraints{MaxDurationSeconds: int(data.TimeConstraints.MaxDurationSeconds.ValueInt64())},
+	}
+
+	for _, g := range data.Groups {
+		createRequest.Groups = append(createRequest.Groups, g.ValueString())
+	}
+
+	for _, g := range data.Approval.Groups {
+		createRequest.Approval.Groups = append(createRequest.Approval.Groups, g.ValueString())
+	}
+
+	for _, u := range data.Approval.Users {
+		createRequest.Approval.Users = append(createRequest.Approval.Users, u.ValueString())
+	}
+
 	//create the new access model with the client
-	res, err := r.client.GovCreateAccessRuleWithResponse(ctx, governance.GovCreateAccessRuleJSONRequestBody{
-		Name:        data.Name.ValueString(),
-		Description: data.Description.ValueString(),
-		Target:      target,
-	})
+	res, err := r.client.GovCreateAccessRuleWithResponse(ctx, createRequest)
 
 	if err != nil {
 
@@ -327,22 +342,18 @@ func (r AccessRuleResource) Delete(ctx context.Context, req resource.DeleteReque
 	}
 
 	// //create the new access model with the client
-	// _, err := r.client.GovUpdateAccessRuleWithResponse(ctx, data.ID.ValueString(), governance.GovUpdateAccessRuleJSONRequestBody{
-	// 	Name:        data.Name.ValueString(),
-	// 	Description: data.Description.ValueString(),
-	// 	Target:      target,
-	// })
-	// if err != nil {
+	_, err := r.client.GovArchiveAccessRuleWithResponse(ctx, data.ID.ValueString())
+	if err != nil {
 
-	// 	resp.Diagnostics.AddError(
-	// 		"Unable to Create Resource",
-	// 		"An unexpected error occurred while parsing the resource creation response. "+
-	// 			"Please report this issue to the provider developers.\n\n"+
-	// 			"JSON Error: "+err.Error(),
-	// 	)
+		resp.Diagnostics.AddError(
+			"Unable to Create Resource",
+			"An unexpected error occurred while parsing the resource creation response. "+
+				"Please report this issue to the provider developers.\n\n"+
+				"JSON Error: "+err.Error(),
+		)
 
-	// 	return
+		return
 
-	// }
+	}
 
 }

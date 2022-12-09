@@ -18,7 +18,7 @@ func main() {
 	flag.Parse()
 	err := providerserver.Serve(context.Background(), commonfate.New, providerserver.ServeOpts{
 		Debug:   debug,
-		Address: "registry.terraform.io/example/commonfate",
+		Address: "commonfate.com/commonfate/commonfate",
 	})
 
 	if err != nil {
