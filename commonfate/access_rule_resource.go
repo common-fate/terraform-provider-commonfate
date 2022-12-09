@@ -9,6 +9,7 @@ import (
 	"github.com/common-fate/common-fate/governance"
 
 	cf_types "github.com/common-fate/common-fate/pkg/types"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -48,6 +49,12 @@ type TargetProviderModel struct {
 type AccessRuleResource struct {
 	client *governance.ClientWithResponses
 }
+
+var (
+	_ resource.Resource                = &AccessRuleResource{}
+	_ resource.ResourceWithConfigure   = &AccessRuleResource{}
+	_ resource.ResourceWithImportState = &AccessRuleResource{}
+)
 
 // Metadata returns the data source type name.
 func (r AccessRuleResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -356,4 +363,9 @@ func (r AccessRuleResource) Delete(ctx context.Context, req resource.DeleteReque
 
 	}
 
+}
+
+func (r *AccessRuleResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	// Retrieve import ID and save to id attribute
+	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
