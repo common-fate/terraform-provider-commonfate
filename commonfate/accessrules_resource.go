@@ -258,18 +258,91 @@ func (r AccessRuleResource) Update(ctx context.Context, req resource.UpdateReque
 			"Unconfigured HTTP Client",
 			"Expected configured HTTP client. Please report this issue to the provider developers.",
 		)
+	}
+	var data *accessRuleModel
+
+	// Read Terraform plan data into the model
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
+
+	if resp.Diagnostics.HasError() {
+
+		resp.Diagnostics.AddError(
+			"Unable to Create Resource",
+			"An unexpected error occurred while parsing the resource creation response.",
+		)
 
 		return
+
 	}
+
+	target := cf_types.CreateAccessRuleTarget{
+		ProviderId: data.Target.Provider.ID.ValueString(),
+	}
+
+	//create the new access model with the client
+	_, err := r.client.GovUpdateAccessRuleWithResponse(ctx, data.ID.ValueString(), governance.GovUpdateAccessRuleJSONRequestBody{
+		Name:        data.Name.ValueString(),
+		Description: data.Description.ValueString(),
+		Target:      target,
+	})
+
+	if err != nil {
+
+		resp.Diagnostics.AddError(
+			"Unable to Create Resource",
+			"An unexpected error occurred while parsing the resource creation response. "+
+				"Please report this issue to the provider developers.\n\n"+
+				"JSON Error: "+err.Error(),
+		)
+
+		return
+
+	}
+
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+
 }
 
-func (r AccessRuleResource) Delete(ctx context.Context, res resource.DeleteRequest, resp *resource.DeleteResponse) {
+func (r AccessRuleResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	if r.client == nil {
 		resp.Diagnostics.AddError(
 			"Unconfigured HTTP Client",
 			"Expected configured HTTP client. Please report this issue to the provider developers.",
 		)
+	}
+	var data *accessRuleModel
+
+	// Read Terraform plan data into the model
+	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
+
+	if resp.Diagnostics.HasError() {
+
+		resp.Diagnostics.AddError(
+			"Unable to Create Resource",
+			"An unexpected error occurred while parsing the resource creation response.",
+		)
 
 		return
+
 	}
+
+	// //create the new access model with the client
+	// _, err := r.client.GovUpdateAccessRuleWithResponse(ctx, data.ID.ValueString(), governance.GovUpdateAccessRuleJSONRequestBody{
+	// 	Name:        data.Name.ValueString(),
+	// 	Description: data.Description.ValueString(),
+	// 	Target:      target,
+	// })
+	// if err != nil {
+
+	// 	resp.Diagnostics.AddError(
+	// 		"Unable to Create Resource",
+	// 		"An unexpected error occurred while parsing the resource creation response. "+
+	// 			"Please report this issue to the provider developers.\n\n"+
+	// 			"JSON Error: "+err.Error(),
+	// 	)
+
+	// 	return
+
+	// }
+
 }
