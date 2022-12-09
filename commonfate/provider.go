@@ -18,7 +18,9 @@ import (
 
 // Ensure the implementation satisfies the expected interfaces
 var (
-	_ provider.Provider = &commonfateProvider{}
+	_ provider.Provider              = &commonfateProvider{}
+	_ provider.ProviderWithMetadata  = &commonfateProvider{}
+	_ provider.ProviderWithGetSchema = &commonfateProvider{}
 )
 
 // New is a helper function to simplify provider server and testing implementation.
