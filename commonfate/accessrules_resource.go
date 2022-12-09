@@ -2,7 +2,9 @@ package commonfate
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"net/http"
 
 	"github.com/common-fate/common-fate/governance"
 
@@ -204,54 +206,50 @@ func (r AccessRuleResource) Read(ctx context.Context, req resource.ReadRequest, 
 
 		return
 	}
-	// var state accessRuleModel
+	var state accessRuleModel
 
-	// accessRules, err := r.client.GovListAccessRulesWithResponse(ctx, &governance.GovListAccessRulesParams{})
+	// Read Terraform prior state data into the model
+	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
 
-	// if err != nil {
-	// 	resp.Diagnostics.AddError(
-	// 		"Unable to Read HashiCups Coffees",
-	// 		err.Error(),
-	// 	)
-	// 	return
-	// }
+	//read access rule
 
-	// var res governance.ListAccessRulesDetailResponse
+	accessRule, err := r.client.GovGetAccessRuleWithResponse(ctx, state.ID.ValueString())
 
-	// err = json.Unmarshal(accessRules.Body, &res)
-	// if err != nil {
-	// 	return
-	// }
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Unable to Read access rule",
+			err.Error(),
+		)
+		return
+	}
 
-	// for _, accessRule := range res.AccessRules {
-	// 	accessRuleState := accessRuleModel{
-	// 		ID:          types.StringValue(accessRule.ID),
-	// 		Description: types.StringValue(accessRule.Description),
-	// 		Target:      TargetModel{Provider: TargetProviderModel{ID: types.StringValue(accessRule.Target.Provider.Id), Type: types.StringValue(accessRule.Target.Provider.Type)}},
-	// 		Status:      types.StringValue(string(accessRule.Status)),
-	// 		Version:     types.StringValue(accessRule.ID),
-	// 	}
+	var res cf_types.AccessRuleDetail
 
-	// 	for _, group := range accessRule.Groups {
-	// 		accessRuleState.Groups = append(accessRuleState.Groups, types.StringValue(group))
-	// 	}
+	err = json.Unmarshal(accessRule.Body, &res)
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Unable to Refresh Resource",
+			"An unexpected error occurred while attempting to refresh resource state. "+
+				"Please retry the operation or report this issue to the provider developers.\n\n"+
+				"HTTP Error: "+err.Error(),
+		)
+		return
+	}
 
-	// 	for _, apGroup := range accessRule.Approval.Groups {
-	// 		accessRuleState.Approval.Groups = append(accessRuleState.Approval.Groups, types.StringValue(apGroup))
-	// 	}
-	// 	for _, apUser := range accessRule.Approval.Users {
-	// 		accessRuleState.Approval.Users = append(accessRuleState.Approval.Users, types.StringValue(apUser))
-	// 	}
+	// Treat HTTP 404 Not Found status as a signal to recreate resource
+	// and return early
+	if accessRule.HTTPResponse.StatusCode == http.StatusNotFound {
+		resp.State.RemoveResource(ctx)
 
-	// 	state.AccessRules = append(state.AccessRules, accessRuleState)
-	// }
+		return
+	}
 
-	// // Set state
-	// diags := resp.State.Set(ctx, &state)
-	// resp.Diagnostics.Append(diags...)
-	// if resp.Diagnostics.HasError() {
-	// 	return
-	// }
+	// Convert from the API data model to the Terraform data model
+	// and refresh any attribute values.
+	state.Name = types.StringValue(res.Name)
+
+	// Save updated data into Terraform state
+	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }
 
 func (r AccessRuleResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
