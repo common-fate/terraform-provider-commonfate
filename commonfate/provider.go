@@ -2,7 +2,6 @@ package commonfate
 
 import (
 	"context"
-	"net/http"
 	"os"
 
 	"github.com/common-fate/common-fate/governance"
@@ -14,6 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
 // Ensure the implementation satisfies the expected interfaces
@@ -113,14 +113,6 @@ func (p *commonfateProvider) Configure(ctx context.Context, req provider.Configu
 				"Either target apply the source of the value first, set the value statically in the configuration, or use the COMMONFATE_PASSWORD environment variable.",
 		)
 	}
-	if config.Version.IsUnknown() {
-		resp.Diagnostics.AddAttributeError(
-			path.Root("version"),
-			"Unknown Common Fate API version",
-			"The provider cannot create the Common Fate API client as there is an unknown configuration value for the Common Fate API Version. "+
-				"Either target apply the source of the value first, set the value statically in the configuration, or use the COMMONFATE_VERSION environment variable.",
-		)
-	}
 
 	if resp.Diagnostics.HasError() {
 		return
@@ -132,7 +124,6 @@ func (p *commonfateProvider) Configure(ctx context.Context, req provider.Configu
 	host := os.Getenv("COMMONFATE_HOST")
 	username := os.Getenv("COMMONFATE_USERNAME")
 	password := os.Getenv("COMMONFATE_PASSWORD")
-	version := os.Getenv("COMMONFATE_VERSION")
 
 	if !config.Host.IsNull() {
 		host = config.Host.ValueString()
@@ -145,9 +136,7 @@ func (p *commonfateProvider) Configure(ctx context.Context, req provider.Configu
 	if !config.Password.IsNull() {
 		password = config.Password.ValueString()
 	}
-	if !config.Version.IsNull() {
-		version = config.Version.ValueString()
-	}
+
 	// If any of the expected configurations are missing, return
 	// errors with provider-specific guidance.
 
@@ -181,22 +170,17 @@ func (p *commonfateProvider) Configure(ctx context.Context, req provider.Configu
 		)
 	}
 
-	if version == "" {
-		resp.Diagnostics.AddAttributeError(
-			path.Root("version"),
-			"Missing Common Fate API Version",
-			"The provider cannot create the Common Fate API client as there is a missing or empty value for the Common Fate API version. "+
-				"Set the password value in the configuration or use the COMMONFATE_VERSION environment variable. "+
-				"If either is already set, ensure the value is not empty.",
-		)
-	}
-
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	client, err := governance.NewClientWithResponses("http://localhost:8889", governance.WithRequestEditorFn(withUserAgent(version)))
+	client, err := governance.NewClientWithResponses("http://localhost:8889")
 	if err != nil {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("client"),
+			"error setting up client",
+			"error",
+		)
 		return
 	}
 
@@ -204,14 +188,17 @@ func (p *commonfateProvider) Configure(ctx context.Context, req provider.Configu
 	// type Configure methods.
 	resp.DataSourceData = client
 	resp.ResourceData = client
+
+	tflog.Info(ctx, "Configured commonfate client", map[string]any{"success": true})
+
 }
 
-func withUserAgent(version string) func(ctx context.Context, req *http.Request) error {
-	return func(ctx context.Context, req *http.Request) error {
-		req.Header.Set("User-Agent", "terraform-provider-commonfate/"+version)
-		return nil
-	}
-}
+// func withUserAgent(version string) func(ctx context.Context, req *http.Request) error {
+// 	return func(ctx context.Context, req *http.Request) error {
+// 		req.Header.Set("User-Agent", "terraform-provider-commonfate/"+version)
+// 		return nil
+// 	}
+// }
 
 // DataSources defines the data sources implemented in the provider.
 func (p *commonfateProvider) DataSources(_ context.Context) []func() datasource.DataSource {
