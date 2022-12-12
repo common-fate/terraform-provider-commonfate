@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"flag"
-	"log"
 
 	"github.com/common-fate/common-fate-terraform-proto/commonfate"
 
@@ -11,19 +10,20 @@ import (
 )
 
 func main() {
+	// fmt.Println("entering main")
 
 	var debug bool
 
 	flag.BoolVar(&debug, "debug", false, "set to true to run the provider with support for debuggers like delve")
 	flag.Parse()
-	err := providerserver.Serve(context.Background(), commonfate.New, providerserver.ServeOpts{
+	providerserver.Serve(context.Background(), commonfate.New, providerserver.ServeOpts{
 		Debug:   debug,
 		Address: "commonfate.com/commonfate/commonfate",
 	})
 
-	if err != nil {
-		log.Fatal(err.Error())
-	} else {
-		log.Println("Running provider")
-	}
+	// if err != nil {
+	// 	log.Fatal(err.Error())
+	// } else {
+	// 	log.Println("Running provider")
+	// }
 }

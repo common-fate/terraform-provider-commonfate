@@ -16,15 +16,15 @@ import (
 )
 
 type accessRuleModel struct {
-	Name            types.String         `tfsdk:"name"`
-	Approval        ApprovalModel        `tfsdk:"approval"`
-	Description     types.String         `tfsdk:"description"`
-	Groups          []types.String       `tfsdk:"groups"`
-	ID              types.String         `tfsdk:"id"`
-	Status          types.String         `tfsdk:"status"`
-	Version         types.String         `tfsdk:"version"`
-	Target          TargetModel          `tfsdk:"target"`
-	TimeConstraints TimeConstraintsModel `tfsdk:"timeConstraints"`
+	Name types.String `tfsdk:"name"`
+	// Approval        ApprovalModel        `tfsdk:"approval"`
+	// Description     types.String         `tfsdk:"description"`
+	// Groups          []types.String       `tfsdk:"groups"`
+	// ID types.String `tfsdk:"id"`
+	// Status          types.String         `tfsdk:"status"`
+	// Version         types.String         `tfsdk:"version"`
+	// Target          TargetModel          `tfsdk:"target"`
+	// TimeConstraints TimeConstraintsModel `tfsdk:"timeConstraints"`
 }
 
 type TimeConstraintsModel struct {
@@ -57,12 +57,12 @@ var (
 )
 
 // Metadata returns the data source type name.
-func (r AccessRuleResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+func (r *AccessRuleResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_access_rule"
 }
 
 // Configure adds the provider configured client to the data source.
-func (r AccessRuleResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *AccessRuleResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -83,7 +83,7 @@ func (r AccessRuleResource) Configure(_ context.Context, req resource.ConfigureR
 
 // GetSchema defines the schema for the data source.
 // schema is based off the governance api
-func (r AccessRuleResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *AccessRuleResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
@@ -92,60 +92,64 @@ func (r AccessRuleResource) Schema(ctx context.Context, req resource.SchemaReque
 			// 	Required:            true,
 			// },
 			"name": schema.StringAttribute{
-				Computed:            true,
+				Required:            true,
 				MarkdownDescription: "Name of the Access Rule",
 			},
-			"description": schema.StringAttribute{
-				Computed:            true,
-				MarkdownDescription: "Description of the Access Rule",
-			},
-			"status": schema.StringAttribute{
-				Computed:            true,
-				MarkdownDescription: "Status of the Access Rule",
-			},
-			"version": schema.StringAttribute{
-				Computed:            true,
-				MarkdownDescription: "Version of the access rule",
-			},
-			"target_provider_id": schema.StringAttribute{
-				Computed:            true,
-				MarkdownDescription: "id of the provider",
-			},
-			"duration": schema.StringAttribute{
-				Computed:            true,
-				MarkdownDescription: "duration of the rule",
-			},
-			"approval": schema.MapNestedAttribute{
-				NestedObject: schema.NestedAttributeObject{
-					Attributes: map[string]schema.Attribute{
-						"groups": schema.ListAttribute{
-							ElementType: types.StringType,
-						},
-						"users": schema.ListAttribute{
-							ElementType: types.StringType,
-						},
-					},
-				},
-			},
-			"target": schema.MapNestedAttribute{
-				NestedObject: schema.NestedAttributeObject{
-					Attributes: map[string]schema.Attribute{
-						"field": schema.StringAttribute{
-							Computed:            true,
-							MarkdownDescription: "id of the provider",
-						},
-						"value": schema.ListAttribute{
-							ElementType: types.StringType,
-						},
-					},
-				},
-			},
+			// "description": schema.StringAttribute{
+			// 	Computed:            true,
+			// 	MarkdownDescription: "Description of the Access Rule",
+			// },
+			// "status": schema.StringAttribute{
+			// 	Computed:            true,
+			// 	MarkdownDescription: "Status of the Access Rule",
+			// },
+			// "version": schema.StringAttribute{
+			// 	Required:            true,
+			// 	MarkdownDescription: "Version of the access rule",
+			// },
+			// "target_provider_id": schema.StringAttribute{
+			// 	Computed:            true,
+			// 	MarkdownDescription: "id of the provider",
+			// },
+			// "duration": schema.StringAttribute{
+			// 	Computed:            true,
+			// 	MarkdownDescription: "duration of the rule",
+			// },
+			// "approval": schema.MapNestedAttribute{
+			// 	Computed: true,
+
+			// 	NestedObject: schema.NestedAttributeObject{
+			// 		Attributes: map[string]schema.Attribute{
+			// 			"groups": schema.ListAttribute{
+			// 				ElementType: types.StringType,
+			// 			},
+			// 			"users": schema.ListAttribute{
+			// 				ElementType: types.StringType,
+			// 			},
+			// 		},
+			// 	},
+			// },
+			// "target": schema.MapNestedAttribute{
+			// 	Computed: true,
+
+			// 	NestedObject: schema.NestedAttributeObject{
+			// 		Attributes: map[string]schema.Attribute{
+			// 			"field": schema.StringAttribute{
+			// 				Computed:            true,
+			// 				MarkdownDescription: "id of the provider",
+			// 			},
+			// 			"value": schema.ListAttribute{
+			// 				ElementType: types.StringType,
+			// 			},
+			// 		},
+			// 	},
+			// },
 		},
 		MarkdownDescription: "Manages a thing.",
 	}
 }
 
-func (r AccessRuleResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+func (r *AccessRuleResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 
 	if r.client == nil {
 		resp.Diagnostics.AddError(
@@ -171,31 +175,31 @@ func (r AccessRuleResource) Create(ctx context.Context, req resource.CreateReque
 
 	}
 
-	target := cf_types.CreateAccessRuleTarget{
-		ProviderId: data.Target.Provider.ID.ValueString(),
-	}
+	// target := cf_types.CreateAccessRuleTarget{
+	// 	ProviderId: data.Target.Provider.ID.ValueString(),
+	// }
 
 	createRequest := governance.GovCreateAccessRuleJSONRequestBody{
-		Name:            data.Name.ValueString(),
-		Description:     data.Description.ValueString(),
-		Target:          target,
-		TimeConstraints: cf_types.TimeConstraints{MaxDurationSeconds: int(data.TimeConstraints.MaxDurationSeconds.ValueInt64())},
+		Name: data.Name.ValueString(),
+		// Description:     data.Description.ValueString(),
+		// Target:          target,
+		// TimeConstraints: cf_types.TimeConstraints{MaxDurationSeconds: int(data.TimeConstraints.MaxDurationSeconds.ValueInt64())},
 	}
 
-	for _, g := range data.Groups {
-		createRequest.Groups = append(createRequest.Groups, g.ValueString())
-	}
+	// for _, g := range data.Groups {
+	// 	createRequest.Groups = append(createRequest.Groups, g.ValueString())
+	// }
 
-	for _, g := range data.Approval.Groups {
-		createRequest.Approval.Groups = append(createRequest.Approval.Groups, g.ValueString())
-	}
+	// for _, g := range data.Approval.Groups {
+	// 	createRequest.Approval.Groups = append(createRequest.Approval.Groups, g.ValueString())
+	// }
 
-	for _, u := range data.Approval.Users {
-		createRequest.Approval.Users = append(createRequest.Approval.Users, u.ValueString())
-	}
+	// for _, u := range data.Approval.Users {
+	// 	createRequest.Approval.Users = append(createRequest.Approval.Users, u.ValueString())
+	// }
 
 	//create the new access model with the client
-	res, err := r.client.GovCreateAccessRuleWithResponse(ctx, createRequest)
+	_, err := r.client.GovCreateAccessRuleWithResponse(ctx, createRequest)
 
 	if err != nil {
 
@@ -212,14 +216,14 @@ func (r AccessRuleResource) Create(ctx context.Context, req resource.CreateReque
 
 	// // Convert from the API data model to the Terraform data model
 	// // and set any unknown attribute values.
-	data.ID = types.StringValue(res.JSON201.ID)
+	// data.ID = types.StringValue(res.JSON201.ID)
 
 	// Save data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
 // Read refreshes the Terraform state with the latest data.
-func (r AccessRuleResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+func (r *AccessRuleResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	if r.client == nil {
 		resp.Diagnostics.AddError(
 			"Unconfigured HTTP Client",
@@ -235,7 +239,7 @@ func (r AccessRuleResource) Read(ctx context.Context, req resource.ReadRequest, 
 
 	//read access rule
 
-	accessRule, err := r.client.GovGetAccessRuleWithResponse(ctx, state.ID.ValueString())
+	accessRule, err := r.client.GovGetAccessRuleWithResponse(ctx, "")
 
 	if err != nil {
 		resp.Diagnostics.AddError(
@@ -274,7 +278,7 @@ func (r AccessRuleResource) Read(ctx context.Context, req resource.ReadRequest, 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }
 
-func (r AccessRuleResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *AccessRuleResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	if r.client == nil {
 		resp.Diagnostics.AddError(
 			"Unconfigured HTTP Client",
@@ -297,35 +301,35 @@ func (r AccessRuleResource) Update(ctx context.Context, req resource.UpdateReque
 
 	}
 
-	target := cf_types.CreateAccessRuleTarget{
-		ProviderId: data.Target.Provider.ID.ValueString(),
-	}
+	// target := cf_types.CreateAccessRuleTarget{
+	// 	ProviderId: data.Target.Provider.ID.ValueString(),
+	// }
 
-	//create the new access model with the client
-	_, err := r.client.GovUpdateAccessRuleWithResponse(ctx, data.ID.ValueString(), governance.GovUpdateAccessRuleJSONRequestBody{
-		Name:        data.Name.ValueString(),
-		Description: data.Description.ValueString(),
-		Target:      target,
-	})
+	// //create the new access model with the client
+	// _, err := r.client.GovUpdateAccessRuleWithResponse(ctx, data.ID.ValueString(), governance.GovUpdateAccessRuleJSONRequestBody{
+	// 	Name:        data.Name.ValueString(),
+	// 	Description: data.Description.ValueString(),
+	// 	Target:      target,
+	// })
 
-	if err != nil {
+	// if err != nil {
 
-		resp.Diagnostics.AddError(
-			"Unable to Create Resource",
-			"An unexpected error occurred while parsing the resource creation response. "+
-				"Please report this issue to the provider developers.\n\n"+
-				"JSON Error: "+err.Error(),
-		)
+	// 	resp.Diagnostics.AddError(
+	// 		"Unable to Create Resource",
+	// 		"An unexpected error occurred while parsing the resource creation response. "+
+	// 			"Please report this issue to the provider developers.\n\n"+
+	// 			"JSON Error: "+err.Error(),
+	// 	)
 
-		return
+	// 	return
 
-	}
+	// }
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 
 }
 
-func (r AccessRuleResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+func (r *AccessRuleResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	if r.client == nil {
 		resp.Diagnostics.AddError(
 			"Unconfigured HTTP Client",
@@ -349,19 +353,19 @@ func (r AccessRuleResource) Delete(ctx context.Context, req resource.DeleteReque
 	}
 
 	// //create the new access model with the client
-	_, err := r.client.GovArchiveAccessRuleWithResponse(ctx, data.ID.ValueString())
-	if err != nil {
+	// _, err := r.client.GovArchiveAccessRuleWithResponse(ctx, data.ID.ValueString())
+	// if err != nil {
 
-		resp.Diagnostics.AddError(
-			"Unable to Create Resource",
-			"An unexpected error occurred while parsing the resource creation response. "+
-				"Please report this issue to the provider developers.\n\n"+
-				"JSON Error: "+err.Error(),
-		)
+	// 	resp.Diagnostics.AddError(
+	// 		"Unable to Create Resource",
+	// 		"An unexpected error occurred while parsing the resource creation response. "+
+	// 			"Please report this issue to the provider developers.\n\n"+
+	// 			"JSON Error: "+err.Error(),
+	// 	)
 
-		return
+	// 	return
 
-	}
+	// }
 
 }
 
