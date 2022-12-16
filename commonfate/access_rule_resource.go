@@ -224,21 +224,6 @@ func (r *AccessRuleResource) Create(ctx context.Context, req resource.CreateRequ
 
 	createRequest.Target = cf_types.CreateAccessRuleTarget{ProviderId: data.TargetProvider.ValueString(), With: cf_types.CreateAccessRuleTarget_With{AdditionalProperties: args}}
 
-	// createRequest.Target = types.CreateAccessRuleTarget{ProviderId: "aws-sso-v2", With: types.CreateAccessRuleTarget_With{AdditionalProperties: map[string]types.CreateAccessRuleTargetDetailArguments{
-	// 	"accountId": {
-	// 		Groupings: types.CreateAccessRuleTargetDetailArguments_Groupings{
-	// 			AdditionalProperties: map[string][]string{},
-	// 		},
-	// 		Values: []string{"632700053629"},
-	// 	},
-	// 	"permissionSetArn": {
-	// 		Groupings: types.CreateAccessRuleTargetDetailArguments_Groupings{
-	// 			AdditionalProperties: map[string][]string{},
-	// 		},
-	// 		Values: []string{"arn:aws:sso:::permissionSet/ssoins-825968feece9a0b6/ps-dda57372ebbfeb94"},
-	// 	},
-	// }}}
-
 	//create the new access model with the client
 	res, err := r.client.GovCreateAccessRuleWithResponse(ctx, createRequest)
 

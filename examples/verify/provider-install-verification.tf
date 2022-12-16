@@ -40,8 +40,6 @@ resource "commonfate_access_rule" "test-2" {
   }
     
   
-    
-  
   target=[
     {
       field="accountId"
