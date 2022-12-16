@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/common-fate/common-fate/governance"
 
@@ -16,15 +17,16 @@ import (
 )
 
 type accessRuleModel struct {
-	Name types.String `tfsdk:"name"`
-	// Approval        ApprovalModel        `tfsdk:"approval"`
-	// Description     types.String         `tfsdk:"description"`
-	// Groups          []types.String       `tfsdk:"groups"`
-	// ID types.String `tfsdk:"id"`
-	// Status          types.String         `tfsdk:"status"`
-	// Version         types.String         `tfsdk:"version"`
-	// Target          TargetModel          `tfsdk:"target"`
-	// TimeConstraints TimeConstraintsModel `tfsdk:"timeConstraints"`
+	Name        types.String   `tfsdk:"name"`
+	Approval    ApprovalModel  `tfsdk:"approval"`
+	Description types.String   `tfsdk:"description"`
+	Groups      []types.String `tfsdk:"groups"`
+	ID          types.String   `tfsdk:"id"`
+	Status      types.String   `tfsdk:"status"`
+	// Version     types.String   `tfsdk:"version"`
+	Target         []TargetProviderModel `tfsdk:"target"`
+	Duration       types.String          `tfsdk:"duration"`
+	TargetProvider types.String          `tfsdk:"target_provider_id"`
 }
 
 type TimeConstraintsModel struct {
@@ -36,13 +38,9 @@ type ApprovalModel struct {
 	Users  []types.String `tfsdk:"users"`
 }
 
-type TargetModel struct {
-	Provider TargetProviderModel `tfsdk:"provider"`
-}
-
 type TargetProviderModel struct {
-	ID   types.String `tfsdk:"id"`
-	Type types.String `tfsdk:"type"`
+	Field types.String `tfsdk:"field"`
+	Value []string     `tfsdk:"value"`
 }
 
 // AccessRuleResource is the data source implementation.
@@ -87,65 +85,71 @@ func (r *AccessRuleResource) Schema(ctx context.Context, req resource.SchemaRequ
 
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
-			// "id": schema.StringAttribute{
-			// 	MarkdownDescription: "Access Aule ID",
-			// 	Required:            true,
-			// },
+			"id": schema.StringAttribute{
+				MarkdownDescription: "Access Aule ID",
+				Computed:            true,
+				// PlanModifiers: planmodifier.String{
+				// 	stringplanmodifier.UseStateForUnknown(),
+				// },
+			},
 			"name": schema.StringAttribute{
 				Required:            true,
 				MarkdownDescription: "Name of the Access Rule",
 			},
-			// "description": schema.StringAttribute{
-			// 	Computed:            true,
-			// 	MarkdownDescription: "Description of the Access Rule",
-			// },
-			// "status": schema.StringAttribute{
-			// 	Computed:            true,
-			// 	MarkdownDescription: "Status of the Access Rule",
-			// },
-			// "version": schema.StringAttribute{
-			// 	Required:            true,
-			// 	MarkdownDescription: "Version of the access rule",
-			// },
-			// "target_provider_id": schema.StringAttribute{
-			// 	Computed:            true,
-			// 	MarkdownDescription: "id of the provider",
-			// },
-			// "duration": schema.StringAttribute{
-			// 	Computed:            true,
-			// 	MarkdownDescription: "duration of the rule",
-			// },
-			// "approval": schema.MapNestedAttribute{
-			// 	Computed: true,
+			"description": schema.StringAttribute{
+				Required:            true,
+				MarkdownDescription: "Description of the Access Rule",
+			},
+			"status": schema.StringAttribute{
+				Optional:            true,
+				MarkdownDescription: "Status of the Access Rule",
+			},
+			"groups": schema.ListAttribute{
+				ElementType:         types.StringType,
+				Required:            true,
+				MarkdownDescription: "groups with access to the Access Rule",
+			},
 
-			// 	NestedObject: schema.NestedAttributeObject{
-			// 		Attributes: map[string]schema.Attribute{
-			// 			"groups": schema.ListAttribute{
-			// 				ElementType: types.StringType,
-			// 			},
-			// 			"users": schema.ListAttribute{
-			// 				ElementType: types.StringType,
-			// 			},
-			// 		},
-			// 	},
-			// },
-			// "target": schema.MapNestedAttribute{
-			// 	Computed: true,
+			"target_provider_id": schema.StringAttribute{
+				Required:            true,
+				MarkdownDescription: "id of the provider",
+			},
+			"duration": schema.StringAttribute{
+				Required:            true,
+				MarkdownDescription: "duration of the rule",
+			},
+			"approval": schema.SingleNestedAttribute{
+				Optional: true,
 
-			// 	NestedObject: schema.NestedAttributeObject{
-			// 		Attributes: map[string]schema.Attribute{
-			// 			"field": schema.StringAttribute{
-			// 				Computed:            true,
-			// 				MarkdownDescription: "id of the provider",
-			// 			},
-			// 			"value": schema.ListAttribute{
-			// 				ElementType: types.StringType,
-			// 			},
-			// 		},
-			// 	},
-			// },
+				Attributes: map[string]schema.Attribute{
+					"groups": schema.ListAttribute{
+						ElementType: types.StringType,
+						Optional:    true,
+					},
+					"users": schema.ListAttribute{
+						ElementType: types.StringType,
+						Optional:    true,
+					},
+				},
+			},
+			"target": schema.ListNestedAttribute{
+				Required: true,
+
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+						"field": schema.StringAttribute{
+							Required:            true,
+							MarkdownDescription: "id of the provider",
+						},
+						"value": schema.ListAttribute{
+							Required:    true,
+							ElementType: types.StringType,
+						},
+					},
+				},
+			},
 		},
-		MarkdownDescription: "Manages a thing.",
+		MarkdownDescription: "Manages the creation of a Common Fate access rule.",
 	}
 }
 
@@ -178,28 +182,65 @@ func (r *AccessRuleResource) Create(ctx context.Context, req resource.CreateRequ
 	// target := cf_types.CreateAccessRuleTarget{
 	// 	ProviderId: data.Target.Provider.ID.ValueString(),
 	// }
+	dur, err := strconv.Atoi(data.Duration.ValueString())
 
+	if err != nil {
+
+		resp.Diagnostics.AddError(
+			"failed to convert time to int",
+			"An unexpected error occurred while parsing the resource creation response. "+
+				"Please report this issue to the provider developers.\n\n"+
+				"JSON Error: "+err.Error(),
+		)
+
+		return
+
+	}
 	createRequest := governance.GovCreateAccessRuleJSONRequestBody{
-		Name: data.Name.ValueString(),
-		// Description:     data.Description.ValueString(),
+		Name:        data.Name.ValueString(),
+		Description: data.Description.ValueString(),
+
 		// Target:          target,
-		// TimeConstraints: cf_types.TimeConstraints{MaxDurationSeconds: int(data.TimeConstraints.MaxDurationSeconds.ValueInt64())},
+		TimeConstraints: cf_types.TimeConstraints{MaxDurationSeconds: dur},
 	}
 
-	// for _, g := range data.Groups {
-	// 	createRequest.Groups = append(createRequest.Groups, g.ValueString())
-	// }
+	for _, g := range data.Groups {
+		createRequest.Groups = append(createRequest.Groups, g.ValueString())
+	}
 
-	// for _, g := range data.Approval.Groups {
-	// 	createRequest.Approval.Groups = append(createRequest.Approval.Groups, g.ValueString())
-	// }
+	for _, g := range data.Approval.Groups {
+		createRequest.Approval.Groups = append(createRequest.Approval.Groups, g.ValueString())
+	}
 
-	// for _, u := range data.Approval.Users {
-	// 	createRequest.Approval.Users = append(createRequest.Approval.Users, u.ValueString())
-	// }
+	for _, u := range data.Approval.Users {
+		createRequest.Approval.Users = append(createRequest.Approval.Users, u.ValueString())
+	}
+
+	args := make(map[string]cf_types.CreateAccessRuleTargetDetailArguments)
+	for _, v := range data.Target {
+
+		args[v.Field.ValueString()] = cf_types.CreateAccessRuleTargetDetailArguments{Values: v.Value}
+	}
+
+	createRequest.Target = cf_types.CreateAccessRuleTarget{ProviderId: data.TargetProvider.ValueString(), With: cf_types.CreateAccessRuleTarget_With{AdditionalProperties: args}}
+
+	// createRequest.Target = types.CreateAccessRuleTarget{ProviderId: "aws-sso-v2", With: types.CreateAccessRuleTarget_With{AdditionalProperties: map[string]types.CreateAccessRuleTargetDetailArguments{
+	// 	"accountId": {
+	// 		Groupings: types.CreateAccessRuleTargetDetailArguments_Groupings{
+	// 			AdditionalProperties: map[string][]string{},
+	// 		},
+	// 		Values: []string{"632700053629"},
+	// 	},
+	// 	"permissionSetArn": {
+	// 		Groupings: types.CreateAccessRuleTargetDetailArguments_Groupings{
+	// 			AdditionalProperties: map[string][]string{},
+	// 		},
+	// 		Values: []string{"arn:aws:sso:::permissionSet/ssoins-825968feece9a0b6/ps-dda57372ebbfeb94"},
+	// 	},
+	// }}}
 
 	//create the new access model with the client
-	_, err := r.client.GovCreateAccessRuleWithResponse(ctx, createRequest)
+	res, err := r.client.GovCreateAccessRuleWithResponse(ctx, createRequest)
 
 	if err != nil {
 
@@ -214,9 +255,22 @@ func (r *AccessRuleResource) Create(ctx context.Context, req resource.CreateRequ
 
 	}
 
+	if res.JSON201 == nil {
+
+		resp.Diagnostics.AddError(
+			"Unable to Create Resource",
+			"An unexpected error occurred while parsing the resource creation response. "+
+				"Please report this issue to the provider developers.\n\n"+
+				"JSON Error: "+res.Status(),
+		)
+
+		return
+
+	}
+
 	// // Convert from the API data model to the Terraform data model
 	// // and set any unknown attribute values.
-	// data.ID = types.StringValue(res.JSON201.ID)
+	data.ID = types.StringValue(res.JSON201.ID)
 
 	// Save data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -239,13 +293,30 @@ func (r *AccessRuleResource) Read(ctx context.Context, req resource.ReadRequest,
 
 	//read access rule
 
-	accessRule, err := r.client.GovGetAccessRuleWithResponse(ctx, "")
+	accessRule, err := r.client.GovGetAccessRuleWithResponse(ctx, state.ID.ValueString())
 
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to Read access rule",
 			err.Error(),
 		)
+		return
+	}
+
+	// Treat HTTP 404 Not Found status as a signal to recreate resource
+	// and return early
+	if accessRule.HTTPResponse.StatusCode != http.StatusOK {
+		resp.Diagnostics.AddError(
+			"Unable to Refresh Resource",
+			"An unexpected error occurred while attempting to refresh resource state. ")
+		return
+	}
+
+	// Treat HTTP 404 Not Found status as a signal to recreate resource
+	// and return early
+	if accessRule.HTTPResponse.StatusCode == http.StatusNotFound {
+		resp.State.RemoveResource(ctx)
+
 		return
 	}
 
@@ -262,17 +333,17 @@ func (r *AccessRuleResource) Read(ctx context.Context, req resource.ReadRequest,
 		return
 	}
 
-	// Treat HTTP 404 Not Found status as a signal to recreate resource
-	// and return early
-	if accessRule.HTTPResponse.StatusCode == http.StatusNotFound {
-		resp.State.RemoveResource(ctx)
-
-		return
-	}
-
 	// Convert from the API data model to the Terraform data model
 	// and refresh any attribute values.
 	state.Name = types.StringValue(res.Name)
+	state.Description = types.StringValue(res.Description)
+	dur := strconv.Itoa(res.TimeConstraints.MaxDurationSeconds)
+	state.Duration = types.StringValue(dur)
+
+	for _, g := range res.Groups {
+		state.Groups = append(state.Groups, types.StringValue(g))
+
+	}
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)

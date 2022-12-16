@@ -5,6 +5,6 @@ provider "commonfate.com/commonfate/commonfate" {
   version     = "1.0.0"
   constraints = "1.0.0"
   hashes = [
-    "h1:mpbtoPJn1+g03+kT/0Wwwz1QPiJWvEZpX9JZM8fzOyY=",
+    "h1:JgAivx9EiVtWWPywxFsu8u9/VM0XDE0PmHBV0WuiBoc=",
   ]
 }
