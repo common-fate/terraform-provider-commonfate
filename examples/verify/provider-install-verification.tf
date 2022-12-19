@@ -15,11 +15,11 @@ provider "commonfate" {
 
 
 resource "commonfate_access_rule" "sandbox-sso-admin" {
-  name ="This was made in terraform 2"
+  name ="This was made in terraform 11"
   description="Access rule made in terraform"
   groups=["common_fate_administrators"]
   approval= {
-      users=["jack@commonfate.io"]
+      users=["jack@commonfate.io", "jack+1@commonfate.io"]
   }
   
   target=[
@@ -37,7 +37,7 @@ resource "commonfate_access_rule" "sandbox-sso-admin" {
 }
 
 resource "commonfate_access_rule" "azure-developer-group" {
-  name ="azure developer group"
+  name ="azure groups rule new name"
   description="Access rule made in terraform for adding users to a group in azure"
   groups=["common_fate_administrators"]
   approval= {
