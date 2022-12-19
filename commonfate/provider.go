@@ -30,18 +30,16 @@ func New() provider.Provider {
 
 // commonfateProvider is the provider implementation.
 type commonfateProvider struct {
-	Host     types.String `tfsdk:"host"`
-	Username types.String `tfsdk:"username"`
-	Password types.String `tfsdk:"password"`
-	Version  types.String `tfsdk:"version"`
+	Host types.String `tfsdk:"host"`
+
+	Version types.String `tfsdk:"version"`
 }
 
 // commonfateProviderModel maps provider schema data to a Go type.
 type commonfateProviderModel struct {
-	Host     types.String `tfsdk:"host"`
-	Username types.String `tfsdk:"username"`
-	Password types.String `tfsdk:"password"`
-	Version  types.String `tfsdk:"version"`
+	Host types.String `tfsdk:"host"`
+
+	Version types.String `tfsdk:"version"`
 }
 
 // Metadata returns the provider type name.
@@ -57,15 +55,7 @@ func (p *commonfateProvider) GetSchema(_ context.Context) (tfsdk.Schema, diag.Di
 				Type:     types.StringType,
 				Optional: true,
 			},
-			"username": {
-				Type:     types.StringType,
-				Optional: true,
-			},
-			"password": {
-				Type:      types.StringType,
-				Optional:  true,
-				Sensitive: true,
-			},
+
 			"version": {
 				Type:     types.StringType,
 				Optional: true,
@@ -96,24 +86,6 @@ func (p *commonfateProvider) Configure(ctx context.Context, req provider.Configu
 		)
 	}
 
-	if config.Username.IsUnknown() {
-		resp.Diagnostics.AddAttributeError(
-			path.Root("username"),
-			"Unknown Common Fate API Username",
-			"The provider cannot create the Common Fate API client as there is an unknown configuration value for the Common Fate API username. "+
-				"Either target apply the source of the value first, set the value statically in the configuration, or use the COMMONFATE_USERNAME environment variable.",
-		)
-	}
-
-	if config.Password.IsUnknown() {
-		resp.Diagnostics.AddAttributeError(
-			path.Root("password"),
-			"Unknown Common Fate API Password",
-			"The provider cannot create the Common Fate API client as there is an unknown configuration value for the Common Fate API password. "+
-				"Either target apply the source of the value first, set the value statically in the configuration, or use the COMMONFATE_PASSWORD environment variable.",
-		)
-	}
-
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -122,19 +94,9 @@ func (p *commonfateProvider) Configure(ctx context.Context, req provider.Configu
 	// with Terraform configuration value if set.
 
 	host := os.Getenv("COMMONFATE_HOST")
-	username := os.Getenv("COMMONFATE_USERNAME")
-	password := os.Getenv("COMMONFATE_PASSWORD")
 
 	if !config.Host.IsNull() {
 		host = config.Host.ValueString()
-	}
-
-	if !config.Username.IsNull() {
-		username = config.Username.ValueString()
-	}
-
-	if !config.Password.IsNull() {
-		password = config.Password.ValueString()
 	}
 
 	// If any of the expected configurations are missing, return
@@ -150,31 +112,11 @@ func (p *commonfateProvider) Configure(ctx context.Context, req provider.Configu
 		)
 	}
 
-	if username == "" {
-		resp.Diagnostics.AddAttributeError(
-			path.Root("username"),
-			"Missing Common Fate API Username",
-			"The provider cannot create the Common Fate API client as there is a missing or empty value for the Common Fate API username. "+
-				"Set the username value in the configuration or use the COMMONFATE_USERNAME environment variable. "+
-				"If either is already set, ensure the value is not empty.",
-		)
-	}
-
-	if password == "" {
-		resp.Diagnostics.AddAttributeError(
-			path.Root("password"),
-			"Missing Common Fate API Password",
-			"The provider cannot create the Common Fate API client as there is a missing or empty value for the Common Fate API password. "+
-				"Set the password value in the configuration or use the COMMONFATE_PASSWORD environment variable. "+
-				"If either is already set, ensure the value is not empty.",
-		)
-	}
-
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	client, err := governance.NewClientWithResponses("http://localhost:8889")
+	client, err := governance.NewClientWithResponses(host)
 	if err != nil {
 		resp.Diagnostics.AddAttributeError(
 			path.Root("client"),

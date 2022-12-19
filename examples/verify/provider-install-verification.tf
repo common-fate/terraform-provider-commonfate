@@ -9,36 +9,18 @@ terraform {
 }
 
 provider "commonfate" {
-  host = "abc"
-  password = "abc"
-  username = "abc"
+  host = "http://localhost:8889"
+  
 }
 
-# resource "commonfate_access_rule" "test" {
-#   name ="demo-test"
-#   description="test"
-#   groups=["internal group"]
-#   # approval={
-#   #   users=[
-#   #     "jack@commonfate.io"
-#   #   ]
-#   # }
-#   # target={
-#   #   field="accountId"
-#   #   value=["12345678912"]
-#   # }
-#   target_provider_id="aws-sso"
-#   duration="3600"
-# }
 
-resource "commonfate_access_rule" "test-2" {
+resource "commonfate_access_rule" "sandbox-sso-admin" {
   name ="This was made in terraform 2"
   description="Access rule made in terraform"
   groups=["common_fate_administrators"]
   approval= {
       users=["jack@commonfate.io"]
   }
-    
   
   target=[
     {
@@ -51,5 +33,24 @@ resource "commonfate_access_rule" "test-2" {
     }
   ]
   target_provider_id="aws-sso-v2"
+  duration="3600"
+}
+
+resource "commonfate_access_rule" "azure-developer-group" {
+  name ="azure developer group"
+  description="Access rule made in terraform for adding users to a group in azure"
+  groups=["common_fate_administrators"]
+  approval= {
+      users=["jack@commonfate.io"]
+  }
+  
+  target=[
+    {
+      field="groupId"
+      value=["4e552c12-d8b3-4fec-a3bf-cfc741f6f02b"]
+    },
+    
+  ]
+  target_provider_id="azure-ad"
   duration="3600"
 }
