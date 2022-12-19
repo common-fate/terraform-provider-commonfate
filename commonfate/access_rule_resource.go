@@ -13,6 +13,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
@@ -88,9 +90,9 @@ func (r *AccessRuleResource) Schema(ctx context.Context, req resource.SchemaRequ
 			"id": schema.StringAttribute{
 				MarkdownDescription: "Access Aule ID",
 				Computed:            true,
-				// PlanModifiers: planmodifier.String{
-				// 	stringplanmodifier.UseStateForUnknown(),
-				// },
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"name": schema.StringAttribute{
 				Required:            true,
@@ -320,15 +322,15 @@ func (r *AccessRuleResource) Read(ctx context.Context, req resource.ReadRequest,
 
 	// Convert from the API data model to the Terraform data model
 	// and refresh any attribute values.
-	state.Name = types.StringValue(res.Name)
-	state.Description = types.StringValue(res.Description)
-	dur := strconv.Itoa(res.TimeConstraints.MaxDurationSeconds)
-	state.Duration = types.StringValue(dur)
+	// state.Name = types.StringValue(res.Name)
+	// state.Description = types.StringValue(res.Description)
+	// dur := strconv.Itoa(res.TimeConstraints.MaxDurationSeconds)
+	// state.Duration = types.StringValue(dur)
 
-	for _, g := range res.Groups {
-		state.Groups = append(state.Groups, types.StringValue(g))
+	// for _, g := range res.Groups {
+	// 	state.Groups = append(state.Groups, types.StringValue(g))
 
-	}
+	// }
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
@@ -341,7 +343,7 @@ func (r *AccessRuleResource) Update(ctx context.Context, req resource.UpdateRequ
 			"Expected configured HTTP client. Please report this issue to the provider developers.",
 		)
 	}
-	var data *accessRuleModel
+	var data accessRuleModel
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -357,29 +359,82 @@ func (r *AccessRuleResource) Update(ctx context.Context, req resource.UpdateRequ
 
 	}
 
-	// target := cf_types.CreateAccessRuleTarget{
-	// 	ProviderId: data.Target.Provider.ID.ValueString(),
-	// }
+	dur, err := strconv.Atoi(data.Duration.ValueString())
 
-	// //create the new access model with the client
-	// _, err := r.client.GovUpdateAccessRuleWithResponse(ctx, data.ID.ValueString(), governance.GovUpdateAccessRuleJSONRequestBody{
-	// 	Name:        data.Name.ValueString(),
-	// 	Description: data.Description.ValueString(),
-	// 	Target:      target,
-	// })
+	if err != nil {
 
-	// if err != nil {
+		resp.Diagnostics.AddError(
+			"failed to convert time to int",
+			"An unexpected error occurred while parsing the resource creation response. "+
+				"Please report this issue to the provider developers.\n\n"+
+				"JSON Error: "+err.Error(),
+		)
 
-	// 	resp.Diagnostics.AddError(
-	// 		"Unable to Create Resource",
-	// 		"An unexpected error occurred while parsing the resource creation response. "+
-	// 			"Please report this issue to the provider developers.\n\n"+
-	// 			"JSON Error: "+err.Error(),
-	// 	)
+		return
 
-	// 	return
+	}
 
-	// }
+	updateRequest := governance.GovUpdateAccessRuleJSONRequestBody{
+		Name:        data.Name.ValueString(),
+		Description: data.Description.ValueString(),
+
+		// Target:          target,
+		TimeConstraints: cf_types.TimeConstraints{MaxDurationSeconds: dur},
+	}
+
+	for _, g := range data.Groups {
+		updateRequest.Groups = append(updateRequest.Groups, g.ValueString())
+	}
+
+	for _, g := range data.Approval.Groups {
+		updateRequest.Approval.Groups = append(updateRequest.Approval.Groups, g.ValueString())
+	}
+
+	for _, u := range data.Approval.Users {
+		updateRequest.Approval.Users = append(updateRequest.Approval.Users, u.ValueString())
+	}
+
+	args := make(map[string]cf_types.CreateAccessRuleTargetDetailArguments)
+	for _, v := range data.Target {
+
+		args[v.Field.ValueString()] = cf_types.CreateAccessRuleTargetDetailArguments{Values: v.Value}
+	}
+
+	updateRequest.Target = cf_types.CreateAccessRuleTarget{ProviderId: data.TargetProvider.ValueString(), With: cf_types.CreateAccessRuleTarget_With{AdditionalProperties: args}}
+	//update the new access model with the client
+
+	fmt.Println(data.ID.ValueString())
+	res, err := r.client.GovUpdateAccessRuleWithResponse(ctx, data.ID.ValueString(), updateRequest)
+
+	if err != nil {
+
+		resp.Diagnostics.AddError(
+			"Unable to Update Resource",
+			"An unexpected error occurred while parsing the resource creation response. "+
+				"Please report this issue to the provider developers.\n\n"+
+
+				"JSON Error: "+res.Status()+" id: "+data.ID.ValueString(),
+		)
+
+		return
+
+	}
+
+	if res.JSON200 == nil {
+
+		resp.Diagnostics.AddError(
+			"Unable to Update Resource",
+			"An unexpected error occurred while parsing the resource creation response. "+
+				"Please report this issue to the provider developers.\n\n"+
+
+				"JSON Error: "+res.Status()+" id: "+data.ID.ValueString(),
+		)
+
+		return
+
+	}
+
+	data.ID = types.StringValue(res.JSON200.ID)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 
@@ -400,7 +455,7 @@ func (r *AccessRuleResource) Delete(ctx context.Context, req resource.DeleteRequ
 	if resp.Diagnostics.HasError() {
 
 		resp.Diagnostics.AddError(
-			"Unable to Create Resource",
+			"Unable to delete Resource",
 			"An unexpected error occurred while parsing the resource creation response.",
 		)
 
@@ -408,20 +463,34 @@ func (r *AccessRuleResource) Delete(ctx context.Context, req resource.DeleteRequ
 
 	}
 
-	// //create the new access model with the client
-	// _, err := r.client.GovArchiveAccessRuleWithResponse(ctx, data.ID.ValueString())
-	// if err != nil {
+	//create the new access model with the client
+	res, err := r.client.GovArchiveAccessRuleWithResponse(ctx, data.ID.ValueString())
 
-	// 	resp.Diagnostics.AddError(
-	// 		"Unable to Create Resource",
-	// 		"An unexpected error occurred while parsing the resource creation response. "+
-	// 			"Please report this issue to the provider developers.\n\n"+
-	// 			"JSON Error: "+err.Error(),
-	// 	)
+	if err != nil {
 
-	// 	return
+		resp.Diagnostics.AddError(
+			"Unable to delete Resource",
+			"An unexpected error occurred while parsing the resource creation response. "+
+				"Please report this issue to the provider developers.\n\n"+
+				"JSON Error: "+err.Error(),
+		)
 
-	// }
+		return
+
+	}
+
+	if res.JSON200 == nil {
+
+		resp.Diagnostics.AddError(
+			"Unable to delete Resource",
+			"An unexpected error occurred while parsing the resource creation response. "+
+				"Please report this issue to the provider developers.\n\n"+
+				"JSON Error: "+res.Status(),
+		)
+
+		return
+
+	}
 
 }
 
