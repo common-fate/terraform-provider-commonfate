@@ -9,3 +9,8 @@ clean:
 	rm examples/verify/.terraform.lock.hcl
 	rm examples/verify/terraform.tfstate
 	rm examples/verify/terraform.tfstate.backup
+
+
+all:
+	make clean
+	make provider
