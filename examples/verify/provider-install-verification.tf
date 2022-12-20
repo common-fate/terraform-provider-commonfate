@@ -15,7 +15,7 @@ provider "commonfate" {
 
 
 resource "commonfate_access_rule" "sandbox-sso-admin" {
-  name ="This was made in terraform 11"
+  name ="This was made in terraform demo"
   description="Access rule made in terraform"
   groups=["common_fate_administrators"]
   approval= {
@@ -36,21 +36,3 @@ resource "commonfate_access_rule" "sandbox-sso-admin" {
   duration="3600"
 }
 
-resource "commonfate_access_rule" "azure-developer-group" {
-  name ="azure groups rule new name"
-  description="Access rule made in terraform for adding users to a group in azure"
-  groups=["common_fate_administrators"]
-  approval= {
-      users=["jack@commonfate.io"]
-  }
-  
-  target=[
-    {
-      field="groupId"
-      value=["4e552c12-d8b3-4fec-a3bf-cfc741f6f02b"]
-    },
-    
-  ]
-  target_provider_id="azure-ad"
-  duration="3600"
-}
