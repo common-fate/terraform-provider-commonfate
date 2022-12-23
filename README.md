@@ -21,6 +21,7 @@ Then build the provider by running `make provider`
 You should now be able to run `terraform init` and `terraform plan` within the example folders
 
 - If you get a permission denied error when `terraform plan` you will need to make sure the binary is executable with:
+
 ```
 chmod +x ~/.terraform.d/plugins/commonfate.com/commonfate/commonfate/1.0.0/darwin_amd64/terraform-provider-commonfate
 ```
