@@ -9,7 +9,8 @@ terraform {
 }
 
 provider "commonfate" {
-  host = "http://localhost:8889"
+  host = "https://f6tj3cg8rf.execute-api.ap-southeast-2.amazonaws.com/prod"
+  region= "ap-southeast-2"
   
 }
 
