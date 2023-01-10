@@ -16,7 +16,7 @@ In the root of the repo;
 Then build the provider by running `make provider` 
 
 # Running the example Terraform
-`cd` into the `/examples` folder and there are example terraform files that can be used for testing
+`cd` into the `/examples` folder and there are example terraform files that can be used for testing, make sure to `cd` into the example folder.
 
 You should now be able to run `terraform init` and `terraform plan` within the example folders
 
@@ -29,6 +29,7 @@ In the plugins repo.
 
 
 - There is a `make clean` command that will reset the terraform state if it ever gets in a broken state
+- Run `make provider` to build a new version of the provider
 - Running `make all` will run both a `make clean` and a `make provider`
 
 ## Tests

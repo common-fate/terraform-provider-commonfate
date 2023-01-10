@@ -39,18 +39,12 @@ func New() provider.Provider {
 
 // commonfateProvider is the provider implementation.
 type commonfateProvider struct {
-	Host   types.String `tfsdk:"host"`
-	Region types.String `tfsdk:"region"`
-
-	Version types.String `tfsdk:"version"`
+	Host types.String `tfsdk:"host"`
 }
 
 // commonfateProviderModel maps provider schema data to a Go type.
 type commonfateProviderModel struct {
-	Host   types.String `tfsdk:"host"`
-	Region types.String `tfsdk:"region"`
-
-	Version types.String `tfsdk:"version"`
+	Host types.String `tfsdk:"host"`
 }
 
 // Metadata returns the provider type name.
@@ -65,15 +59,6 @@ func (p *commonfateProvider) GetSchema(_ context.Context) (tfsdk.Schema, diag.Di
 			"host": {
 				Type:     types.StringType,
 				Required: true,
-			},
-			"region": {
-				Type:     types.StringType,
-				Required: true,
-			},
-
-			"version": {
-				Type:     types.StringType,
-				Optional: true,
 			},
 		},
 	}, nil
@@ -127,11 +112,7 @@ func (p *commonfateProvider) Configure(ctx context.Context, req provider.Configu
 		)
 	}
 
-	region := os.Getenv("COMMONFATE_REGION")
-
-	if !config.Region.IsNull() {
-		region = config.Region.ValueString()
-	}
+	region := os.Getenv("AWS_REGION")
 
 	// If any of the expected configurations are missing, return
 	// errors with provider-specific guidance.
@@ -188,6 +169,22 @@ func (p *commonfateProvider) Configure(ctx context.Context, req provider.Configu
 
 }
 
+// DataSources defines the data sources implemented in the provider.
+func (p *commonfateProvider) DataSources(_ context.Context) []func() datasource.DataSource {
+	return []func() datasource.DataSource{}
+}
+
+func (p *commonfateProvider) Resources(_ context.Context) []func() resource.Resource {
+	return []func() resource.Resource{
+		NewAccessRuleResource,
+	}
+}
+
+// With the resource.Resource implementation
+func NewAccessRuleResource() resource.Resource {
+	return &AccessRuleResource{}
+}
+
 // apiGatewayRequestSigner uses the AWS SDK to sign the request with sigv4
 // Docs are scarce for this however I found this good example repo which is a little old but has some gems in it
 // https://github.com/smarty-archives/go-aws-auth
@@ -212,27 +209,4 @@ func apiGatewayRequestSigner(creds aws.Credentials, region string) governance.Re
 		sha256_hash := hex.EncodeToString(h.Sum(nil))
 		return signer.SignHTTP(ctx, creds, req, sha256_hash, "execute-api", region, time.Now())
 	}
-}
-
-// func withUserAgent(version string) func(ctx context.Context, req *http.Request) error {
-// 	return func(ctx context.Context, req *http.Request) error {
-// 		req.Header.Set("User-Agent", "terraform-provider-commonfate/"+version)
-// 		return nil
-// 	}
-// }
-
-// DataSources defines the data sources implemented in the provider.
-func (p *commonfateProvider) DataSources(_ context.Context) []func() datasource.DataSource {
-	return []func() datasource.DataSource{}
-}
-
-func (p *commonfateProvider) Resources(_ context.Context) []func() resource.Resource {
-	return []func() resource.Resource{
-		NewAccessRuleResource,
-	}
-}
-
-// With the resource.Resource implementation
-func NewAccessRuleResource() resource.Resource {
-	return &AccessRuleResource{}
 }
