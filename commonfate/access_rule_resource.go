@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/common-fate/common-fate/governance"
+	governance "github.com/common-fate/common-fate/governance/pkg/types"
 
 	cf_types "github.com/common-fate/common-fate/pkg/types"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -210,9 +210,11 @@ func (r *AccessRuleResource) Create(ctx context.Context, req resource.CreateRequ
 		createRequest.Groups = append(createRequest.Groups, g.ValueString())
 	}
 
+	createRequest.Approval.Groups = make([]string, 0)
 	for _, g := range data.Approval.Groups {
 		createRequest.Approval.Groups = append(createRequest.Approval.Groups, g.ValueString())
 	}
+	createRequest.Approval.Users = make([]string, 0)
 
 	for _, u := range data.Approval.Users {
 		createRequest.Approval.Users = append(createRequest.Approval.Users, u.ValueString())

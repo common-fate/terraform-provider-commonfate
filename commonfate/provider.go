@@ -1,10 +1,19 @@
 package commonfate
 
 import (
+	"bytes"
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
+	"io"
+	"net/http"
 	"os"
+	"time"
 
-	"github.com/common-fate/common-fate/governance"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	v4 "github.com/aws/aws-sdk-go-v2/aws/signer/v4"
+	governance "github.com/common-fate/common-fate/governance/pkg/types"
+	"github.com/common-fate/common-fate/pkg/cfaws"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -30,14 +39,16 @@ func New() provider.Provider {
 
 // commonfateProvider is the provider implementation.
 type commonfateProvider struct {
-	Host types.String `tfsdk:"host"`
+	Host   types.String `tfsdk:"host"`
+	Region types.String `tfsdk:"region"`
 
 	Version types.String `tfsdk:"version"`
 }
 
 // commonfateProviderModel maps provider schema data to a Go type.
 type commonfateProviderModel struct {
-	Host types.String `tfsdk:"host"`
+	Host   types.String `tfsdk:"host"`
+	Region types.String `tfsdk:"region"`
 
 	Version types.String `tfsdk:"version"`
 }
@@ -53,7 +64,11 @@ func (p *commonfateProvider) GetSchema(_ context.Context) (tfsdk.Schema, diag.Di
 		Attributes: map[string]tfsdk.Attribute{
 			"host": {
 				Type:     types.StringType,
-				Optional: true,
+				Required: true,
+			},
+			"region": {
+				Type:     types.StringType,
+				Required: true,
 			},
 
 			"version": {
@@ -112,17 +127,55 @@ func (p *commonfateProvider) Configure(ctx context.Context, req provider.Configu
 		)
 	}
 
-	if resp.Diagnostics.HasError() {
-		return
+	region := os.Getenv("COMMONFATE_REGION")
+
+	if !config.Region.IsNull() {
+		region = config.Region.ValueString()
 	}
 
-	client, err := governance.NewClientWithResponses(host)
+	// If any of the expected configurations are missing, return
+	// errors with provider-specific guidance.
+
+	if region == "" {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("region"),
+			"Missing Common Fate API Host",
+			"The provider cannot create the Common Fate API client as there is a missing or empty value for the Common Fate API region. "+
+				"Set the host value in the configuration or use the COMMONFATE_REGION environment variable. "+
+				"If either is already set, ensure the value is not empty.",
+		)
+	}
+
+	awsCfg, err := cfaws.ConfigFromContextOrDefault(ctx)
 	if err != nil {
 		resp.Diagnostics.AddAttributeError(
 			path.Root("client"),
 			"error setting up client",
 			"error",
 		)
+		return
+	}
+	creds, err := awsCfg.Credentials.Retrieve(ctx)
+	if err != nil {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("client"),
+			"error setting up client",
+			"error",
+		)
+		return
+	}
+
+	client, err := governance.NewClientWithResponses(host, governance.WithRequestEditorFn(apiGatewayRequestSigner(creds, region)))
+	if err != nil {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("client"),
+			"error setting up client",
+			"error",
+		)
+		return
+	}
+
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -133,6 +186,32 @@ func (p *commonfateProvider) Configure(ctx context.Context, req provider.Configu
 
 	tflog.Info(ctx, "Configured commonfate client", map[string]any{"success": true})
 
+}
+
+// apiGatewayRequestSigner uses the AWS SDK to sign the request with sigv4
+// Docs are scarce for this however I found this good example repo which is a little old but has some gems in it
+// https://github.com/smarty-archives/go-aws-auth
+func apiGatewayRequestSigner(creds aws.Credentials, region string) governance.RequestEditorFn {
+	return func(ctx context.Context, req *http.Request) (err error) {
+		signer := v4.NewSigner()
+		h := sha256.New()
+		var b []byte
+		if req.Body != nil {
+			b, err = io.ReadAll(req.Body)
+			// after you read the body you need to replace it with a new readcloser!
+			req.Body = io.NopCloser(bytes.NewReader(b))
+			if err != nil {
+				return err
+			}
+		}
+
+		_, err = h.Write(b)
+		if err != nil {
+			return err
+		}
+		sha256_hash := hex.EncodeToString(h.Sum(nil))
+		return signer.SignHTTP(ctx, creds, req, sha256_hash, "execute-api", region, time.Now())
+	}
 }
 
 // func withUserAgent(version string) func(ctx context.Context, req *http.Request) error {
