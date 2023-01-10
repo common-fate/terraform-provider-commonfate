@@ -9,17 +9,17 @@ terraform {
 }
 
 provider "commonfate" {
-  host = "https://f6tj3cg8rf.execute-api.ap-southeast-2.amazonaws.com/prod"
+  host = ""
   
 }
 
 
-resource "commonfate_access_rule" "sandbox-sso-admin" {
+resource "commonfate_access_rule" "uat-aws-admin" {
   name ="This was made in terraform demo"
   description="Access rule made in terraform"
   groups=["common_fate_administrators"]
   approval= {
-      users=["jack@commonfate.io", "jack+1@commonfate.io"]
+      users=[""]
   }
   
   target=[
