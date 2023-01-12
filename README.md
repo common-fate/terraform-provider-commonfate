@@ -39,3 +39,10 @@ Run the following to run the acceptance tests:
 ```
 TF_ACC=1 go test -v ./... 
 ```
+
+
+## Generating Docs
+Run the following command: 
+```
+./tfplugindocs generate --rendered-provider-name="CommonFate" --provider-name="commonfate"  --examples-dir="examples" --website-source-dir="templates"
+```

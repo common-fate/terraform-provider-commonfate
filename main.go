@@ -4,7 +4,7 @@ import (
 	"context"
 	"flag"
 
-	"github.com/common-fate/common-fate-terraform-proto/commonfate"
+	commonfate "github.com/common-fate/common-fate-terraform-proto/provider"
 
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
 )
