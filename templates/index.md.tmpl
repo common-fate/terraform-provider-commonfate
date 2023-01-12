@@ -11,22 +11,7 @@ Use the Common Fate provider to interact with your access rules managed under Co
 Common Fate’s governance API uses IAM auth via API Gateway, so you will need to configure a role to be used by the Terraform provider to enable it to communicate via the Common Fate API.
 
 For example:
-```terraform
-terraform {
-  required_providers {
-    commonfate = {
-      source = "commonfate.com/commonfate/commonfate"
-      version = "1.0.0"
-
-    }
-  }
-}
-
-provider "commonfate" {
-  host = "https://example-commonfate.com"
-  
-}
-```
+{{ tffile "examples/provider/provider.tf" }}
 
 # Authorization and Configuration
 To allow Common Fate to make access rules it will need to communicate with the deployed developer API for your Common Fate instance. 
@@ -100,26 +85,7 @@ With the Common Fate Terraform module you will be able to create and manage acce
 Access rules control who can request access to what, and the requirements surrounding their requests.
 
 For example:
-```terraform
-resource "commonfate_access_rule" "aws-admin" {
-  name ="This was made in terraform demo"
-  description="Access rule made in terraform"
-  groups=["common_fate_administrators"]
-  approval= {
-      users=[""]
-  }
-  
-  target=[
-    {
-      field="accountId"
-      value=["123456789012"]
-    },
-    {
-      field="permissionSetArn"
-      value=["arn:aws:sso:::permissionSet/ssoins-825968feece9a0b6/3hjdfkj3r28ef"]
-    }
-  ]
-  target_provider_id="aws-sso-v2"
-  duration="3600"
-}
-```
+{{ tffile "examples/resources/commonfate_access_rule/resource.tf" }}
+
+
+{{- /* No schema in this provider, so no need for this: .SchemaMarkdown | trimspace */ -}}

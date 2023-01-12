@@ -1,4 +1,4 @@
-package commonfate
+package provider
 
 import (
 	"testing"

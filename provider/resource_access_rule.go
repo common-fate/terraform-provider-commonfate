@@ -1,4 +1,4 @@
-package commonfate
+package provider
 
 import (
 	"context"
@@ -86,9 +86,10 @@ func (r *AccessRuleResource) Configure(_ context.Context, req resource.Configure
 func (r *AccessRuleResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 
 	resp.Schema = schema.Schema{
+		Description: "Create and manage Common Fate Access Rules",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
-				MarkdownDescription: "Access Aule ID",
+				MarkdownDescription: "The internal Access Aule ID",
 				Computed:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -109,16 +110,16 @@ func (r *AccessRuleResource) Schema(ctx context.Context, req resource.SchemaRequ
 			"groups": schema.ListAttribute{
 				ElementType:         types.StringType,
 				Required:            true,
-				MarkdownDescription: "groups with access to the Access Rule",
+				MarkdownDescription: "Groups with access to the Access Rule",
 			},
 
 			"target_provider_id": schema.StringAttribute{
 				Required:            true,
-				MarkdownDescription: "id of the provider",
+				MarkdownDescription: "Id of the provider. Eg. `aws-sso-v2",
 			},
 			"duration": schema.StringAttribute{
 				Required:            true,
-				MarkdownDescription: "duration of the rule",
+				MarkdownDescription: "Duration of the rule",
 			},
 			"approval": schema.SingleNestedAttribute{
 				Optional: true,
@@ -141,11 +142,12 @@ func (r *AccessRuleResource) Schema(ctx context.Context, req resource.SchemaRequ
 					Attributes: map[string]schema.Attribute{
 						"field": schema.StringAttribute{
 							Required:            true,
-							MarkdownDescription: "id of the provider",
+							MarkdownDescription: "Name of the targeted field. Example: `accountId`",
 						},
 						"value": schema.ListAttribute{
-							Required:    true,
-							ElementType: types.StringType,
+							Required:            true,
+							ElementType:         types.StringType,
+							MarkdownDescription: "Value of the targeted field. Example: `123456789123`",
 						},
 					},
 				},
