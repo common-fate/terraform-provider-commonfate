@@ -2,12 +2,17 @@
 page_title: "commonfate_access_rule Resource - commonfate"
 subcategory: ""
 description: |-
-  Manages the creation of a Common Fate access rule.
+  Access rules control who can request access to what, and the requirements surrounding their requests.
+  To create an access rule, you must be an administrator in Common Fate. See Creating an admin user https://docs.commonfate.io/common-fate/deploying-common-fate/deploying/#creating-an-admin-user
 ---
 
 # commonfate_access_rule (Resource)
 
-Manages the creation of a Common Fate access rule.
+Access rules control who can request access to what, and the requirements surrounding their requests.
+
+To create an access rule, you must be an administrator in Common Fate. See [Creating an admin user](https://docs.commonfate.io/common-fate/deploying-common-fate/deploying/#creating-an-admin-user)
+
+
 
 ## Example Usage
 
@@ -41,16 +46,16 @@ resource "commonfate_access_rule" "aws-admin" {
 
 ### Required
 
-- `description` (String) Description of the Access Rule
-- `duration` (String) Duration of the rule
-- `groups` (List of String) Groups with access to the Access Rule
-- `name` (String) Name of the Access Rule
-- `target` (Attributes List) (see [below for nested schema](#nestedatt--target))
-- `target_provider_id` (String) Id of the provider. Eg. `aws-sso-v2
+- `description` (String) Description of the Access Rule. Make this something that has meaning in your context so users understand what this gives access to.
+- `duration` (String) The duration section allows you to configure constraints around how long your users may request access for. (unit is seconds)
+- `groups` (List of String) configures who can request this access rule. Access is governed by identity provider groups. For example, you have a group for your “web app developers” and you are creating a rule that grants temporary access to “production web app account”.
+- `name` (String) Name of the Access Rule. The name is what users will see when they look at what they can request access to.  Make this something that has meaning in your context, such as Dev Admin or Prod Admin.
+- `target` (Attributes List) Configuration options for initialising the provider's setup. In the webapp this is the `provider` section when creating an access rule. (see [below for nested schema](#nestedatt--target))
+- `target_provider_id` (String) Id of the provider. Eg. `aws-sso-v2. Make sure the provider has been configured before attempting to create an access rule for it.
 
 ### Optional
 
-- `approval` (Attributes) (see [below for nested schema](#nestedatt--approval))
+- `approval` (Attributes) configure whether an approval is required when a user requests this rule, this is optional. Can specify individual users or whole groups to request approval from. (see [below for nested schema](#nestedatt--approval))
 - `status` (String) Status of the Access Rule
 
 ### Read-Only
@@ -71,5 +76,9 @@ Required:
 
 Optional:
 
-- `groups` (List of String)
-- `users` (List of String)
+- `groups` (List of String) Groups to be given access to request the rule being created.
+- `users` (List of String) Users to be given access to request the rule being created.
+
+Creating access rules in Terraform is the exact same as creating them in the Common Fate app. Each field of the provider corresponds to fields in the access rule creation wizard, this can be used as a reference point when creating access rules in Terraform.
+
+You can also find our documentation on creating [Access Rules here](https://docs.commonfate.io/common-fate/configuration/access-rules).
