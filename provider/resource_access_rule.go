@@ -86,7 +86,10 @@ func (r *AccessRuleResource) Configure(_ context.Context, req resource.Configure
 func (r *AccessRuleResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 
 	resp.Schema = schema.Schema{
-		Description: "Create and manage Common Fate Access Rules",
+		Description: `Access rules control who can request access to what, and the requirements surrounding their requests.
+
+To create an access rule, you must be an administrator.
+`,
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				MarkdownDescription: "The internal Access Aule ID",
@@ -97,11 +100,11 @@ func (r *AccessRuleResource) Schema(ctx context.Context, req resource.SchemaRequ
 			},
 			"name": schema.StringAttribute{
 				Required:            true,
-				MarkdownDescription: "Name of the Access Rule",
+				MarkdownDescription: "Name of the Access Rule. The name is what users will see when they look at what they can request access to.  Make this something that has meaning in your context, such as Dev Admin or Prod Admin.",
 			},
 			"description": schema.StringAttribute{
 				Required:            true,
-				MarkdownDescription: "Description of the Access Rule",
+				MarkdownDescription: "Description of the Access Rule. Make this something that has meaning in your context so users understand what this gives access to.",
 			},
 			"status": schema.StringAttribute{
 				Optional:            true,
@@ -110,26 +113,30 @@ func (r *AccessRuleResource) Schema(ctx context.Context, req resource.SchemaRequ
 			"groups": schema.ListAttribute{
 				ElementType:         types.StringType,
 				Required:            true,
-				MarkdownDescription: "Groups with access to the Access Rule",
+				MarkdownDescription: "configures who can request this access rule. Access is governed by identity provider groups. For example, you have a group for your “web app developers” and you are creating a rule that grants temporary access to “production web app account”.",
 			},
 
 			"target_provider_id": schema.StringAttribute{
 				Required:            true,
-				MarkdownDescription: "Id of the provider. Eg. `aws-sso-v2",
+				MarkdownDescription: "Id of the provider. Eg. `aws-sso-v2. Make sure the provider has been configured before attempting to create an access rule for it.",
 			},
 			"duration": schema.StringAttribute{
 				Required:            true,
-				MarkdownDescription: "Duration of the rule",
+				MarkdownDescription: "The duration section allows you to configure constraints around how long your users may request access for. (unit is seconds)",
 			},
 			"approval": schema.SingleNestedAttribute{
-				Optional: true,
+				Optional:            true,
+				MarkdownDescription: "configure whether an approval is required when a user requests this rule, this is optional. Can specify individual users or whole groups to request approval from.",
 
 				Attributes: map[string]schema.Attribute{
 					"groups": schema.ListAttribute{
-						ElementType: types.StringType,
-						Optional:    true,
+						MarkdownDescription: "Groups to be given access to request the rule being created.",
+						ElementType:         types.StringType,
+						Optional:            true,
 					},
 					"users": schema.ListAttribute{
+						MarkdownDescription: "Users to be given access to request the rule being created.",
+
 						ElementType: types.StringType,
 						Optional:    true,
 					},
@@ -137,6 +144,8 @@ func (r *AccessRuleResource) Schema(ctx context.Context, req resource.SchemaRequ
 			},
 			"target": schema.ListNestedAttribute{
 				Required: true,
+
+				MarkdownDescription: "Configuration options for initialising the provider's setup. In the webapp this is the `provider` section when creating an access rule.",
 
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
@@ -153,7 +162,10 @@ func (r *AccessRuleResource) Schema(ctx context.Context, req resource.SchemaRequ
 				},
 			},
 		},
-		MarkdownDescription: "Manages the creation of a Common Fate access rule.",
+		MarkdownDescription: `Access rules control who can request access to what, and the requirements surrounding their requests.
+
+To create an access rule, you must be an administrator in Common Fate. See [Creating an admin user](https://docs.commonfate.io/common-fate/deploying-common-fate/deploying/#creating-an-admin-user)
+`,
 	}
 }
 
