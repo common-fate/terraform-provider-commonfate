@@ -4,14 +4,12 @@ import (
 	"context"
 	"flag"
 
-	commonfate "github.com/common-fate/common-fate-terraform-proto/provider"
+	commonfate "github.com/common-fate/common-fate-terraform-proto/internal"
 
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
 )
 
 func main() {
-	// fmt.Println("entering main")
-
 	var debug bool
 
 	flag.BoolVar(&debug, "debug", false, "set to true to run the provider with support for debuggers like delve")
@@ -21,9 +19,4 @@ func main() {
 		Address: "commonfate.com/commonfate/commonfate",
 	})
 
-	// if err != nil {
-	// 	log.Fatal(err.Error())
-	// } else {
-	// 	log.Println("Running provider")
-	// }
 }

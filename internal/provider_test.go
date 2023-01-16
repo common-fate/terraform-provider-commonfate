@@ -1,4 +1,4 @@
-package provider
+package internal
 
 import (
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"

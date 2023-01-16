@@ -1,4 +1,4 @@
-package provider
+package internal
 
 import (
 	"context"
@@ -20,7 +20,7 @@ import (
 
 type accessRuleModel struct {
 	Name        types.String   `tfsdk:"name"`
-	Approval    ApprovalModel  `tfsdk:"approval"`
+	Approval    *ApprovalModel `tfsdk:"approval"`
 	Description types.String   `tfsdk:"description"`
 	Groups      []types.String `tfsdk:"groups"`
 	ID          types.String   `tfsdk:"id"`
@@ -36,8 +36,8 @@ type TimeConstraintsModel struct {
 }
 
 type ApprovalModel struct {
-	Groups []types.String `tfsdk:"groups"`
-	Users  []types.String `tfsdk:"users"`
+	Groups *[]types.String `tfsdk:"groups"`
+	Users  *[]types.String `tfsdk:"users"`
 }
 
 type TargetProviderModel struct {
@@ -195,9 +195,6 @@ func (r *AccessRuleResource) Create(ctx context.Context, req resource.CreateRequ
 
 	}
 
-	// target := cf_types.CreateAccessRuleTarget{
-	// 	ProviderId: data.Target.Provider.ID.ValueString(),
-	// }
 	dur, err := strconv.Atoi(data.Duration.ValueString())
 
 	if err != nil {
@@ -212,11 +209,10 @@ func (r *AccessRuleResource) Create(ctx context.Context, req resource.CreateRequ
 		return
 
 	}
-	createRequest := governance.GovCreateAccessRuleJSONRequestBody{
-		Name:        data.Name.ValueString(),
-		Description: data.Description.ValueString(),
 
-		// Target:          target,
+	createRequest := governance.GovCreateAccessRuleJSONRequestBody{
+		Name:            data.Name.ValueString(),
+		Description:     data.Description.ValueString(),
 		TimeConstraints: cf_types.TimeConstraints{MaxDurationSeconds: dur},
 	}
 
@@ -224,14 +220,23 @@ func (r *AccessRuleResource) Create(ctx context.Context, req resource.CreateRequ
 		createRequest.Groups = append(createRequest.Groups, g.ValueString())
 	}
 
-	createRequest.Approval.Groups = make([]string, 0)
-	for _, g := range data.Approval.Groups {
-		createRequest.Approval.Groups = append(createRequest.Approval.Groups, g.ValueString())
-	}
-	createRequest.Approval.Users = make([]string, 0)
+	//if approval not empty
 
-	for _, u := range data.Approval.Users {
-		createRequest.Approval.Users = append(createRequest.Approval.Users, u.ValueString())
+	if data.Approval != nil {
+		if len(*data.Approval.Groups) > 0 {
+			for _, g := range *data.Approval.Groups {
+				createRequest.Approval.Groups = append(createRequest.Approval.Groups, g.ValueString())
+			}
+		}
+
+		if len(*data.Approval.Users) > 0 {
+			for _, u := range *data.Approval.Users {
+				createRequest.Approval.Users = append(createRequest.Approval.Users, u.ValueString())
+			}
+		}
+	} else {
+		createRequest.Approval = cf_types.ApproverConfig{Groups: []string{}, Users: []string{}}
+
 	}
 
 	args := make(map[string]cf_types.CreateAccessRuleTargetDetailArguments)
@@ -402,11 +407,11 @@ func (r *AccessRuleResource) Update(ctx context.Context, req resource.UpdateRequ
 		updateRequest.Groups = append(updateRequest.Groups, g.ValueString())
 	}
 
-	for _, g := range data.Approval.Groups {
+	for _, g := range *data.Approval.Groups {
 		updateRequest.Approval.Groups = append(updateRequest.Approval.Groups, g.ValueString())
 	}
 
-	for _, u := range data.Approval.Users {
+	for _, u := range *data.Approval.Users {
 		updateRequest.Approval.Users = append(updateRequest.Approval.Users, u.ValueString())
 	}
 
