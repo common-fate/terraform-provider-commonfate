@@ -120,10 +120,9 @@ func (p *commonfateProvider) Configure(ctx context.Context, req provider.Configu
 	if region == "" {
 		resp.Diagnostics.AddAttributeError(
 			path.Root("region"),
-			"Missing Common Fate API Host",
+			"Missing AWS region",
 			"The provider cannot create the Common Fate API client as there is a missing or empty value for the Common Fate API region. "+
-				"Set the host value in the configuration or use the COMMONFATE_REGION environment variable. "+
-				"If either is already set, ensure the value is not empty.",
+				"Make sure the AWS_REGION environment variable is set.",
 		)
 	}
 
@@ -131,8 +130,8 @@ func (p *commonfateProvider) Configure(ctx context.Context, req provider.Configu
 	if err != nil {
 		resp.Diagnostics.AddAttributeError(
 			path.Root("client"),
-			"error setting up client",
-			"error",
+			"error pulling AWS config",
+			"error pulling AWS config",
 		)
 		return
 	}
@@ -140,8 +139,8 @@ func (p *commonfateProvider) Configure(ctx context.Context, req provider.Configu
 	if err != nil {
 		resp.Diagnostics.AddAttributeError(
 			path.Root("client"),
-			"error setting up client",
-			"error",
+			"error fetching AWS credentials",
+			"error fetching AWS credentials",
 		)
 		return
 	}
@@ -151,7 +150,7 @@ func (p *commonfateProvider) Configure(ctx context.Context, req provider.Configu
 		resp.Diagnostics.AddAttributeError(
 			path.Root("client"),
 			"error setting up client",
-			"error",
+			"error setting up Common Fate client, make sure you have valid AWS credentials and region exported to your environment.",
 		)
 		return
 	}
@@ -160,7 +159,7 @@ func (p *commonfateProvider) Configure(ctx context.Context, req provider.Configu
 		return
 	}
 
-	// Make the HashiCups client available during DataSource and Resource
+	// Make the Common Fate client available during DataSource and Resource
 	// type Configure methods.
 	resp.DataSourceData = client
 	resp.ResourceData = client

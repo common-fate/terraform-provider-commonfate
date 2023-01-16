@@ -200,10 +200,10 @@ func (r *AccessRuleResource) Create(ctx context.Context, req resource.CreateRequ
 	if err != nil {
 
 		resp.Diagnostics.AddError(
-			"failed to convert time to int",
+			"failed to configure duration",
 			"An unexpected error occurred while parsing the resource creation response. "+
 				"Please report this issue to the provider developers.\n\n"+
-				"JSON Error: "+err.Error(),
+				"Error: "+err.Error(),
 		)
 
 		return
@@ -253,7 +253,7 @@ func (r *AccessRuleResource) Create(ctx context.Context, req resource.CreateRequ
 	if err != nil {
 
 		resp.Diagnostics.AddError(
-			"Unable to Create Resource",
+			"Failed to Create Resource",
 			"An unexpected error occurred while parsing the resource creation response. "+
 				"Please report this issue to the provider developers.\n\n"+
 				"JSON Error: "+err.Error(),
@@ -266,7 +266,7 @@ func (r *AccessRuleResource) Create(ctx context.Context, req resource.CreateRequ
 	if res.JSON201 == nil {
 
 		resp.Diagnostics.AddError(
-			"Unable to Create Resource",
+			"Failed to Create Resource",
 			"An unexpected error occurred while parsing the resource creation response. "+
 				"Please report this issue to the provider developers.\n\n"+
 				"JSON Error: "+res.Status(),
@@ -305,7 +305,7 @@ func (r *AccessRuleResource) Read(ctx context.Context, req resource.ReadRequest,
 
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to Read access rule",
+			"Failed to Read access rule",
 			err.Error(),
 		)
 		return
@@ -340,18 +340,6 @@ func (r *AccessRuleResource) Read(ctx context.Context, req resource.ReadRequest,
 		)
 		return
 	}
-
-	// Convert from the API data model to the Terraform data model
-	// and refresh any attribute values.
-	// state.Name = types.StringValue(res.Name)
-	// state.Description = types.StringValue(res.Description)
-	// dur := strconv.Itoa(res.TimeConstraints.MaxDurationSeconds)
-	// state.Duration = types.StringValue(dur)
-
-	// for _, g := range res.Groups {
-	// 	state.Groups = append(state.Groups, types.StringValue(g))
-
-	// }
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
@@ -396,10 +384,8 @@ func (r *AccessRuleResource) Update(ctx context.Context, req resource.UpdateRequ
 	}
 
 	updateRequest := governance.GovUpdateAccessRuleJSONRequestBody{
-		Name:        data.Name.ValueString(),
-		Description: data.Description.ValueString(),
-
-		// Target:          target,
+		Name:            data.Name.ValueString(),
+		Description:     data.Description.ValueString(),
 		TimeConstraints: cf_types.TimeConstraints{MaxDurationSeconds: dur},
 	}
 
