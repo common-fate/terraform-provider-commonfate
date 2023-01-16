@@ -407,14 +407,22 @@ func (r *AccessRuleResource) Update(ctx context.Context, req resource.UpdateRequ
 		updateRequest.Groups = append(updateRequest.Groups, g.ValueString())
 	}
 
-	for _, g := range *data.Approval.Groups {
-		updateRequest.Approval.Groups = append(updateRequest.Approval.Groups, g.ValueString())
-	}
+	if data.Approval != nil {
+		if len(*data.Approval.Groups) > 0 {
+			for _, g := range *data.Approval.Groups {
+				updateRequest.Approval.Groups = append(updateRequest.Approval.Groups, g.ValueString())
+			}
+		}
 
-	for _, u := range *data.Approval.Users {
-		updateRequest.Approval.Users = append(updateRequest.Approval.Users, u.ValueString())
-	}
+		if len(*data.Approval.Users) > 0 {
+			for _, u := range *data.Approval.Users {
+				updateRequest.Approval.Users = append(updateRequest.Approval.Users, u.ValueString())
+			}
+		}
+	} else {
+		updateRequest.Approval = cf_types.ApproverConfig{Groups: []string{}, Users: []string{}}
 
+	}
 	args := make(map[string]cf_types.CreateAccessRuleTargetDetailArguments)
 	for _, v := range data.Target {
 
