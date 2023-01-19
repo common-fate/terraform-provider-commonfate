@@ -107,7 +107,7 @@ To create an access rule, you must be an administrator.
 				MarkdownDescription: "Description of the Access Rule. Make this something that has meaning in your context so users understand what this gives access to.",
 			},
 			"status": schema.StringAttribute{
-				Optional:            true,
+				Computed:            true,
 				MarkdownDescription: "Status of the Access Rule",
 			},
 			"groups": schema.ListAttribute{
