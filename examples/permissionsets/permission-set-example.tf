@@ -10,9 +10,7 @@ terraform {
 }
 
 provider "commonfate" {
-  #host = "https://lpscp2am1g.execute-api.ap-southeast-2.amazonaws.com/prod/"
-  host = "http://localhost:8889"
-  
+  host = "https://lpscp2am1g.execute-api.ap-southeast-2.amazonaws.com/prod/"
 }
 
 
