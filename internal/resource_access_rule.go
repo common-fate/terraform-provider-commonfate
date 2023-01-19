@@ -279,6 +279,7 @@ func (r *AccessRuleResource) Create(ctx context.Context, req resource.CreateRequ
 	// // Convert from the API data model to the Terraform data model
 	// // and set any unknown attribute values.
 	data.ID = types.StringValue(res.JSON201.ID)
+	data.Status = types.StringValue(string(res.JSON201.Status))
 
 	// Save data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
