@@ -1,4 +1,4 @@
-# common-fate-terraform-proto
+# Common Fate Terraform Provider
 Common Fate Terraform provider using Terraform plugin framework
 
 
