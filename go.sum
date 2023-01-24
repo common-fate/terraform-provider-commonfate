@@ -51,6 +51,8 @@ github.com/common-fate/common-fate v0.11.2-0.20230116023628-8341edfd947b h1:BctK
 github.com/common-fate/common-fate v0.11.2-0.20230116023628-8341edfd947b/go.mod h1:kD9HvIhZXHIloJBP27L6WuHvxGF68fBpGYslD0j2qsU=
 github.com/common-fate/common-fate v0.11.2-0.20230116030727-97552ab61532 h1:9IUHswrPjxyEm9jVO533JAaTSURVMhKuFWnkQpm7UIk=
 github.com/common-fate/common-fate v0.11.2-0.20230116030727-97552ab61532/go.mod h1:kD9HvIhZXHIloJBP27L6WuHvxGF68fBpGYslD0j2qsU=
+github.com/common-fate/common-fate v0.12.1 h1:QsPfwOO9REAAnUKVmXGqy1OJoHqIQOhWbylfP4QOo2M=
+github.com/common-fate/common-fate v0.12.1/go.mod h1:8QmWR7HqYklL0/V1aQcMBJdDlCxLXwiVbx28tnv5Ftw=
 github.com/common-fate/iso8601 v1.0.2 h1:gl6iNbE8TnJzg+lYJxPNYOkF+oHYde2K2s2i+5o4yHE=
 github.com/common-fate/iso8601 v1.0.2/go.mod h1:DU4mvUEkkWZUUSJq2aCuNqM1luSb0Pwyb2dLzXS+img=
 github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
