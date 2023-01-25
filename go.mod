@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/aws/aws-sdk-go-v2 v1.17.1
-	github.com/common-fate/common-fate v0.12.1
+	github.com/common-fate/common-fate v0.12.2-0.20230118082125-ea30a430180a
 	github.com/hashicorp/terraform-plugin-framework v0.17.0
 	github.com/hashicorp/terraform-plugin-go v0.14.2
 	github.com/hashicorp/terraform-plugin-log v0.7.0
