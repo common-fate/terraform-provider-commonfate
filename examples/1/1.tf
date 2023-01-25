@@ -30,7 +30,7 @@ resource "commonfate_access_rule" "aws-admin" {
     },
     {
       field="permissionSetArn"
-      value=["arn:aws:sso:::permissionSet/ssoins-825968feece9a0b6/3hjdfkj3r28ef"]
+      value=[""]
     }
   ]
   target_provider_id="aws-sso-v2"
