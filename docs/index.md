@@ -6,9 +6,7 @@ description: |-
 
 # Common Fate Provider
 
-Use the Common Fate provider to interact with your access rules managed under Common Fate. You must configure the provider with the proper credentials before you can use it.
-
-Common Fate’s governance API uses IAM auth via API Gateway, so you will need to configure a role to be used by the Terraform provider to enable it to communicate via the Common Fate API.
+Use the Common Fate provider to interact with your access rules managed under Common Fate. 
 
 For example:
 ```terraform
@@ -28,6 +26,8 @@ provider "commonfate" {
 }
 ```
 
+You must have exported valid AWS credentials before you will be able to create access rules using the Terraform provider.
+
 # Authorization and Configuration
 To allow Common Fate to make access rules it will need to communicate with the deployed developer API for your Common Fate instance. 
 
@@ -35,7 +35,7 @@ This API is an AWS API Gateway with IAM Authorisation. Thus to communicate with 
 
 ### Creating a Invoke API Policy
 
-To complete the step below you will need to create a policy that allows `execute-api:Invoke`
+To complete the step below you will need to create a policy that allows `execute-api:Invoke` then you will need to assume that role and export the credentials to your local environment.
 
 1. Go to the AWS console in the account Common Fate is deployed to and go to Identity and Access Management (IAM)
 2. Go to Policies and click “Create Policy” 

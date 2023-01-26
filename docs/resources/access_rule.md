@@ -56,11 +56,11 @@ resource "commonfate_access_rule" "aws-admin" {
 ### Optional
 
 - `approval` (Attributes) configure whether an approval is required when a user requests this rule, this is optional. Can specify individual users or whole groups to request approval from. (see [below for nested schema](#nestedatt--approval))
-- `status` (String) Status of the Access Rule
 
 ### Read-Only
 
 - `id` (String) The internal Access Aule ID
+- `status` (String) Status of the Access Rule
 
 <a id="nestedatt--target"></a>
 ### Nested Schema for `target`
