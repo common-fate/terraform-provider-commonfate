@@ -6,7 +6,7 @@ description: |-
 
 # Common Fate Provider
 
-Use the Common Fate provider to interact with your Access Rules managed under Common Fate.
+Use the Common Fate provider to interact with your Access Rules managed under [Common Fate](https://docs.commonfate.io/common-fate/introduction).
 
 For example:
 
