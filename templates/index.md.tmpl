@@ -36,7 +36,13 @@ To utilise the Common Fate Provider, you must have the following:
 
 ## Configuration
 
-To enable the connection of your Terraform and your Common Fate deployment, you must identify the host within your provider. To achieve this, you are required to run `gdeploy status` in the root of your Common Fate deployment. Within the returned table will be a `GovernanceURL` credential, it will look something like this: [https://dfksjgvbee.execute-api.ap-southeast-2.amazonaws.com/prod/](https://dfksjgvbee.execute-api.ap-southeast-2.amazonaws.com/prod/). Copy this value and assign it to the host within your Provider. Below is an example:
+To enable the connection of your Terraform and your Common Fate deployment, you must identify the host within your provider. To achieve this, you are required to run the following command in the root of your Common Fate deployment.
+
+```bash
+gdeploy status
+```
+
+Within the returned table will be a `GovernanceURL` credential, it will look something like this: [https://dfksjgvbee.execute-api.ap-southeast-2.amazonaws.com/prod/](https://dfksjgvbee.execute-api.ap-southeast-2.amazonaws.com/prod/). Copy this value and assign it to the host within your Provider. Below is an example:
 
 ```terraform
 provider "commonfate" {
@@ -75,6 +81,11 @@ resource "commonfate_access_rule" "aws-admin" {
   target_provider_id="aws-sso-v2"
   duration="3600"
 }
+```
+
+To apply your changes, ensure you have exported the appropriate credentials to your terminal window, then run the standard Terraform command:
+```bash
+terraform apply
 ```
 
 ## Authorization
