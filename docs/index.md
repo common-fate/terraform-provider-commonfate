@@ -36,7 +36,7 @@ To utilise the Common Fate Provider, you must have the following:
 
 ## Configuration
 
-To enable the connection of your Terraform and your Common Fate deployment, you must identify the host within your provider. To achieve this, you are required to run the following command in the root of your Common Fate deployment.
+To enable the connection of your Terraform and your Common Fate deployment, you must identify the host within your provider. To achieve this, ensure you have exported valid AWS credentials to your terminal window. You are then required to run the following command in the root of your Common Fate deployment:
 
 ```bash
 gdeploy status
