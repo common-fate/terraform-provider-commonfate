@@ -14,16 +14,14 @@ For example:
 terraform {
   required_providers {
     commonfate = {
-      source = "commonfate.com/commonfate/commonfate"
-      version = "1.0.0"
-
+      source = "common-fate/commonfate"
+      version = "1.0.1"
     }
   }
 }
 
 provider "commonfate" {
   host = "https://example-commonfate.com"
-
 }
 ```
 
@@ -84,6 +82,7 @@ resource "commonfate_access_rule" "aws-admin" {
 ```
 
 To apply your changes, ensure you have exported the appropriate credentials to your terminal window, then run the standard Terraform command:
+
 ```bash
 terraform apply
 ```
