@@ -1,7 +1,7 @@
 ---
 page_title: "Provider: Common Fate"
 description: |-
-  The Common Fate provider is used to configure and manage access to resources.
+  The Common Fate provider is used to configure and manage access to your cloud and critical applications.
 ---
 
 # Common Fate Provider
@@ -15,13 +15,13 @@ terraform {
   required_providers {
     commonfate = {
       source = "common-fate/commonfate"
-      version = "1.0.1"
+      version = "~> 1.0"
     }
   }
 }
 
 provider "commonfate" {
-  host = "https://example-commonfate.com"
+  host = "https://commonfate-api.example.com"
 }
 ```
 
@@ -102,7 +102,7 @@ To complete the step below you will need to create a policy that allows `execute
 3. Then click on the JSON tab
 4. Copy in the following Policy
 
-```
+```json
 {
     "Version": "2012-10-17",
     "Statement": [
@@ -132,8 +132,7 @@ Credentials must be provided by using the AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_K
 
 For example:
 
-```json
-
+```
 provider "commonfate" {
 	host = "https://flkdj3s9fs.execute-api.ap-southeast-2.amazonaws.com/prod"
 }
@@ -141,12 +140,11 @@ $ export AWS_ACCESS_KEY_ID="anaccesskey"
 $ export AWS_SECRET_ACCESS_KEY="asecretkey"
 $ export AWS_REGION="us-west-2"
 $ terraform plan
-
 ```
 
 Alternatively and a more preferred method of exporting credentials is to use [Granted](https://granted.dev/). Granted will automatically create credentials for a given role and export them to your environment.
 
-```json
+```
 provider "commonfate" {
 	host = "https://flkdj3s9fs.execute-api.ap-southeast-2.amazonaws.com/prod"
 }

@@ -1,7 +1,5 @@
 package main
 
-//go:generate tfplugindocs generate --rendered-provider-name="CommonFate" --provider-name="commonfate"  --examples-dir="examples" --website-source-dir="templates"
-
 import (
 	"context"
 	"flag"
