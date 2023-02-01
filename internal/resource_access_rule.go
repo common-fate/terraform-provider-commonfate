@@ -317,7 +317,7 @@ func (r *AccessRuleResource) Read(ctx context.Context, req resource.ReadRequest,
 	if accessRule.HTTPResponse.StatusCode != http.StatusOK {
 		resp.Diagnostics.AddError(
 			"Unable to Refresh Resource",
-			"An unexpected error occurred while attempting to refresh resource state. ")
+			"An unexpected error occurred while attempting to refresh resource state: "+string(accessRule.Body))
 		return
 	}
 
