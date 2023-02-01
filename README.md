@@ -68,7 +68,7 @@ To update the docs, edit the [template file](./templates/index.md.tmpl). To upda
 Run the following command:
 
 ```
-tfplugindocs generate --rendered-provider-name="CommonFate" --provider-name="commonfate"  --examples-dir="examples" --website-source-dir="templates"
+make generate
 ```
 
 The updated docs can be found in the [docs file](./docs/index.md)

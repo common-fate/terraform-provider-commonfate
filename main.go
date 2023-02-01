@@ -1,10 +1,9 @@
 package main
 
-//go:generate tfplugindocs generate --rendered-provider-name="CommonFate" --provider-name="commonfate"  --examples-dir="examples" --website-source-dir="templates"
-
 import (
 	"context"
 	"flag"
+	"log"
 
 	commonfate "github.com/common-fate/common-fate-terraform-proto/internal"
 
@@ -16,9 +15,11 @@ func main() {
 
 	flag.BoolVar(&debug, "debug", false, "set to true to run the provider with support for debuggers like delve")
 	flag.Parse()
-	providerserver.Serve(context.Background(), commonfate.New, providerserver.ServeOpts{
+	err := providerserver.Serve(context.Background(), commonfate.New, providerserver.ServeOpts{
 		Debug:   debug,
 		Address: "commonfate.com/commonfate/commonfate",
 	})
-
+	if err != nil {
+		log.Fatal(err)
+	}
 }
