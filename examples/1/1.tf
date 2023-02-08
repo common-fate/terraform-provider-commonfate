@@ -11,7 +11,7 @@ terraform {
 
 
 provider "commonfate" {
-  host = ""
+  governance_api_url = ""
 }
 
 

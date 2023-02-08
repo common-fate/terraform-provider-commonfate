@@ -21,7 +21,7 @@ terraform {
 }
 
 provider "commonfate" {
-  host = "https://commonfate-api.example.com"
+  governance_api_url = "https://commonfate-api.example.com"
 }
 ```
 
@@ -44,7 +44,7 @@ Within the returned table will be a `GovernanceURL` credential, it will look som
 
 ```terraform
 provider "commonfate" {
-  host = "https://yfbttt8s59.execute-api.ap-southeast-2.amazonaws.com/prod/"
+  governance_api_url = "https://yfbttt8s59.execute-api.ap-southeast-2.amazonaws.com/prod/"
 }
 ```
 
@@ -104,15 +104,15 @@ To complete the step below you will need to create a policy that allows `execute
 
 ```json
 {
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Sid": "VisualEditor0",
-            "Effect": "Allow",
-            "Action": "execute-api:Invoke",
-            "Resource": "arn:aws:execute-api:{REGION}:{AWS_ACCOUNT}:{API_GATEWAYY_ID}/*/*/*"
-        }
-    ]
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "VisualEditor0",
+      "Effect": "Allow",
+      "Action": "execute-api:Invoke",
+      "Resource": "arn:aws:execute-api:{REGION}:{AWS_ACCOUNT}:{API_GATEWAYY_ID}/*/*/*"
+    }
+  ]
 }
 ```
 
@@ -134,7 +134,7 @@ For example:
 
 ```
 provider "commonfate" {
-	host = "https://flkdj3s9fs.execute-api.ap-southeast-2.amazonaws.com/prod"
+	governance_api_url = "https://flkdj3s9fs.execute-api.ap-southeast-2.amazonaws.com/prod"
 }
 $ export AWS_ACCESS_KEY_ID="anaccesskey"
 $ export AWS_SECRET_ACCESS_KEY="asecretkey"
@@ -146,7 +146,7 @@ Alternatively and a more preferred method of exporting credentials is to use [Gr
 
 ```
 provider "commonfate" {
-	host = "https://flkdj3s9fs.execute-api.ap-southeast-2.amazonaws.com/prod"
+	governance_api_url = "https://flkdj3s9fs.execute-api.ap-southeast-2.amazonaws.com/prod"
 }
 $ assume cf-deployment-terraform
 $ terraform plan

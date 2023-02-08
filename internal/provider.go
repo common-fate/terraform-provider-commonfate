@@ -7,13 +7,14 @@ import (
 	"encoding/hex"
 	"io"
 	"net/http"
-	"os"
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	v4 "github.com/aws/aws-sdk-go-v2/aws/signer/v4"
+	awsconfig "github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/credentials/stscreds"
+	"github.com/aws/aws-sdk-go-v2/service/sts"
 	governance "github.com/common-fate/common-fate/governance/pkg/types"
-	"github.com/common-fate/common-fate/pkg/cfaws"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -39,12 +40,16 @@ func New() provider.Provider {
 
 // commonfateProvider is the provider implementation.
 type commonfateProvider struct {
-	Host types.String `tfsdk:"host"`
+	GovernanceAPIURL types.String `tfsdk:"governance_api_url"`
+	AWSRegion        types.String `tfsdk:"aws_region"`
+	AssumeRoleARN    types.String `tfsdk:"assume_role_arn"`
 }
 
 // commonfateProviderModel maps provider schema data to a Go type.
 type commonfateProviderModel struct {
-	Host types.String `tfsdk:"host"`
+	GovernanceAPIURL types.String `tfsdk:"governance_api_url"`
+	AWSRegion        types.String `tfsdk:"aws_region"`
+	AssumeRoleARN    types.String `tfsdk:"assume_role_arn"`
 }
 
 // Metadata returns the provider type name.
@@ -56,9 +61,17 @@ func (p *commonfateProvider) Metadata(_ context.Context, _ provider.MetadataRequ
 func (p *commonfateProvider) GetSchema(_ context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
 		Attributes: map[string]tfsdk.Attribute{
-			"host": {
+			"governance_api_url": {
 				Type:     types.StringType,
 				Required: true,
+			},
+			"aws_region": {
+				Type:     types.StringType,
+				Required: true,
+			},
+			"assume_role_arn": {
+				Type:     types.StringType,
+				Optional: true,
 			},
 		},
 	}, nil
@@ -77,12 +90,11 @@ func (p *commonfateProvider) Configure(ctx context.Context, req provider.Configu
 	// If practitioner provided a configuration value for any of the
 	// attributes, it must be a known value.
 
-	if config.Host.IsUnknown() {
+	if config.GovernanceAPIURL.IsUnknown() {
 		resp.Diagnostics.AddAttributeError(
-			path.Root("host"),
+			path.Root("governance_api_url"),
 			"Unknown Common Fate API Host",
-			"The provider cannot create the Common Fate API client as there is an unknown configuration value for the Common Fate API host. "+
-				"Either target apply the source of the value first, set the value statically in the configuration, or use the COMMONFATE_HOST environment variable.",
+			"The provider cannot create the Common Fate API client as there is an unknown configuration value for the Common Fate Governance API.",
 		)
 	}
 
@@ -90,21 +102,14 @@ func (p *commonfateProvider) Configure(ctx context.Context, req provider.Configu
 		return
 	}
 
-	// Default values to environment variables, but override
-	// with Terraform configuration value if set.
-
-	host := os.Getenv("COMMONFATE_HOST")
-
-	if !config.Host.IsNull() {
-		host = config.Host.ValueString()
-	}
+	governanceAPIURL := config.GovernanceAPIURL.ValueString()
 
 	// If any of the expected configurations are missing, return
 	// errors with provider-specific guidance.
 
-	if host == "" {
+	if governanceAPIURL == "" {
 		resp.Diagnostics.AddAttributeError(
-			path.Root("host"),
+			path.Root("governance_api_url"),
 			"Missing Common Fate API Host",
 			"The provider cannot create the Common Fate API client as there is a missing or empty value for the Common Fate API host. "+
 				"Set the host value in the configuration or use the COMMONFATE_HOST environment variable. "+
@@ -112,45 +117,68 @@ func (p *commonfateProvider) Configure(ctx context.Context, req provider.Configu
 		)
 	}
 
-	region := os.Getenv("AWS_REGION")
+	region := config.AWSRegion.ValueString()
 
 	// If any of the expected configurations are missing, return
 	// errors with provider-specific guidance.
 
 	if region == "" {
 		resp.Diagnostics.AddAttributeError(
-			path.Root("region"),
+			path.Root("aws_region"),
 			"Missing AWS region",
 			"The provider cannot create the Common Fate API client as there is a missing or empty value for the Common Fate API region. "+
-				"Make sure the AWS_REGION environment variable is set.",
+				"Make sure the aws_region provider variable is set.",
 		)
 	}
 
-	awsCfg, err := cfaws.ConfigFromContextOrDefault(ctx)
+	awsCfg, err := awsconfig.LoadDefaultConfig(ctx,
+		awsconfig.WithRegion(region),
+	)
 	if err != nil {
 		resp.Diagnostics.AddAttributeError(
 			path.Root("client"),
-			"error pulling AWS config",
-			"error pulling AWS config",
+			"error creating AWS config",
+			err.Error(),
 		)
 		return
 	}
+
+	assumeRoleARN := config.AssumeRoleARN.ValueString()
+	if assumeRoleARN != "" {
+		tflog.Debug(ctx, "assuming role", map[string]interface{}{"role": assumeRoleARN})
+
+		stsclient := sts.NewFromConfig(awsCfg)
+		awsCfg, err = awsconfig.LoadDefaultConfig(
+			ctx, awsconfig.WithRegion(region),
+			awsconfig.WithCredentialsProvider(aws.NewCredentialsCache(
+				stscreds.NewAssumeRoleProvider(
+					stsclient,
+					assumeRoleARN,
+				)),
+			),
+		)
+		if err != nil {
+			resp.Diagnostics.AddError("error assuming role", err.Error())
+			return
+		}
+	}
+
 	creds, err := awsCfg.Credentials.Retrieve(ctx)
 	if err != nil {
 		resp.Diagnostics.AddAttributeError(
 			path.Root("client"),
 			"error fetching AWS credentials",
-			"error fetching AWS credentials",
+			err.Error(),
 		)
 		return
 	}
 
-	client, err := governance.NewClientWithResponses(host, governance.WithRequestEditorFn(apiGatewayRequestSigner(creds, region)))
+	client, err := governance.NewClientWithResponses(governanceAPIURL, governance.WithRequestEditorFn(apiGatewayRequestSigner(creds, region)))
 	if err != nil {
 		resp.Diagnostics.AddAttributeError(
 			path.Root("client"),
-			"error setting up client",
-			"error setting up Common Fate client, make sure you have valid AWS credentials and region exported to your environment.",
+			"error creating Common Fate API client",
+			err.Error(),
 		)
 		return
 	}
@@ -164,8 +192,7 @@ func (p *commonfateProvider) Configure(ctx context.Context, req provider.Configu
 	resp.DataSourceData = client
 	resp.ResourceData = client
 
-	tflog.Info(ctx, "Configured commonfate client", map[string]any{"success": true})
-
+	tflog.Info(ctx, "Configured Common Fate client", map[string]any{"success": true})
 }
 
 // DataSources defines the data sources implemented in the provider.

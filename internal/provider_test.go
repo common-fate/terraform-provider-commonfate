@@ -12,7 +12,8 @@ const (
 	// such as updating the Makefile and running the testing through that tool.
 	providerConfig = `
 provider "commonfate" {
-  host     = "http://localhost:8889"
+  governance_api_url     = "http://localhost:8889"
+  aws_region			 = "ap-southeast-2"
 }
 `
 )
