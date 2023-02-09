@@ -13,21 +13,21 @@ Then open the file just created in your editor of choice and add the following
 ```
 plugin_cache_dir   = "$HOME/.terraform.d/plugin-cache"
 disable_checkpoint = true
+
+provider_installation {
+  dev_overrides {
+                "registry.terraform.io/common-fate/commonfate" = "/Users/PATH_TO_GITHUB_REPO/common-fate-terraform-proto"
+ }
+
+  direct {}
+}
 ```
+- This tells Terraform to use a local copy of the provider over the deployed instance running at `registry.terraform.io`
 
 save and exit.
 
-Next we will make a local directory for the provider to live. To do this run:
-
-```
-mkdir -p ~/.terraform.d/plugins/commonfate.com/commonfate/commonfate/1.0.0/darwin_amd64
-```
-
-In the root of the repo;
-
 Then build the provider by running `make provider`
-
-- This will copy the terraform binary into the local directory we made above.
+- This will create the binary of the provider in your local directory.
 
 # Running the example Terraform
 
@@ -35,17 +35,8 @@ Then build the provider by running `make provider`
 
 You should now be able to run `terraform init` and `terraform plan` within the example folders
 
-- If you get a permission denied error when `terraform plan` you will need to make sure the binary is executable with:
-
-```
-chmod +x ~/.terraform.d/plugins/commonfate.com/commonfate/commonfate/1.0.0/darwin_amd64/terraform-provider-commonfate
-```
-
 In the plugins repo.
-
-- There is a `make clean` command that will reset the terraform state if it ever gets in a broken state
 - Run `make provider` to build a new version of the provider
-- Running `make all` will run both a `make clean` and a `make provider`
 
 ## Tests
 

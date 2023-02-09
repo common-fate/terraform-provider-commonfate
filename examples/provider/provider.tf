@@ -9,5 +9,5 @@ terraform {
 }
 
 provider "commonfate" {
-  host = "https://commonfate-api.example.com"
+  governance_api_url = "https://commonfate-api.example.com"
 }
