@@ -451,6 +451,7 @@ func (r *AccessRuleResource) Update(ctx context.Context, req resource.UpdateRequ
 	}
 
 	data.ID = types.StringValue(res.JSON200.ID)
+	data.Status = types.StringValue(string(res.JSON200.Status))
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 
