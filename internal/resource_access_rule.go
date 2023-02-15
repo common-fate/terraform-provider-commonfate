@@ -223,13 +223,13 @@ func (r *AccessRuleResource) Create(ctx context.Context, req resource.CreateRequ
 	//if approval not empty
 
 	if data.Approval != nil {
-		if len(*data.Approval.Groups) > 0 {
+		if data.Approval.Groups != nil && len(*data.Approval.Groups) > 0 {
 			for _, g := range *data.Approval.Groups {
 				createRequest.Approval.Groups = append(createRequest.Approval.Groups, g.ValueString())
 			}
 		}
 
-		if len(*data.Approval.Users) > 0 {
+		if data.Approval.Users != nil && len(*data.Approval.Users) > 0 {
 			for _, u := range *data.Approval.Users {
 				createRequest.Approval.Users = append(createRequest.Approval.Users, u.ValueString())
 			}
