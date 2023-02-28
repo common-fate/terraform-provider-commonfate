@@ -17,20 +17,19 @@ import (
 	governance "github.com/common-fate/common-fate/governance/pkg/types"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
+	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
 // Ensure the implementation satisfies the expected interfaces
 var (
-	_ provider.Provider              = &commonfateProvider{}
-	_ provider.ProviderWithMetadata  = &commonfateProvider{}
-	_ provider.ProviderWithGetSchema = &commonfateProvider{}
+// _ provider.Provider              = &commonfateProvider{}
+// // _ provider.ProviderWithMetadata  = &commonfateProvider{}
+// _ provider.ProviderWithMetaSchema = &commonfateProvider{}
 )
 
 // New is a helper function to simplify provider server and testing implementation.
@@ -58,23 +57,20 @@ func (p *commonfateProvider) Metadata(_ context.Context, _ provider.MetadataRequ
 }
 
 // GetSchema defines the provider-level schema for configuration data.
-func (p *commonfateProvider) GetSchema(_ context.Context) (tfsdk.Schema, diag.Diagnostics) {
-	return tfsdk.Schema{
-		Attributes: map[string]tfsdk.Attribute{
-			"governance_api_url": {
-				Type:     types.StringType,
+func (p *commonfateProvider) Schema(ctx context.Context, req provider.SchemaRequest, resp *provider.SchemaResponse) {
+	resp.Schema = schema.Schema{
+		Attributes: map[string]schema.Attribute{
+			"governance_api_url": schema.StringAttribute{
 				Required: true,
 			},
-			"aws_region": {
-				Type:     types.StringType,
+			"aws_region": schema.StringAttribute{
 				Required: true,
 			},
-			"assume_role_arn": {
-				Type:     types.StringType,
+			"assume_role_arn": schema.StringAttribute{
 				Optional: true,
 			},
 		},
-	}, nil
+	}
 }
 
 // Configure prepares a the Common Fate API for data sources and resources.
