@@ -224,18 +224,23 @@ func (r *AccessRuleResource) Create(ctx context.Context, req resource.CreateRequ
 
 	if data.Approval != nil {
 		if data.Approval.Groups != nil && len(*data.Approval.Groups) > 0 {
+			tempList := []string{}
 			for _, g := range *data.Approval.Groups {
-				createRequest.Approval.Groups = append(createRequest.Approval.Groups, g.ValueString())
+				tempList = append(tempList, g.ValueString())
 			}
+			createRequest.Approval.Groups = &tempList
 		}
 
 		if data.Approval.Users != nil && len(*data.Approval.Users) > 0 {
+			tempList := []string{}
 			for _, u := range *data.Approval.Users {
-				createRequest.Approval.Users = append(createRequest.Approval.Users, u.ValueString())
+				tempList = append(tempList, u.ValueString())
 			}
+			createRequest.Approval.Users = &tempList
+
 		}
 	} else {
-		createRequest.Approval = cf_types.ApproverConfig{Groups: []string{}, Users: []string{}}
+		createRequest.Approval = cf_types.ApproverConfig{Groups: nil, Users: nil}
 
 	}
 
@@ -395,19 +400,24 @@ func (r *AccessRuleResource) Update(ctx context.Context, req resource.UpdateRequ
 	}
 
 	if data.Approval != nil {
-		if len(*data.Approval.Groups) > 0 {
+		if data.Approval.Groups != nil && len(*data.Approval.Groups) > 0 {
+			tempList := []string{}
 			for _, g := range *data.Approval.Groups {
-				updateRequest.Approval.Groups = append(updateRequest.Approval.Groups, g.ValueString())
+				tempList = append(tempList, g.ValueString())
 			}
+			updateRequest.Approval.Groups = &tempList
 		}
 
-		if len(*data.Approval.Users) > 0 {
+		if data.Approval.Users != nil && len(*data.Approval.Users) > 0 {
+			tempList := []string{}
 			for _, u := range *data.Approval.Users {
-				updateRequest.Approval.Users = append(updateRequest.Approval.Users, u.ValueString())
+				tempList = append(tempList, u.ValueString())
 			}
+			updateRequest.Approval.Users = &tempList
+
 		}
 	} else {
-		updateRequest.Approval = cf_types.ApproverConfig{Groups: []string{}, Users: []string{}}
+		updateRequest.Approval = cf_types.ApproverConfig{Groups: nil, Users: nil}
 
 	}
 	args := make(map[string]cf_types.CreateAccessRuleTargetDetailArguments)
