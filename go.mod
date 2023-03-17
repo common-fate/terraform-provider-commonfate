@@ -7,7 +7,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/config v1.18.15
 	github.com/aws/aws-sdk-go-v2/credentials v1.13.15
 	github.com/aws/aws-sdk-go-v2/service/sts v1.18.5
-	github.com/common-fate/common-fate v0.15.1-0.20230316055133-9a9634f89dba
+	github.com/common-fate/common-fate v0.15.1-0.20230317000441-30007a2539fd
 	github.com/hashicorp/terraform-plugin-docs v0.13.0
 	github.com/hashicorp/terraform-plugin-framework v1.1.1
 	github.com/hashicorp/terraform-plugin-go v0.14.3

@@ -258,8 +258,8 @@ func (r *AccessRuleResource) Create(ctx context.Context, req resource.CreateRequ
 	if err != nil {
 
 		resp.Diagnostics.AddError(
-			"Failed to Create Resource",
-			"An unexpected error occurred while parsing the resource creation response. "+
+			"Unable to Update Resource",
+			"An unexpected error occurred while communicating with Common Fate API. "+
 				"Please report this issue to the provider developers.\n\n"+
 				"JSON Error: "+err.Error(),
 		)
@@ -267,18 +267,24 @@ func (r *AccessRuleResource) Create(ctx context.Context, req resource.CreateRequ
 		return
 
 	}
-
-	if res.JSON201 == nil {
+	if res.StatusCode() == 404 {
 
 		resp.Diagnostics.AddError(
 			"Failed to Create Resource",
-			"An unexpected error occurred while parsing the resource creation response. "+
+			"JSON Error: "+string(res.Body),
+		)
+		return
+	}
+
+	if res.JSON201 == nil {
+		resp.Diagnostics.AddError(
+			"Unable to Update Resource",
+			"An unexpected error occurred while communicating with Common Fate API. "+
 				"Please report this issue to the provider developers.\n\n"+
-				"JSON Error: "+res.Status(),
+				"JSON Error: "+err.Error(),
 		)
 
 		return
-
 	}
 
 	// // Convert from the API data model to the Terraform data model
@@ -436,28 +442,32 @@ func (r *AccessRuleResource) Update(ctx context.Context, req resource.UpdateRequ
 
 		resp.Diagnostics.AddError(
 			"Unable to Update Resource",
-			"An unexpected error occurred while parsing the resource creation response. "+
+			"An unexpected error occurred while communicating with Common Fate API. "+
 				"Please report this issue to the provider developers.\n\n"+
-
-				"JSON Error: "+res.Status()+" id: "+data.ID.ValueString(),
+				"JSON Error: "+err.Error(),
 		)
 
 		return
 
 	}
-
-	if res.JSON200 == nil {
+	if res.StatusCode() == 404 {
 
 		resp.Diagnostics.AddError(
-			"Unable to Update Resource",
-			"An unexpected error occurred while parsing the resource creation response. "+
-				"Please report this issue to the provider developers.\n\n"+
+			"Failed to Create Resource",
+			"JSON Error: "+string(res.Body),
+		)
+		return
+	}
 
-				"JSON Error: "+res.Status()+" id: "+data.ID.ValueString(),
+	if res.JSON200 == nil {
+		resp.Diagnostics.AddError(
+			"Unable to Update Resource",
+			"An unexpected error occurred while communicating with Common Fate API. "+
+				"Please report this issue to the provider developers.\n\n"+
+				"JSON Error: "+err.Error(),
 		)
 
 		return
-
 	}
 
 	data.ID = types.StringValue(res.JSON200.ID)

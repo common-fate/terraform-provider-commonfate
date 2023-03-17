@@ -56,6 +56,12 @@ github.com/common-fate/common-fate v0.15.1-0.20230316054420-23120864b1bf h1:gN/1
 github.com/common-fate/common-fate v0.15.1-0.20230316054420-23120864b1bf/go.mod h1:GCi2nVZ3oI0hZKXBzt/eW2fzp/1V51x/fbU4pDPC27g=
 github.com/common-fate/common-fate v0.15.1-0.20230316055133-9a9634f89dba h1:nH/ZhXiMkwwV8Wd/GwlTC72xhPhVUSwx+kB+ndmbyew=
 github.com/common-fate/common-fate v0.15.1-0.20230316055133-9a9634f89dba/go.mod h1:GCi2nVZ3oI0hZKXBzt/eW2fzp/1V51x/fbU4pDPC27g=
+github.com/common-fate/common-fate v0.15.1-0.20230316230713-350225d7b0ba h1:GOEJpn+skEiw95I8oWi4KS7TfZxUsS1A5qRcd4HNnjU=
+github.com/common-fate/common-fate v0.15.1-0.20230316230713-350225d7b0ba/go.mod h1:GCi2nVZ3oI0hZKXBzt/eW2fzp/1V51x/fbU4pDPC27g=
+github.com/common-fate/common-fate v0.15.1-0.20230316233404-078dadd5575d h1:0n2AcuQ4NhyMMScQKLNdYx5n3vuINFKjNOUMoB4iAi4=
+github.com/common-fate/common-fate v0.15.1-0.20230316233404-078dadd5575d/go.mod h1:GCi2nVZ3oI0hZKXBzt/eW2fzp/1V51x/fbU4pDPC27g=
+github.com/common-fate/common-fate v0.15.1-0.20230317000441-30007a2539fd h1:KBvkNy3L+Or7UPP4MDva7TLSQw6GdvgiWcUprzIBvHw=
+github.com/common-fate/common-fate v0.15.1-0.20230317000441-30007a2539fd/go.mod h1:GCi2nVZ3oI0hZKXBzt/eW2fzp/1V51x/fbU4pDPC27g=
 github.com/common-fate/iso8601 v1.0.2 h1:gl6iNbE8TnJzg+lYJxPNYOkF+oHYde2K2s2i+5o4yHE=
 github.com/common-fate/iso8601 v1.0.2/go.mod h1:DU4mvUEkkWZUUSJq2aCuNqM1luSb0Pwyb2dLzXS+img=
 github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
