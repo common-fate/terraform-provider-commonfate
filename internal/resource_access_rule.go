@@ -224,18 +224,23 @@ func (r *AccessRuleResource) Create(ctx context.Context, req resource.CreateRequ
 
 	if data.Approval != nil {
 		if data.Approval.Groups != nil && len(*data.Approval.Groups) > 0 {
+			tempList := []string{}
 			for _, g := range *data.Approval.Groups {
-				createRequest.Approval.Groups = append(createRequest.Approval.Groups, g.ValueString())
+				tempList = append(tempList, g.ValueString())
 			}
+			createRequest.Approval.Groups = &tempList
 		}
 
 		if data.Approval.Users != nil && len(*data.Approval.Users) > 0 {
+			tempList := []string{}
 			for _, u := range *data.Approval.Users {
-				createRequest.Approval.Users = append(createRequest.Approval.Users, u.ValueString())
+				tempList = append(tempList, u.ValueString())
 			}
+			createRequest.Approval.Users = &tempList
+
 		}
 	} else {
-		createRequest.Approval = cf_types.ApproverConfig{Groups: []string{}, Users: []string{}}
+		createRequest.Approval = cf_types.ApproverConfig{Groups: nil, Users: nil}
 
 	}
 
@@ -253,8 +258,8 @@ func (r *AccessRuleResource) Create(ctx context.Context, req resource.CreateRequ
 	if err != nil {
 
 		resp.Diagnostics.AddError(
-			"Failed to Create Resource",
-			"An unexpected error occurred while parsing the resource creation response. "+
+			"Unable to Update Resource",
+			"An unexpected error occurred while communicating with Common Fate API. "+
 				"Please report this issue to the provider developers.\n\n"+
 				"JSON Error: "+err.Error(),
 		)
@@ -262,18 +267,24 @@ func (r *AccessRuleResource) Create(ctx context.Context, req resource.CreateRequ
 		return
 
 	}
-
-	if res.JSON201 == nil {
+	if res.StatusCode() == 404 {
 
 		resp.Diagnostics.AddError(
 			"Failed to Create Resource",
-			"An unexpected error occurred while parsing the resource creation response. "+
+			"JSON Error: "+string(res.Body),
+		)
+		return
+	}
+
+	if res.JSON201 == nil {
+		resp.Diagnostics.AddError(
+			"Unable to Update Resource",
+			"An unexpected error occurred while communicating with Common Fate API. "+
 				"Please report this issue to the provider developers.\n\n"+
-				"JSON Error: "+res.Status(),
+				"JSON Error: "+err.Error(),
 		)
 
 		return
-
 	}
 
 	// // Convert from the API data model to the Terraform data model
@@ -395,19 +406,24 @@ func (r *AccessRuleResource) Update(ctx context.Context, req resource.UpdateRequ
 	}
 
 	if data.Approval != nil {
-		if len(*data.Approval.Groups) > 0 {
+		if data.Approval.Groups != nil && len(*data.Approval.Groups) > 0 {
+			tempList := []string{}
 			for _, g := range *data.Approval.Groups {
-				updateRequest.Approval.Groups = append(updateRequest.Approval.Groups, g.ValueString())
+				tempList = append(tempList, g.ValueString())
 			}
+			updateRequest.Approval.Groups = &tempList
 		}
 
-		if len(*data.Approval.Users) > 0 {
+		if data.Approval.Users != nil && len(*data.Approval.Users) > 0 {
+			tempList := []string{}
 			for _, u := range *data.Approval.Users {
-				updateRequest.Approval.Users = append(updateRequest.Approval.Users, u.ValueString())
+				tempList = append(tempList, u.ValueString())
 			}
+			updateRequest.Approval.Users = &tempList
+
 		}
 	} else {
-		updateRequest.Approval = cf_types.ApproverConfig{Groups: []string{}, Users: []string{}}
+		updateRequest.Approval = cf_types.ApproverConfig{Groups: nil, Users: nil}
 
 	}
 	args := make(map[string]cf_types.CreateAccessRuleTargetDetailArguments)
@@ -426,28 +442,32 @@ func (r *AccessRuleResource) Update(ctx context.Context, req resource.UpdateRequ
 
 		resp.Diagnostics.AddError(
 			"Unable to Update Resource",
-			"An unexpected error occurred while parsing the resource creation response. "+
+			"An unexpected error occurred while communicating with Common Fate API. "+
 				"Please report this issue to the provider developers.\n\n"+
-
-				"JSON Error: "+res.Status()+" id: "+data.ID.ValueString(),
+				"JSON Error: "+err.Error(),
 		)
 
 		return
 
 	}
-
-	if res.JSON200 == nil {
+	if res.StatusCode() == 404 {
 
 		resp.Diagnostics.AddError(
-			"Unable to Update Resource",
-			"An unexpected error occurred while parsing the resource creation response. "+
-				"Please report this issue to the provider developers.\n\n"+
+			"Failed to Create Resource",
+			"JSON Error: "+string(res.Body),
+		)
+		return
+	}
 
-				"JSON Error: "+res.Status()+" id: "+data.ID.ValueString(),
+	if res.JSON200 == nil {
+		resp.Diagnostics.AddError(
+			"Unable to Update Resource",
+			"An unexpected error occurred while communicating with Common Fate API. "+
+				"Please report this issue to the provider developers.\n\n"+
+				"JSON Error: "+err.Error(),
 		)
 
 		return
-
 	}
 
 	data.ID = types.StringValue(res.JSON200.ID)
