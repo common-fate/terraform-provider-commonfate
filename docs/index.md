@@ -121,7 +121,7 @@ To create an access rule with group approvals, add the desired group(s) to the `
 ```terraform
 resource "commonfate_access_rule" "aws-admin" {
   name ="This was made in terraform demo"
-  description="Access rule with user approval"
+  description="Access rule with group approval"
   groups=["common_fate_administrators"]
   
   approval= {
