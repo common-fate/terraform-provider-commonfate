@@ -58,17 +58,14 @@ Once you have completed authentication with the governance API, you can run thro
 With the Common Fate Terraform module you will be able to create and manage Access Rules, a commonly used resource in Common Fate.
 Access Rules control who can request access to what, and the requirements surrounding their requests.
 
-Below is a sample Terraform file. This code snippet demonstrates creating an access rule called "Common Fate Access Rule", allowing anyone in the "common_fate_administrators" group to assume it, without requiring approval.
+Below is a sample Terraform file. This code snippet demonstrates creating an access rule called "aws-admin", allowing anyone in the "common_fate_administrators" group to assume it, without requiring approval.
 
 ```terraform
 resource "commonfate_access_rule" "aws-admin" {
   name ="This was made in terraform demo"
-  description="Access rule made in terraform"
+  description="Access rule with no approval"
   groups=["common_fate_administrators"]
-  approval= {
-      users=[""]
-  }
-
+  
   target=[
     {
       field="accountId"
@@ -79,6 +76,69 @@ resource "commonfate_access_rule" "aws-admin" {
       value=["arn:aws:sso:::permissionSet/ssoins-825968feece9a0b6/3hjdfkj3r28ef"]
     }
   ]
+  
+  target_provider_id="aws-sso-v2"
+  duration="3600"
+}
+```
+### Access Rules with Approvals 
+
+#### User Approvals
+
+To create an access rule with user approvals, add the desired user IDs to the `approval` block's `users` list. You can find the user IDs in the URL of the user after `/user/`. For example, if the user ID in the URL is `usr_2SUkv2MSqKWKOmiQhzHEN6kMv2X`, you would use that ID in the `users` list:
+
+```terraform
+resource "commonfate_access_rule" "aws-admin" {
+  name ="This was made in terraform demo"
+  description="Access rule with user approval"
+  groups=["common_fate_administrators"]
+  
+  approval= {
+    users=["usr_2SUkv2MSqKWKOmiQhzHEN6kMv2X"]
+  }
+  
+  target=[
+    {
+      field="accountId"
+      value=["123456789012"]
+    },
+    {
+      field="permissionSetArn"
+      value=["arn:aws:sso:::permissionSet/ssoins-825968feece9a0b6/3hjdfkj3r28ef"]
+    }
+  ]
+  
+  target_provider_id="aws-sso-v2"
+  duration="3600"
+}
+```
+
+#### Group Approvals
+
+To create an access rule with group approvals, add the desired group(s) to the `approval` block's `groups` list. For example:
+
+
+```terraform
+resource "commonfate_access_rule" "aws-admin" {
+  name ="This was made in terraform demo"
+  description="Access rule with user approval"
+  groups=["common_fate_administrators"]
+  
+  approval= {
+    groups=["common_fate_administrators"]
+  }
+  
+  target=[
+    {
+      field="accountId"
+      value=["123456789012"]
+    },
+    {
+      field="permissionSetArn"
+      value=["arn:aws:sso:::permissionSet/ssoins-825968feece9a0b6/3hjdfkj3r28ef"]
+    }
+  ]
+  
   target_provider_id="aws-sso-v2"
   duration="3600"
 }

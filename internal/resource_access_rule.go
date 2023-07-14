@@ -185,20 +185,16 @@ func (r *AccessRuleResource) Create(ctx context.Context, req resource.CreateRequ
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 
 	if resp.Diagnostics.HasError() {
-
 		resp.Diagnostics.AddError(
 			"Unable to Create Resource",
 			"An unexpected error occurred while parsing the resource creation response.",
 		)
 
 		return
-
 	}
 
 	dur, err := strconv.Atoi(data.Duration.ValueString())
-
 	if err != nil {
-
 		resp.Diagnostics.AddError(
 			"failed to configure duration",
 			"An unexpected error occurred while parsing the resource creation response. "+
@@ -207,7 +203,6 @@ func (r *AccessRuleResource) Create(ctx context.Context, req resource.CreateRequ
 		)
 
 		return
-
 	}
 
 	createRequest := governance.GovCreateAccessRuleJSONRequestBody{
@@ -237,16 +232,13 @@ func (r *AccessRuleResource) Create(ctx context.Context, req resource.CreateRequ
 				tempList = append(tempList, u.ValueString())
 			}
 			createRequest.Approval.Users = &tempList
-
 		}
 	} else {
 		createRequest.Approval = cf_types.ApproverConfig{Groups: nil, Users: nil}
-
 	}
 
 	args := make(map[string]cf_types.CreateAccessRuleTargetDetailArguments)
 	for _, v := range data.Target {
-
 		args[v.Field.ValueString()] = cf_types.CreateAccessRuleTargetDetailArguments{Values: v.Value}
 	}
 
@@ -254,9 +246,7 @@ func (r *AccessRuleResource) Create(ctx context.Context, req resource.CreateRequ
 
 	//create the new access model with the client
 	res, err := r.client.GovCreateAccessRuleWithResponse(ctx, createRequest)
-
 	if err != nil {
-
 		resp.Diagnostics.AddError(
 			"Unable to Update Resource",
 			"An unexpected error occurred while communicating with Common Fate API. "+
@@ -265,13 +255,11 @@ func (r *AccessRuleResource) Create(ctx context.Context, req resource.CreateRequ
 		)
 
 		return
-
 	}
-	if res.StatusCode() == 404 {
-
+	if res.StatusCode() >= 300 {
 		resp.Diagnostics.AddError(
 			"Failed to Create Resource",
-			"JSON Error: "+string(res.Body),
+			fmt.Sprintf("JSON Error: %s Status Code: %d", string(res.Body), res.StatusCode()),
 		)
 		return
 	}
@@ -280,8 +268,8 @@ func (r *AccessRuleResource) Create(ctx context.Context, req resource.CreateRequ
 		resp.Diagnostics.AddError(
 			"Unable to Update Resource",
 			"An unexpected error occurred while communicating with Common Fate API. "+
-				"Please report this issue to the provider developers.\n\n"+
-				"JSON Error: "+err.Error(),
+				"res.JSON201 was nil\n\n"+
+				"JSON Error: "+string(res.Body),
 		)
 
 		return
@@ -368,22 +356,17 @@ func (r *AccessRuleResource) Update(ctx context.Context, req resource.UpdateRequ
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
-
 	if resp.Diagnostics.HasError() {
-
 		resp.Diagnostics.AddError(
 			"Unable to Create Resource",
 			"An unexpected error occurred while parsing the resource creation response.",
 		)
 
 		return
-
 	}
 
 	dur, err := strconv.Atoi(data.Duration.ValueString())
-
 	if err != nil {
-
 		resp.Diagnostics.AddError(
 			"failed to convert time to int",
 			"An unexpected error occurred while parsing the resource creation response. "+
@@ -392,7 +375,6 @@ func (r *AccessRuleResource) Update(ctx context.Context, req resource.UpdateRequ
 		)
 
 		return
-
 	}
 
 	updateRequest := governance.GovUpdateAccessRuleJSONRequestBody{
@@ -420,15 +402,12 @@ func (r *AccessRuleResource) Update(ctx context.Context, req resource.UpdateRequ
 				tempList = append(tempList, u.ValueString())
 			}
 			updateRequest.Approval.Users = &tempList
-
 		}
 	} else {
 		updateRequest.Approval = cf_types.ApproverConfig{Groups: nil, Users: nil}
-
 	}
 	args := make(map[string]cf_types.CreateAccessRuleTargetDetailArguments)
 	for _, v := range data.Target {
-
 		args[v.Field.ValueString()] = cf_types.CreateAccessRuleTargetDetailArguments{Values: v.Value}
 	}
 
@@ -437,9 +416,7 @@ func (r *AccessRuleResource) Update(ctx context.Context, req resource.UpdateRequ
 
 	fmt.Println(data.ID.ValueString())
 	res, err := r.client.GovUpdateAccessRuleWithResponse(ctx, data.ID.ValueString(), updateRequest)
-
 	if err != nil {
-
 		resp.Diagnostics.AddError(
 			"Unable to Update Resource",
 			"An unexpected error occurred while communicating with Common Fate API. "+
@@ -450,11 +427,10 @@ func (r *AccessRuleResource) Update(ctx context.Context, req resource.UpdateRequ
 		return
 
 	}
-	if res.StatusCode() == 404 {
-
+	if res.StatusCode() >= 300 {
 		resp.Diagnostics.AddError(
 			"Failed to Create Resource",
-			"JSON Error: "+string(res.Body),
+			fmt.Sprintf("JSON Error: %s Status Code: %d", string(res.Body), res.StatusCode()),
 		)
 		return
 	}
@@ -463,8 +439,8 @@ func (r *AccessRuleResource) Update(ctx context.Context, req resource.UpdateRequ
 		resp.Diagnostics.AddError(
 			"Unable to Update Resource",
 			"An unexpected error occurred while communicating with Common Fate API. "+
-				"Please report this issue to the provider developers.\n\n"+
-				"JSON Error: "+err.Error(),
+				"res.JSON200 was nil\n\n"+
+				"JSON Error: "+string(res.Body),
 		)
 
 		return
@@ -474,7 +450,6 @@ func (r *AccessRuleResource) Update(ctx context.Context, req resource.UpdateRequ
 	data.Status = types.StringValue(string(res.JSON200.Status))
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
-
 }
 
 func (r *AccessRuleResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -488,23 +463,18 @@ func (r *AccessRuleResource) Delete(ctx context.Context, req resource.DeleteRequ
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
-
 	if resp.Diagnostics.HasError() {
-
 		resp.Diagnostics.AddError(
 			"Unable to delete Resource",
 			"An unexpected error occurred while parsing the resource creation response.",
 		)
 
 		return
-
 	}
 
 	//create the new access model with the client
 	res, err := r.client.GovArchiveAccessRuleWithResponse(ctx, data.ID.ValueString())
-
 	if err != nil {
-
 		resp.Diagnostics.AddError(
 			"Unable to delete Resource",
 			"An unexpected error occurred while parsing the resource creation response. "+
@@ -513,11 +483,9 @@ func (r *AccessRuleResource) Delete(ctx context.Context, req resource.DeleteRequ
 		)
 
 		return
-
 	}
 
 	if res.JSON200 == nil {
-
 		resp.Diagnostics.AddError(
 			"Unable to delete Resource",
 			"An unexpected error occurred while parsing the resource creation response. "+
@@ -526,9 +494,7 @@ func (r *AccessRuleResource) Delete(ctx context.Context, req resource.DeleteRequ
 		)
 
 		return
-
 	}
-
 }
 
 func (r *AccessRuleResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
