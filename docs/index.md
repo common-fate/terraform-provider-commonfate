@@ -45,8 +45,11 @@ Within the returned table will be a `GovernanceURL` credential, it will look som
 ```terraform
 provider "commonfate" {
   governance_api_url = "https://yfbttt8s59.execute-api.ap-southeast-2.amazonaws.com/prod/"
+  aws_region         = "us-west-2"
 }
 ```
+
+The `aws_region` field must be set to the region that Common Fate is deployed to.
 
 Once you have completed authentication with the governance API, you can run through the demo Terraform provider.
 
@@ -55,17 +58,14 @@ Once you have completed authentication with the governance API, you can run thro
 With the Common Fate Terraform module you will be able to create and manage Access Rules, a commonly used resource in Common Fate.
 Access Rules control who can request access to what, and the requirements surrounding their requests.
 
-Below is a sample Terraform file. This code snippet demonstrates creating an access rule called "Common Fate Access Rule", allowing anyone in the "common_fate_administrators" group to assume it, without requiring approval.
+Below is a sample Terraform file. This code snippet demonstrates creating an access rule called "aws-admin", allowing anyone in the "common_fate_administrators" group to assume it, without requiring approval.
 
 ```terraform
 resource "commonfate_access_rule" "aws-admin" {
   name ="This was made in terraform demo"
-  description="Access rule made in terraform"
+  description="Access rule with no approval"
   groups=["common_fate_administrators"]
-  approval= {
-      users=[""]
-  }
-
+  
   target=[
     {
       field="accountId"
@@ -76,6 +76,69 @@ resource "commonfate_access_rule" "aws-admin" {
       value=["arn:aws:sso:::permissionSet/ssoins-825968feece9a0b6/3hjdfkj3r28ef"]
     }
   ]
+  
+  target_provider_id="aws-sso-v2"
+  duration="3600"
+}
+```
+### Access Rules with Approvals 
+
+#### User Approvals
+
+To create an access rule with user approvals, add the desired user IDs to the `approval` block's `users` list. You can find the user IDs in the URL of the user after `/user/`. For example, if the user ID in the URL is `usr_2SUkv2MSqKWKOmiQhzHEN6kMv2X`, you would use that ID in the `users` list:
+
+```terraform
+resource "commonfate_access_rule" "aws-admin" {
+  name ="This was made in terraform demo"
+  description="Access rule with user approval"
+  groups=["common_fate_administrators"]
+  
+  approval= {
+    users=["usr_2SUkv2MSqKWKOmiQhzHEN6kMv2X"]
+  }
+  
+  target=[
+    {
+      field="accountId"
+      value=["123456789012"]
+    },
+    {
+      field="permissionSetArn"
+      value=["arn:aws:sso:::permissionSet/ssoins-825968feece9a0b6/3hjdfkj3r28ef"]
+    }
+  ]
+  
+  target_provider_id="aws-sso-v2"
+  duration="3600"
+}
+```
+
+#### Group Approvals
+
+To create an access rule with group approvals, add the desired group(s) to the `approval` block's `groups` list. For example:
+
+
+```terraform
+resource "commonfate_access_rule" "aws-admin" {
+  name ="This was made in terraform demo"
+  description="Access rule with group approval"
+  groups=["common_fate_administrators"]
+  
+  approval= {
+    groups=["common_fate_administrators"]
+  }
+  
+  target=[
+    {
+      field="accountId"
+      value=["123456789012"]
+    },
+    {
+      field="permissionSetArn"
+      value=["arn:aws:sso:::permissionSet/ssoins-825968feece9a0b6/3hjdfkj3r28ef"]
+    }
+  ]
+  
   target_provider_id="aws-sso-v2"
   duration="3600"
 }
@@ -104,15 +167,15 @@ To complete the step below you will need to create a policy that allows `execute
 
 ```json
 {
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Sid": "VisualEditor0",
-      "Effect": "Allow",
-      "Action": "execute-api:Invoke",
-      "Resource": "arn:aws:execute-api:{REGION}:{AWS_ACCOUNT}:{API_GATEWAYY_ID}/*/*/*"
-    }
-  ]
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "VisualEditor0",
+            "Effect": "Allow",
+            "Action": "execute-api:Invoke",
+            "Resource": "arn:aws:execute-api:{REGION}:{AWS_ACCOUNT}:{API_GATEWAYY_ID}/*/*/*"
+        }
+    ]
 }
 ```
 
@@ -128,13 +191,14 @@ Add the policy to a permission set or role and get credentials for the policy th
 
 Right now the only way to pass credentials to terraform is through environment variables. More methods of auth will come at a later date.
 
-Credentials must be provided by using the AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, and optionally AWS_SESSION_TOKEN environment variables. The region can be set using the AWS_REGION or AWS_DEFAULT_REGION environment variables.
+Credentials must be provided by using the AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, and optionally AWS_SESSION_TOKEN environment variables. The region can be set using the `aws_region` provider parameter.
 
 For example:
 
 ```
 provider "commonfate" {
 	governance_api_url = "https://flkdj3s9fs.execute-api.ap-southeast-2.amazonaws.com/prod"
+  aws_region         = "us-west-2"
 }
 $ export AWS_ACCESS_KEY_ID="anaccesskey"
 $ export AWS_SECRET_ACCESS_KEY="asecretkey"
@@ -147,6 +211,7 @@ Alternatively and a more preferred method of exporting credentials is to use [Gr
 ```
 provider "commonfate" {
 	governance_api_url = "https://flkdj3s9fs.execute-api.ap-southeast-2.amazonaws.com/prod"
+  aws_region         = "us-west-2"
 }
 $ assume cf-deployment-terraform
 $ terraform plan
