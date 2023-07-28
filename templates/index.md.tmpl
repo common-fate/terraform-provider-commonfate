@@ -15,7 +15,7 @@ terraform {
   required_providers {
     commonfate = {
       source = "common-fate/commonfate"
-      version = "~> 1.1"
+      version = "1.2.2"
     }
   }
 }
@@ -58,7 +58,9 @@ Once you have completed authentication with the governance API, you can run thro
 With the Common Fate Terraform module you will be able to create and manage Access Rules, a commonly used resource in Common Fate.
 Access Rules control who can request access to what, and the requirements surrounding their requests.
 
-Below is a sample Terraform file. This code snippet demonstrates creating an access rule called "aws-admin", allowing anyone in the "common_fate_administrators" group to assume it, without requiring approval.
+The following is a sample Terraform file. The code snippet illustrates the creation of an access rule named "aws-admin," which permits members of the "common_fate_administrators" group to assume it without the need for approval.
+
+To specify the groups, you must utilize the group IDs found in the URL after `/group/`. For instance, if the group ID in the URL is `common_fate_administrators`, you would use that ID in the groups list.
 
 ```terraform
 resource "commonfate_access_rule" "aws-admin" {
@@ -115,7 +117,7 @@ resource "commonfate_access_rule" "aws-admin" {
 
 #### Group Approvals
 
-To create an access rule with group approvals, add the desired group(s) to the `approval` block's `groups` list. For example:
+To create an access rule with group approvals, add the desired group IDs to the `approval` block's `groups` list. You can find the group IDs in the URL of the group after `/group/`. For example, if the group ID in the URL is `grp_2SUkv2MSqKWKOmiQhzHEN6kMv2X`, you would use that ID in the `groups` list:
 
 
 ```terraform
@@ -125,7 +127,7 @@ resource "commonfate_access_rule" "aws-admin" {
   groups=["common_fate_administrators"]
   
   approval= {
-    groups=["common_fate_administrators"]
+    groups=["grp_2SUkv2MSqKWKOmiQhzHEN6kMv2X"]
   }
   
   target=[
@@ -173,7 +175,7 @@ To complete the step below you will need to create a policy that allows `execute
             "Sid": "VisualEditor0",
             "Effect": "Allow",
             "Action": "execute-api:Invoke",
-            "Resource": "arn:aws:execute-api:{REGION}:{AWS_ACCOUNT}:{API_GATEWAYY_ID}/*/*/*"
+            "Resource": "arn:aws:execute-api:{REGION}:{AWS_ACCOUNT}:{API_GATEWAY_ID}/*/*/*"
         }
     ]
 }
