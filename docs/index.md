@@ -30,7 +30,11 @@ provider "commonfate" {
 To utilise the Common Fate Provider, you must have the following:
 
 - A valid Common Fate deployment
-- Exported valid AWS credentials to enable you to create Access Rules using the Terraform provider. To create a permission set or role with the appropriate permissions, see the section on [Authorization and Configurtion](#authorization-and-configuration). To understand how to appropriately export credentials, see [Exporting Credentials](#exporting-credentials)
+- IAM Role or valid AWS credentials to enable you to create Access Rules using the Terraform provider. 
+
+To create a permission set or role with the appropriate permissions, see the section on [Authorization and Configurtion](#authorization-and-configuration). 
+To understand how to appropriately export credentials, see [Exporting Credentials](#exporting-credentials)
+
 
 ## Configuration
 
@@ -50,6 +54,16 @@ provider "commonfate" {
 ```
 
 The `aws_region` field must be set to the region that Common Fate is deployed to.
+
+### use IAM role
+
+```terraform
+provider "commonfate" {
+  governance_api_url = "https://yfbttt8s59.execute-api.ap-southeast-2.amazonaws.com/prod/"
+  aws_region         = "us-west-2"
+  assume_role_arn    = "arn:aws:iam::1234567890:role/RoleWithPermissionsToInvokeGovernanceApiUrl"
+}
+```
 
 Once you have completed authentication with the governance API, you can run through the demo Terraform provider.
 
@@ -189,15 +203,13 @@ Add the policy to a permission set or role and get credentials for the policy th
 
 ### Exporting Credentials
 
-Right now the only way to pass credentials to terraform is through environment variables. More methods of auth will come at a later date.
-
 Credentials must be provided by using the AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, and optionally AWS_SESSION_TOKEN environment variables. The region can be set using the `aws_region` provider parameter.
 
 For example:
 
 ```
 provider "commonfate" {
-	governance_api_url = "https://flkdj3s9fs.execute-api.ap-southeast-2.amazonaws.com/prod"
+  governance_api_url = "https://flkdj3s9fs.execute-api.ap-southeast-2.amazonaws.com/prod"
   aws_region         = "us-west-2"
 }
 $ export AWS_ACCESS_KEY_ID="anaccesskey"
@@ -210,9 +222,20 @@ Alternatively and a more preferred method of exporting credentials is to use [Gr
 
 ```
 provider "commonfate" {
-	governance_api_url = "https://flkdj3s9fs.execute-api.ap-southeast-2.amazonaws.com/prod"
+  governance_api_url = "https://flkdj3s9fs.execute-api.ap-southeast-2.amazonaws.com/prod"
   aws_region         = "us-west-2"
 }
 $ assume cf-deployment-terraform
+$ terraform plan
+```
+
+Instead of exporting credentials best way is to use IAM role in the provider configuration
+
+```
+provider "commonfate" {
+  governance_api_url = "https://flkdj3s9fs.execute-api.ap-southeast-2.amazonaws.com/prod"
+  aws_region         = "us-west-2"
+  assume_role_arn    = "arn:aws:iam::1234567890:role/RoleWithPermissionsToInvokeGovernanceApiUrl"
+}
 $ terraform plan
 ```
