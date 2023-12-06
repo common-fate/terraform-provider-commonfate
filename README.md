@@ -16,7 +16,7 @@ disable_checkpoint = true
 
 provider_installation {
   dev_overrides {
-                "commonfate.com/common-fate/commonfate" = "/Users/PATH_TO_GITHUB_REPO/terraform-provider-commonfate"
+                "registry.terraform.io/common-fate/commonfate" = "/Users/PATH_TO_GITHUB_REPO/terraform-provider-commonfate"
  }
 
   direct {}
@@ -65,7 +65,7 @@ There is a vscode debugging provider called 'Debug Terraform Provider'. Run this
 ```
 Provider started. To attach Terraform CLI, set the TF_REATTACH_PROVIDERS environment variable with the following:
 
-	TF_REATTACH_PROVIDERS='{"commonfate.com/common-fate/cf":{"Protocol":"grpc","ProtocolVersion":6,"Pid":39056,"Test":true,"Addr":{"Network":"unix","String":"/var/folders/6b/nks_6fns3sj3ljtwcjrt5t840000gn/T/plugin2126076831"}}}'
+	TF_REATTACH_PROVIDERS='{"registry.terraform.io/common-fate/commonfate":{"Protocol":"grpc","ProtocolVersion":6,"Pid":39056,"Test":true,"Addr":{"Network":"unix","String":"/var/folders/6b/nks_6fns3sj3ljtwcjrt5t840000gn/T/plugin2126076831"}}}'
 ```
 
 export this env variable to the directory where you are running your terraform code. Then run a plan/apply with breakpoints set and it will catch. 
