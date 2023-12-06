@@ -33,7 +33,7 @@ var (
 
 // Metadata returns the data source type name.
 func (r *ScheduleResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "pagerduty_schedule"
+	resp.TypeName = req.ProviderTypeName + "_pagerduty_schedule"
 }
 
 // Configure adds the provider configured client to the data source.
