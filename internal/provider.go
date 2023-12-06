@@ -1,18 +1,9 @@
 package internal
 
 import (
-	"bytes"
 	"context"
-	"crypto/sha256"
-	"encoding/hex"
-	"io"
-	"net/http"
 	"strings"
-	"time"
 
-	"github.com/aws/aws-sdk-go-v2/aws"
-	v4 "github.com/aws/aws-sdk-go-v2/aws/signer/v4"
-	governance "github.com/common-fate/common-fate/governance/pkg/types"
 	config_client "github.com/common-fate/sdk/config"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
@@ -150,30 +141,4 @@ func NewScheduleResource() resource.Resource {
 
 func NewPagerDutyScheduleDataSource() datasource.DataSource {
 	return &PagerdutyScheduleDataSource{}
-}
-
-// apiGatewayRequestSigner uses the AWS SDK to sign the request with sigv4
-// Docs are scarce for this however I found this good example repo which is a little old but has some gems in it
-// https://github.com/smarty-archives/go-aws-auth
-func apiGatewayRequestSigner(creds aws.Credentials, region string) governance.RequestEditorFn {
-	return func(ctx context.Context, req *http.Request) (err error) {
-		signer := v4.NewSigner()
-		h := sha256.New()
-		var b []byte
-		if req.Body != nil {
-			b, err = io.ReadAll(req.Body)
-			// after you read the body you need to replace it with a new readcloser!
-			req.Body = io.NopCloser(bytes.NewReader(b))
-			if err != nil {
-				return err
-			}
-		}
-
-		_, err = h.Write(b)
-		if err != nil {
-			return err
-		}
-		sha256_hash := hex.EncodeToString(h.Sum(nil))
-		return signer.SignHTTP(ctx, creds, req, sha256_hash, "execute-api", region, time.Now())
-	}
 }
