@@ -5,7 +5,7 @@ import (
 	"flag"
 	"log"
 
-	commonfate "github.com/common-fate/common-fate-terraform-proto/internal"
+	commonfate "github.com/common-fate/terraform-provider-commonfate/internal"
 
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
 )

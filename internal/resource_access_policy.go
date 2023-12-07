@@ -12,14 +12,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
 type PolicyModel struct {
 	ID    types.String `tfsdk:"id"`
-	Name  types.String `tfsdk:"name"`
 	Cedar types.String `tfsdk:"cedar"`
 }
 
@@ -69,15 +66,9 @@ func (r *PolicyResource) Schema(ctx context.Context, req resource.SchemaRequest,
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				MarkdownDescription: "The internal Common Fate policy ID",
-				Computed:            true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
-			},
-			"name": schema.StringAttribute{
-				MarkdownDescription: "The unique name of the policy for you to identify it.",
 				Required:            true,
 			},
+
 			"cedar": schema.StringAttribute{
 				MarkdownDescription: "The Cedar policy to define permissions as policies in your Common Fate instance.",
 				Required:            true,
@@ -114,7 +105,6 @@ func (r *PolicyResource) Create(ctx context.Context, req resource.CreateRequest,
 	res, err := r.client.CreatePolicy(ctx, connect.NewRequest(&configv1alpha1.CreatePolicyRequest{
 		Id:          data.ID.ValueString(),
 		CedarPolicy: data.Cedar.ValueString(),
-		Name:        data.Name.ValueString(),
 	}))
 
 	if err != nil {
@@ -187,19 +177,31 @@ func (r *PolicyResource) Update(ctx context.Context, req resource.UpdateRequest,
 		return
 	}
 
-	//TODO: build update request and send it off to the api client
+	//because we are saving straight to the authz db we have no good way to update the values while deleting the old policy.
+	//To make sure the delete occurs it is done in two calls on the terraform side.
+
+	_, err := r.client.DeletePolicy(ctx, connect.NewRequest(&configv1alpha1.DeletePolicyRequest{
+		Id: data.ID.ValueString(),
+	}))
+
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"access policy not found in Common Fate",
+			"JSON Error: "+err.Error(),
+		)
+
+		return
+	}
 	res, err := r.client.UpdatePolicy(ctx, connect.NewRequest(&configv1alpha1.UpdatePolicyRequest{
 		Id:          data.ID.ValueString(),
 		CedarPolicy: data.Cedar.String(),
-		Name:        data.Name.ValueString(),
 	}))
 
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to Update Resource",
-			"An unexpected error occurred while communicating with Common Fate API. "+
-				"Please report this issue to the provider developers.\n\n"+
-				"JSON Error: "+err.Error(),
+
+			"JSON Error: "+err.Error(),
 		)
 
 		return

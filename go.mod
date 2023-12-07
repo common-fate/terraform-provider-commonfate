@@ -1,17 +1,14 @@
-module github.com/common-fate/common-fate-terraform-proto
+module github.com/common-fate/terraform-provider-commonfate
 
 go 1.21.3
 
 toolchain go1.21.4
 
 require (
-	github.com/aws/aws-sdk-go-v2 v1.17.5
 	github.com/bufbuild/connect-go v1.10.0
-	github.com/common-fate/common-fate v0.15.1-0.20230317000441-30007a2539fd
-	github.com/common-fate/sdk v0.0.0-20231205232648-cf6e4872b7a3
+	github.com/common-fate/sdk v0.0.0-20231207031634-9d4a51f17d6f
 	github.com/hashicorp/terraform-plugin-docs v0.13.0
 	github.com/hashicorp/terraform-plugin-framework v1.1.1
-	github.com/hashicorp/terraform-plugin-go v0.14.3
 	github.com/hashicorp/terraform-plugin-log v0.8.0
 	google.golang.org/protobuf v1.31.0
 )
@@ -24,19 +21,12 @@ require (
 	github.com/Masterminds/semver/v3 v3.1.1 // indirect
 	github.com/Masterminds/sprig/v3 v3.2.2 // indirect
 	github.com/armon/go-radix v1.0.0 // indirect
-	github.com/aws/smithy-go v1.13.5 // indirect
 	github.com/bgentry/speakeasy v0.1.0 // indirect
 	github.com/common-fate/clio v1.2.3 // indirect
 	github.com/common-fate/grab v1.0.0 // indirect
-	github.com/common-fate/iso8601 v1.0.2 // indirect
 	github.com/danieljoos/wincred v1.1.2 // indirect
-	github.com/deepmap/oapi-codegen v1.11.0 // indirect
 	github.com/dvsekhvalnov/jose2go v1.5.0 // indirect
 	github.com/fatih/color v1.13.0 // indirect
-	github.com/getkin/kin-openapi v0.107.0 // indirect
-	github.com/go-chi/chi/v5 v5.0.10 // indirect
-	github.com/go-openapi/jsonpointer v0.19.5 // indirect
-	github.com/go-openapi/swag v0.22.0 // indirect
 	github.com/godbus/dbus v0.0.0-20190726142602-4481cbc300e2 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/google/uuid v1.4.0 // indirect
@@ -54,28 +44,25 @@ require (
 	github.com/hashicorp/hc-install v0.5.0 // indirect
 	github.com/hashicorp/terraform-exec v0.17.3 // indirect
 	github.com/hashicorp/terraform-json v0.15.0 // indirect
+	github.com/hashicorp/terraform-plugin-go v0.14.3 // indirect
 	github.com/hashicorp/terraform-registry-address v0.1.0 // indirect
 	github.com/hashicorp/terraform-svchost v0.0.0-20200729002733-f050f53b9734 // indirect
 	github.com/hashicorp/yamux v0.0.0-20181012175058-2f1d1f20f75d // indirect
 	github.com/huandu/xstrings v1.3.2 // indirect
 	github.com/imdario/mergo v0.3.13 // indirect
-	github.com/invopop/yaml v0.2.0 // indirect
-	github.com/josharian/intern v1.0.0 // indirect
-	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mitchellh/cli v1.1.5 // indirect
 	github.com/mitchellh/copystructure v1.2.0 // indirect
 	github.com/mitchellh/go-testing-interface v1.14.1 // indirect
 	github.com/mitchellh/reflectwalk v1.0.2 // indirect
-	github.com/mohae/deepcopy v0.0.0-20170929034955-c48cc78d4826 // indirect
 	github.com/mtibben/percent v0.2.1 // indirect
 	github.com/muhlemmer/gu v0.3.1 // indirect
 	github.com/oklog/run v1.0.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/posener/complete v1.2.3 // indirect
+	github.com/rogpeppe/go-internal v1.8.1 // indirect
 	github.com/russross/blackfriday v1.6.0 // indirect
-	github.com/segmentio/ksuid v1.0.4 // indirect
 	github.com/shopspring/decimal v1.3.1 // indirect
 	github.com/spf13/cast v1.5.0 // indirect
 	github.com/vmihailenco/msgpack/v4 v4.3.12 // indirect
@@ -96,5 +83,4 @@ require (
 	google.golang.org/grpc v1.51.0 // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
 	gopkg.in/square/go-jose.v2 v2.6.0 // indirect
-	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

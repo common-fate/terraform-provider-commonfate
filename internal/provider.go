@@ -121,6 +121,7 @@ func (p *CommonFateProvider) Resources(_ context.Context) []func() resource.Reso
 		NewScheduleResource,
 		NewAWSJITPolicyResource,
 		NewGCPJITPolicyResource,
+		NewGCPConnectionsResource,
 	}
 }
 
@@ -137,6 +138,10 @@ func NewGCPJITPolicyResource() resource.Resource {
 }
 func NewScheduleResource() resource.Resource {
 	return &ScheduleResource{}
+}
+
+func NewGCPConnectionsResource() resource.Resource {
+	return &GCPOrganizationResource{}
 }
 
 func NewPagerDutyScheduleDataSource() datasource.DataSource {

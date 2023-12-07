@@ -16,10 +16,7 @@ import (
 )
 
 type GCPOrganizationModel struct {
-	Id                   types.String `tfsdk:"id"`
-	Org                  types.String `tfsdk:"org"`
-	Slug                 types.String `tfsdk:"slug"`
-	WorkloadIdentityRole types.String `tfsdk:"workload_identity_role"`
+	Id types.String `tfsdk:"id"`
 }
 
 // AccessRuleResource is the data source implementation.
@@ -35,7 +32,7 @@ var (
 
 // Metadata returns the data source type name.
 func (r *GCPOrganizationResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_gcp_Organization"
+	resp.TypeName = req.ProviderTypeName + "_gcp_organization"
 }
 
 // Configure adds the provider configured client to the data source.
@@ -67,19 +64,7 @@ func (r *GCPOrganizationResource) Schema(ctx context.Context, req resource.Schem
 `,
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
-				MarkdownDescription: "the internal id for the gcp Organization",
-				Required:            true,
-			},
-			"org": schema.StringAttribute{
-				MarkdownDescription: "The GCP organization to pull folders, projects and roles from to be used in access policies",
-				Required:            true,
-			},
-			"slug": schema.StringAttribute{
-				MarkdownDescription: "The GCP organization to pull folders, projects and roles from to be used in access policies",
-				Required:            true,
-			},
-			"workload_identity_role": schema.StringAttribute{
-				MarkdownDescription: "The role that allows Common Fate to sync resources from GCP",
+				MarkdownDescription: "The ID of the GCP organization",
 				Required:            true,
 			},
 		},
@@ -112,10 +97,7 @@ func (r *GCPOrganizationResource) Create(ctx context.Context, req resource.Creat
 	}
 
 	res, err := r.client.CreateGCPOrganization(ctx, connect.NewRequest(&configv1alpha1.CreateGCPOrganizationRequest{
-		Id:                   data.Id.ValueString(),
-		Org:                  data.Org.ValueString(),
-		Slug:                 data.Slug.ValueString(),
-		WorkloadIdentityRole: data.WorkloadIdentityRole.ValueString(),
+		Id: data.Id.ValueString(),
 	}))
 
 	if err != nil {
@@ -186,12 +168,8 @@ func (r *GCPOrganizationResource) Update(ctx context.Context, req resource.Updat
 		return
 	}
 
-	//TODO: build update request and send it off to the api client
 	res, err := r.client.UpdateGCPOrganization(ctx, connect.NewRequest(&configv1alpha1.UpdateGCPOrganizationRequest{
-		Id:                   data.Id.ValueString(),
-		Org:                  data.Org.ValueString(),
-		Slug:                 data.Slug.ValueString(),
-		WorkloadIdentityRole: data.WorkloadIdentityRole.ValueString(),
+		Id: data.Id.ValueString(),
 	}))
 
 	if err != nil {
