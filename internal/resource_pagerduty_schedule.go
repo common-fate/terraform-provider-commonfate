@@ -142,7 +142,7 @@ func (r *ScheduleResource) Read(ctx context.Context, req resource.ReadRequest, r
 
 	//read the state from the client
 	_, err := r.client.ReadSchedule(ctx, connect.NewRequest(&configv1alpha1.ReadScheduleRequest{
-		Id: state.ID.String(),
+		Id: state.ID.ValueString(),
 	}))
 
 	if err != nil {

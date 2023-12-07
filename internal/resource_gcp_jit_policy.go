@@ -187,7 +187,8 @@ func (r *GCPJITPolicyResource) Create(ctx context.Context, req resource.CreateRe
 				},
 			},
 		},
-		Role: data.Role.ValueString(),
+		Role:               data.Role.ValueString(),
+		NotifySlackChannel: data.NotifySlackChannel.ValueString(),
 	}))
 
 	if err != nil {
@@ -306,6 +307,7 @@ func (r *GCPJITPolicyResource) Update(ctx context.Context, req resource.UpdateRe
 					},
 				},
 			},
+			NotifySlackChannel: data.NotifySlackChannel.ValueString(),
 		},
 	}))
 

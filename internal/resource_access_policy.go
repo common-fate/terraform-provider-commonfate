@@ -143,7 +143,7 @@ func (r *PolicyResource) Read(ctx context.Context, req resource.ReadRequest, res
 
 	//read the state from the client
 	_, err := r.client.ReadPolicy(ctx, connect.NewRequest(&configv1alpha1.ReadPolicyRequest{
-		Id: state.ID.String(),
+		Id: state.ID.ValueString(),
 	}))
 
 	if err != nil {
@@ -194,7 +194,7 @@ func (r *PolicyResource) Update(ctx context.Context, req resource.UpdateRequest,
 	}
 	res, err := r.client.UpdatePolicy(ctx, connect.NewRequest(&configv1alpha1.UpdatePolicyRequest{
 		Id:          data.ID.ValueString(),
-		CedarPolicy: data.Cedar.String(),
+		CedarPolicy: data.Cedar.ValueString(),
 	}))
 
 	if err != nil {

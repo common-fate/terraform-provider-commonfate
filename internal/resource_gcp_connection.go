@@ -16,7 +16,8 @@ import (
 )
 
 type GCPOrganizationModel struct {
-	Id types.String `tfsdk:"id"`
+	Id                   types.String `tfsdk:"id"`
+	WorkloadIdentityRole types.String `tfsdk:"workload_identity_role"`
 }
 
 // AccessRuleResource is the data source implementation.
@@ -67,6 +68,10 @@ func (r *GCPOrganizationResource) Schema(ctx context.Context, req resource.Schem
 				MarkdownDescription: "The ID of the GCP organization",
 				Required:            true,
 			},
+			"workload_identity_role": schema.StringAttribute{
+				MarkdownDescription: "aws role to be used to be able to pull resources from GCP through a federated workload identity.",
+				Required:            true,
+			},
 		},
 		MarkdownDescription: `Creates a access policy that Common Fate will use to use in the approval engine.`,
 	}
@@ -97,7 +102,8 @@ func (r *GCPOrganizationResource) Create(ctx context.Context, req resource.Creat
 	}
 
 	res, err := r.client.CreateGCPOrganization(ctx, connect.NewRequest(&configv1alpha1.CreateGCPOrganizationRequest{
-		Id: data.Id.ValueString(),
+		Id:                   data.Id.ValueString(),
+		WorkloadIdentityRole: data.WorkloadIdentityRole.ValueString(),
 	}))
 
 	if err != nil {
@@ -169,7 +175,8 @@ func (r *GCPOrganizationResource) Update(ctx context.Context, req resource.Updat
 	}
 
 	res, err := r.client.UpdateGCPOrganization(ctx, connect.NewRequest(&configv1alpha1.UpdateGCPOrganizationRequest{
-		Id: data.Id.ValueString(),
+		Id:                   data.Id.ValueString(),
+		WorkloadIdentityRole: data.WorkloadIdentityRole.ValueString(),
 	}))
 
 	if err != nil {
