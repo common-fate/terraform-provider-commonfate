@@ -119,8 +119,8 @@ func (p *CommonFateProvider) Resources(_ context.Context) []func() resource.Reso
 	return []func() resource.Resource{
 		NewAccessPolicyResource,
 		NewScheduleResource,
-		NewAWSJITPolicyResource,
-		NewGCPJITPolicyResource,
+		NewAccessWorkflowResource,
+		NewAccessSelectorResource,
 		NewGCPConnectionsResource,
 	}
 }
@@ -130,11 +130,14 @@ func NewAccessPolicyResource() resource.Resource {
 	return &PolicyResource{}
 }
 
-func NewAWSJITPolicyResource() resource.Resource {
-	return &AWSJITPolicyResource{}
+//	func NewAWSJITPolicyResource() resource.Resource {
+//		return &AWSJITPolicyResource{}
+//	}
+func NewAccessSelectorResource() resource.Resource {
+	return &AccessSelectorResource{}
 }
-func NewGCPJITPolicyResource() resource.Resource {
-	return &GCPJITPolicyResource{}
+func NewAccessWorkflowResource() resource.Resource {
+	return &AccessWorkflowResource{}
 }
 func NewScheduleResource() resource.Resource {
 	return &ScheduleResource{}
