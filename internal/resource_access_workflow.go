@@ -79,7 +79,7 @@ func (r *AccessWorkflowResource) Schema(ctx context.Context, req resource.Schema
 			},
 			"name": schema.StringAttribute{
 				MarkdownDescription: "A unique name for the workflow so you know how to identify it.",
-				Required:            false,
+				Optional:            true,
 			},
 			"duration": schema.StringAttribute{
 				MarkdownDescription: "The duration of the access workflow.",

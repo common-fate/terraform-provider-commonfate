@@ -96,8 +96,7 @@ func (r *AccessSelectorResource) Schema(ctx context.Context, req resource.Schema
 				MarkdownDescription: "The type of selector that you want the configured access to target.",
 				Required:            true,
 			},
-			"workflow_id": schema.ListAttribute{
-				ElementType:         types.StringType,
+			"workflow_id": schema.StringAttribute{
 				MarkdownDescription: "The ID of the workflow created, that workflow will be used when creating access requests for the targeted resources.",
 				Required:            true,
 				//todo: possibly add a validator here

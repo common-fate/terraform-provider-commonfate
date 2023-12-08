@@ -12,6 +12,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
@@ -66,10 +68,12 @@ func (r *SlackAlertResource) Schema(ctx context.Context, req resource.SchemaRequ
 `,
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
-				MarkdownDescription: "The internal Common Fate SlackAlert ID",
-				Required:            true,
+				MarkdownDescription: "The internal approval workflow ID",
+				Computed:            true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
-
 			"workflow_id": schema.StringAttribute{
 				MarkdownDescription: "The Cedar SlackAlert to define permissions as policies in your Common Fate instance.",
 				Required:            true,
