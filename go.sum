@@ -54,6 +54,16 @@ github.com/common-fate/sdk v0.0.0-20231208031054-d5e1c070e938 h1:2AkefgoLh6gYRfV
 github.com/common-fate/sdk v0.0.0-20231208031054-d5e1c070e938/go.mod h1:u16/09qqao49kNZVMjnj/gpSUhw9kOgi51Tg3vWjEKc=
 github.com/common-fate/sdk v0.0.0-20231208063158-5baad1e7c081 h1:HEWFmGnMmN6XGRj/fbYm1/Lfpe7prJ80T/EwMOKL5m4=
 github.com/common-fate/sdk v0.0.0-20231208063158-5baad1e7c081/go.mod h1:u16/09qqao49kNZVMjnj/gpSUhw9kOgi51Tg3vWjEKc=
+github.com/common-fate/sdk v0.0.0-20231209103713-21194dcee991 h1:qOOKuEtgRt6rgGXVUurSV2z4so/N3PcfCPpx+oQwv/c=
+github.com/common-fate/sdk v0.0.0-20231209103713-21194dcee991/go.mod h1:u16/09qqao49kNZVMjnj/gpSUhw9kOgi51Tg3vWjEKc=
+github.com/common-fate/sdk v0.0.0-20231209151655-0b3352920afe h1:4X1ZDOB0cDyatifwX3KnB7M21bacf5xGKrinGGKpTWM=
+github.com/common-fate/sdk v0.0.0-20231209151655-0b3352920afe/go.mod h1:u16/09qqao49kNZVMjnj/gpSUhw9kOgi51Tg3vWjEKc=
+github.com/common-fate/sdk v0.0.0-20231209152608-941d17f450fd h1:G/ck9C9/xw2mpCWhzpXghrt0Av6FIM6fOEWNr5F2gGw=
+github.com/common-fate/sdk v0.0.0-20231209152608-941d17f450fd/go.mod h1:u16/09qqao49kNZVMjnj/gpSUhw9kOgi51Tg3vWjEKc=
+github.com/common-fate/sdk v0.0.0-20231209155443-daaddee91f39 h1:oZPhL24xQJLA92VqqdGof/3a4aKaN6sq5PF2c2vXR7g=
+github.com/common-fate/sdk v0.0.0-20231209155443-daaddee91f39/go.mod h1:u16/09qqao49kNZVMjnj/gpSUhw9kOgi51Tg3vWjEKc=
+github.com/common-fate/sdk v0.0.0-20231209171042-33fd094d13de h1:k2sGpLAkfnWgWVMD4K87wRw7vVJvRkXGTtMjFKBFUrY=
+github.com/common-fate/sdk v0.0.0-20231209171042-33fd094d13de/go.mod h1:u16/09qqao49kNZVMjnj/gpSUhw9kOgi51Tg3vWjEKc=
 github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
 github.com/danieljoos/wincred v1.1.2 h1:QLdCxFs1/Yl4zduvBdcHB8goaYk9RARS2SgLLRuAyr0=
 github.com/danieljoos/wincred v1.1.2/go.mod h1:GijpziifJoIBfYh+S7BbkdUTU4LfM+QnGqR5Vl2tAx0=

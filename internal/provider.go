@@ -31,7 +31,7 @@ type CommonFateProvider struct {
 
 // commonfateProviderModel maps provider schema data to a Go type.
 type CommonFateProviderModel struct {
-	DeploymentAPIURL types.String `tfsdk:"deployment_api_url"`
+	APIURL           types.String `tfsdk:"api_url"`
 	IssuerURL        types.String `tfsdk:"issuer_url"`
 	OIDCClientId     types.String `tfsdk:"oidc_client_id"`
 	OIDCClientSecret types.String `tfsdk:"oidc_client_secret"`
@@ -48,7 +48,7 @@ func (p *CommonFateProvider) Schema(ctx context.Context, req provider.SchemaRequ
 	resp.Schema = schema.Schema{
 		Description: "",
 		Attributes: map[string]schema.Attribute{
-			"deployment_api_url": schema.StringAttribute{
+			"api_url": schema.StringAttribute{
 				Description: "The API url of your Common Fate deployment.",
 				Required:    true,
 			},
@@ -83,7 +83,7 @@ func (p *CommonFateProvider) Configure(ctx context.Context, req provider.Configu
 	//using context.Background() here causes a cancelled context issue
 	//see https://github.com/databricks/databricks-sdk-go/issues/671
 	cfg, err := config_client.NewServerContext(context.Background(), config_client.Opts{
-		APIURL:       config.DeploymentAPIURL.ValueString(),
+		APIURL:       config.APIURL.ValueString(),
 		AccessURL:    config.IssuerURL.ValueString(),
 		ClientID:     config.OIDCClientId.ValueString(),
 		ClientSecret: config.OIDCClientSecret.ValueString(),
@@ -105,22 +105,20 @@ func (p *CommonFateProvider) Configure(ctx context.Context, req provider.Configu
 	resp.DataSourceData = cfg
 	resp.ResourceData = cfg
 
-	tflog.Info(ctx, "Configured Common Fate client", map[string]any{"success": true})
+	tflog.Debug(ctx, "Configured Common Fate client", map[string]any{"success": true})
 }
 
 // DataSources defines the data sources implemented in the provider.
 func (p *CommonFateProvider) DataSources(_ context.Context) []func() datasource.DataSource {
-	return []func() datasource.DataSource{
-		NewPagerDutyScheduleDataSource,
-	}
+	return []func() datasource.DataSource{}
 }
 
 func (p *CommonFateProvider) Resources(_ context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
 		NewAccessPolicyResource,
-		NewScheduleResource,
 		NewAccessWorkflowResource,
-		NewAccessSelectorResource,
+		NewSelectorResource,
+		NewAvailabilitySpecResource,
 		NewGCPConnectionsResource,
 		NewSlackAlertResource,
 	}
@@ -131,23 +129,22 @@ func NewAccessPolicyResource() resource.Resource {
 	return &PolicyResource{}
 }
 
-func NewAccessSelectorResource() resource.Resource {
-	return &AccessSelectorResource{}
+func NewSelectorResource() resource.Resource {
+	return &SelectorResource{}
 }
+
+func NewAvailabilitySpecResource() resource.Resource {
+	return &AvailabilitySpecResource{}
+}
+
 func NewSlackAlertResource() resource.Resource {
 	return &SlackAlertResource{}
 }
+
 func NewAccessWorkflowResource() resource.Resource {
 	return &AccessWorkflowResource{}
-}
-func NewScheduleResource() resource.Resource {
-	return &ScheduleResource{}
 }
 
 func NewGCPConnectionsResource() resource.Resource {
 	return &GCPOrganizationResource{}
-}
-
-func NewPagerDutyScheduleDataSource() datasource.DataSource {
-	return &PagerdutyScheduleDataSource{}
 }
