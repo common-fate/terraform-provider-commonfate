@@ -6,7 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-var UIDAttrs = map[string]schema.Attribute{
+var EIDAttrs = map[string]schema.Attribute{
 	"type": schema.StringAttribute{
 		Required:            true,
 		MarkdownDescription: "The entity type",
@@ -17,35 +17,35 @@ var UIDAttrs = map[string]schema.Attribute{
 	},
 }
 
-type UID struct {
+type EID struct {
 	Type types.String `tfsdk:"type"`
 	ID   types.String `tfsdk:"id"`
 }
 
-func (u UID) ToAPI() *entityv1alpha1.UID {
-	return &entityv1alpha1.UID{
+func (u EID) ToAPI() *entityv1alpha1.EID {
+	return &entityv1alpha1.EID{
 		Type: u.Type.ValueString(),
 		Id:   u.ID.ValueString(),
 	}
 }
 
-func uidFromAPI(input *entityv1alpha1.UID) UID {
+func uidFromAPI(input *entityv1alpha1.EID) EID {
 	if input == nil {
-		return UID{}
+		return EID{}
 	}
 
-	return UID{
+	return EID{
 		Type: types.StringValue(input.Type),
 		ID:   types.StringValue(input.Id),
 	}
 }
 
-func uidPtrFromAPI(input *entityv1alpha1.UID) *UID {
+func uidPtrFromAPI(input *entityv1alpha1.EID) *EID {
 	if input == nil {
 		return nil
 	}
 
-	return &UID{
+	return &EID{
 		Type: types.StringValue(input.Type),
 		ID:   types.StringValue(input.Id),
 	}

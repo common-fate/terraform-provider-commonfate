@@ -121,6 +121,7 @@ func (p *CommonFateProvider) Resources(_ context.Context) []func() resource.Reso
 		NewAvailabilitySpecResource,
 		NewGCPConnectionsResource,
 		NewSlackAlertResource,
+		NewWebhookProvisionerResource,
 	}
 }
 
@@ -131,6 +132,10 @@ func NewAccessPolicyResource() resource.Resource {
 
 func NewSelectorResource() resource.Resource {
 	return &SelectorResource{}
+}
+
+func NewWebhookProvisionerResource() resource.Resource {
+	return &WebhookProvisionerResource{}
 }
 
 func NewAvailabilitySpecResource() resource.Resource {

@@ -92,7 +92,7 @@ func (r *AccessWorkflowResource) Schema(ctx context.Context, req resource.Schema
 			},
 			"priority": schema.Int64Attribute{
 				MarkdownDescription: "The priority that governs whether the policy will be used. If a different policy with a higher priority and the same role exists that one will be used over another.",
-				Required:            true,
+				Optional:            true,
 			},
 		},
 		MarkdownDescription: `Create`,

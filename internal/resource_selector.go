@@ -12,8 +12,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
@@ -21,8 +19,21 @@ type Selector struct {
 	ID           types.String `tfsdk:"id"`
 	Name         types.String `tfsdk:"name"`
 	ResourceType types.String `tfsdk:"resource_type"`
-	BelongingTo  UID          `tfsdk:"belonging_to"`
+	BelongingTo  EID          `tfsdk:"belonging_to"`
 	Where        types.String `tfsdk:"where"`
+}
+
+func (s Selector) ToAPI() *configv1alpha1.Selector {
+	return &configv1alpha1.Selector{
+		Id:           s.ID.ValueString(),
+		Name:         s.Name.ValueString(),
+		ResourceType: s.ResourceType.ValueString(),
+		BelongingTo: &entityv1alpha1.EID{
+			Type: s.BelongingTo.Type.ValueString(),
+			Id:   s.BelongingTo.ID.ValueString(),
+		},
+		When: s.Where.ValueString(),
+	}
 }
 
 // AccessRuleResource is the data source implementation.
@@ -69,11 +80,8 @@ func (r *SelectorResource) Schema(ctx context.Context, req resource.SchemaReques
 		Description: "Access Selectors select resources matching a criteria specified in the 'when' parameter. Resources matching this criteria can be made available for Access Worfklows.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
-				MarkdownDescription: "The internal Common Fate ID",
-				Computed:            true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
+				MarkdownDescription: "The ID of the selector",
+				Required:            true,
 			},
 
 			"name": schema.StringAttribute{
@@ -136,13 +144,7 @@ func (r *SelectorResource) Create(ctx context.Context, req resource.CreateReques
 	}
 
 	res, err := r.client.Selector().CreateSelector(ctx, connect.NewRequest(&configv1alpha1.CreateSelectorRequest{
-		Name:         data.Name.ValueString(),
-		ResourceType: data.ResourceType.ValueString(),
-		BelongingTo: &entityv1alpha1.UID{
-			Type: data.BelongingTo.Type.ValueString(),
-			Id:   data.BelongingTo.ID.ValueString(),
-		},
-		When: data.Where.ValueString(),
+		Selector: data.ToAPI(),
 	}))
 
 	if err != nil {
@@ -227,16 +229,7 @@ func (r *SelectorResource) Update(ctx context.Context, req resource.UpdateReques
 	}
 
 	res, err := r.client.Selector().UpdateSelector(ctx, connect.NewRequest(&configv1alpha1.UpdateSelectorRequest{
-		Selector: &configv1alpha1.Selector{
-			Id:           data.ID.ValueString(),
-			Name:         data.Name.ValueString(),
-			ResourceType: data.ResourceType.ValueString(),
-			BelongingTo: &entityv1alpha1.UID{
-				Type: data.BelongingTo.Type.ValueString(),
-				Id:   data.BelongingTo.ID.ValueString(),
-			},
-			When: data.Where.ValueString(),
-		},
+		Selector: data.ToAPI(),
 	}))
 	if err != nil {
 		resp.Diagnostics.AddError(
