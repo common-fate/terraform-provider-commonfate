@@ -145,7 +145,7 @@ func (r *GCPOrganizationResource) Read(ctx context.Context, req resource.ReadReq
 
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Failed to Read access policy",
+			"Failed to read GCP Connection",
 			err.Error(),
 		)
 		return

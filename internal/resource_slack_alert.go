@@ -163,7 +163,7 @@ func (r *SlackAlertResource) Read(ctx context.Context, req resource.ReadRequest,
 
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Failed to Read access SlackAlert",
+			"Failed to read SlackAlert",
 			err.Error(),
 		)
 		return

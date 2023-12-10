@@ -189,7 +189,7 @@ func (r *WebhookProvisionerResource) Read(ctx context.Context, req resource.Read
 		return
 	} else if err != nil {
 		resp.Diagnostics.AddError(
-			"Failed to read Access Workflow",
+			"Failed to read Webhook Provisioner",
 			err.Error(),
 		)
 		return

@@ -32,7 +32,7 @@ type CommonFateProvider struct {
 // commonfateProviderModel maps provider schema data to a Go type.
 type CommonFateProviderModel struct {
 	APIURL           types.String `tfsdk:"api_url"`
-	IssuerURL        types.String `tfsdk:"issuer_url"`
+	AuthzURL         types.String `tfsdk:"authz_url"`
 	OIDCClientId     types.String `tfsdk:"oidc_client_id"`
 	OIDCClientSecret types.String `tfsdk:"oidc_client_secret"`
 	OIDCIssuer       types.String `tfsdk:"oidc_issuer"`
@@ -52,9 +52,9 @@ func (p *CommonFateProvider) Schema(ctx context.Context, req provider.SchemaRequ
 				Description: "The API url of your Common Fate deployment.",
 				Required:    true,
 			},
-			"issuer_url": schema.StringAttribute{
-				Description: "The API  of your app client.",
-				Required:    true,
+			"authz_url": schema.StringAttribute{
+				Description: "The base URL of the Common Fate authz service. If not provided, will default to the same URL as the api_url",
+				Optional:    true,
 			},
 			"oidc_client_id": schema.StringAttribute{
 				Required: true,
@@ -84,13 +84,12 @@ func (p *CommonFateProvider) Configure(ctx context.Context, req provider.Configu
 	//see https://github.com/databricks/databricks-sdk-go/issues/671
 	cfg, err := config_client.NewServerContext(context.Background(), config_client.Opts{
 		APIURL:       config.APIURL.ValueString(),
-		AccessURL:    config.IssuerURL.ValueString(),
 		ClientID:     config.OIDCClientId.ValueString(),
 		ClientSecret: config.OIDCClientSecret.ValueString(),
 		// @TODO consider changing this to use a direct issuer env var
 		OIDCIssuer: strings.TrimSuffix(config.OIDCIssuer.ValueString(), "/"),
+		AuthzURL:   config.AuthzURL.ValueString(),
 	})
-
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Failed to load config",
@@ -115,9 +114,11 @@ func (p *CommonFateProvider) DataSources(_ context.Context) []func() datasource.
 
 func (p *CommonFateProvider) Resources(_ context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
-		NewAccessPolicyResource,
+		NewPolicySetResource,
 		NewAccessWorkflowResource,
 		NewSelectorResource,
+		NewGCPProjectSelectorResource,
+		NewGCPProjectAvailabilitiesResource,
 		NewAvailabilitySpecResource,
 		NewGCPConnectionsResource,
 		NewSlackAlertResource,
@@ -126,12 +127,20 @@ func (p *CommonFateProvider) Resources(_ context.Context) []func() resource.Reso
 }
 
 // With the resource.Resource implementation
-func NewAccessPolicyResource() resource.Resource {
-	return &PolicyResource{}
+func NewPolicySetResource() resource.Resource {
+	return &PolicySetResource{}
 }
 
 func NewSelectorResource() resource.Resource {
 	return &SelectorResource{}
+}
+
+func NewGCPProjectSelectorResource() resource.Resource {
+	return &GCPProjectSelectorResource{}
+}
+
+func NewGCPProjectAvailabilitiesResource() resource.Resource {
+	return &GCPProjectAvailabilitiesResource{}
 }
 
 func NewWebhookProvisionerResource() resource.Resource {
