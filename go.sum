@@ -46,6 +46,8 @@ github.com/common-fate/sdk v0.0.0-20231211012012-15ce6c46d2a2 h1:QChF4bK8bhTuekw
 github.com/common-fate/sdk v0.0.0-20231211012012-15ce6c46d2a2/go.mod h1:u16/09qqao49kNZVMjnj/gpSUhw9kOgi51Tg3vWjEKc=
 github.com/common-fate/sdk v0.0.0-20231211120552-be99a9b8b054 h1:PppNRvkvPCp1osn48+sG/aW3hhD/OuE1DJiTp4KrgoY=
 github.com/common-fate/sdk v0.0.0-20231211120552-be99a9b8b054/go.mod h1:u16/09qqao49kNZVMjnj/gpSUhw9kOgi51Tg3vWjEKc=
+github.com/common-fate/sdk v0.0.0-20231211130130-c12034c68541 h1:bXBbMI/Naw18q7jrfPJR+wtLgRYgv0fDpBZ+5gqvHq4=
+github.com/common-fate/sdk v0.0.0-20231211130130-c12034c68541/go.mod h1:u16/09qqao49kNZVMjnj/gpSUhw9kOgi51Tg3vWjEKc=
 github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
 github.com/cyphar/filepath-securejoin v0.2.4 h1:Ugdm7cg7i6ZK6x3xDF1oEu1nfkyfH53EtKeQYTC3kyg=
 github.com/cyphar/filepath-securejoin v0.2.4/go.mod h1:aPGpWjXOXUn2NCNjFvBE6aRxGGx79pTxQpKOJNYHHl4=

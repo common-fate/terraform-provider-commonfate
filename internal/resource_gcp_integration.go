@@ -22,6 +22,8 @@ type GCPIntegrationModel struct {
 	Name                                types.String `tfsdk:"name"`
 	WorkloadIdentityConfig              types.String `tfsdk:"workload_identity_config"`
 	ServiceAccountCredentialsSecretPath types.String `tfsdk:"service_account_credentials_secret_path"`
+	OrganizationID                      types.String `tfsdk:"organization_id"`
+	GoogleWorkspaceCustomerID           types.String `tfsdk:"google_workspace_customer_id"`
 }
 
 type GCPIntegrationResource struct {
@@ -85,6 +87,14 @@ func (r *GCPIntegrationResource) Schema(ctx context.Context, req resource.Schema
 				MarkdownDescription: "Path to secret for Service account credentials",
 				Optional:            true,
 			},
+			"organization_id": schema.StringAttribute{
+				MarkdownDescription: "GCP organization ID",
+				Required:            true,
+			},
+			"google_workspace_customer_id": schema.StringAttribute{
+				MarkdownDescription: "The Google Workspace Customer ID",
+				Required:            true,
+			},
 		},
 		MarkdownDescription: `Registers an integration with Google Cloud`,
 	}
@@ -120,6 +130,8 @@ func (r *GCPIntegrationResource) Create(ctx context.Context, req resource.Create
 			Gcp: &integrationv1alpha1.GCP{
 				WorkloadIdentityConfig:              data.WorkloadIdentityConfig.ValueString(),
 				ServiceAccountCredentialsSecretPath: data.ServiceAccountCredentialsSecretPath.ValueString(),
+				OrganizationId:                      data.OrganizationID.ValueString(),
+				GoogleWorkspaceCustomerId:           data.GoogleWorkspaceCustomerID.ValueString(),
 			},
 		},
 	}))
@@ -174,6 +186,8 @@ func (r *GCPIntegrationResource) Read(ctx context.Context, req resource.ReadRequ
 		Name:                                types.StringValue(res.Msg.Name),
 		WorkloadIdentityConfig:              types.StringValue(res.Msg.Gcp.WorkloadIdentityConfig),
 		ServiceAccountCredentialsSecretPath: types.StringValue(res.Msg.Gcp.ServiceAccountCredentialsSecretPath),
+		OrganizationID:                      types.StringValue(res.Msg.Gcp.OrganizationId),
+		GoogleWorkspaceCustomerID:           types.StringValue(res.Msg.Gcp.GoogleWorkspaceCustomerId),
 	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
@@ -206,6 +220,8 @@ func (r *GCPIntegrationResource) Update(ctx context.Context, req resource.Update
 			Gcp: &integrationv1alpha1.GCP{
 				WorkloadIdentityConfig:              data.WorkloadIdentityConfig.ValueString(),
 				ServiceAccountCredentialsSecretPath: data.ServiceAccountCredentialsSecretPath.ValueString(),
+				OrganizationId:                      data.OrganizationID.ValueString(),
+				GoogleWorkspaceCustomerId:           data.GoogleWorkspaceCustomerID.ValueString(),
 			},
 		},
 	}))
