@@ -171,10 +171,10 @@ func (r *SlackAlertResource) Read(ctx context.Context, req resource.ReadRequest,
 
 	//refresh state
 	state = SlackAlertModel{
-		ID:               types.StringValue(res.Msg.Id),
-		WorkflowID:       types.StringValue(res.Msg.WorkflowId),
-		SlackChannelID:   types.StringValue(res.Msg.SlackChannel),
-		SlackWorkspaceID: types.StringValue(res.Msg.SlackWorkspace),
+		ID:               types.StringValue(res.Msg.Alert.Id),
+		WorkflowID:       types.StringValue(res.Msg.Alert.WorkflowId),
+		SlackChannelID:   types.StringValue(res.Msg.Alert.SlackChannelId),
+		SlackWorkspaceID: types.StringValue(res.Msg.Alert.SlackWorkspaceId),
 	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)

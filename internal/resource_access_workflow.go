@@ -192,10 +192,11 @@ func (r *AccessWorkflowResource) Read(ctx context.Context, req resource.ReadRequ
 
 	//refresh state
 	state = AccessWorkflowModel{
-		ID:             types.StringValue(res.Msg.Id),
-		Name:           types.StringValue(res.Msg.Name),
-		AccessDuration: types.StringValue(res.Msg.AccessDuration.AsDuration().String()),
-		Priority:       types.Int64Value(int64(res.Msg.Priority)),
+		ID:             types.StringValue(res.Msg.Workflow.Id),
+		Name:           types.StringValue(res.Msg.Workflow.Name),
+		AccessDuration: types.StringValue(res.Msg.Workflow.AccessDuration.AsDuration().String()),
+		Priority:       types.Int64Value(int64(res.Msg.Workflow.Priority)),
+		TryExtendAfter: types.StringValue(res.Msg.Workflow.TryExtendAfter.AsDuration().String()),
 	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
