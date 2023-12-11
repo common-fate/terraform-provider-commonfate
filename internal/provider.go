@@ -120,7 +120,7 @@ func (p *CommonFateProvider) Resources(_ context.Context) []func() resource.Reso
 		NewGCPProjectSelectorResource,
 		NewGCPProjectAvailabilitiesResource,
 		NewAvailabilitySpecResource,
-		NewGCPConnectionsResource,
+		NewGCPIntegrationResource,
 		NewSlackAlertResource,
 		NewWebhookProvisionerResource,
 	}
@@ -159,6 +159,6 @@ func NewAccessWorkflowResource() resource.Resource {
 	return &AccessWorkflowResource{}
 }
 
-func NewGCPConnectionsResource() resource.Resource {
-	return &GCPOrganizationResource{}
+func NewGCPIntegrationResource() resource.Resource {
+	return &GCPIntegrationResource{}
 }
