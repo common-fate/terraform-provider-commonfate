@@ -121,6 +121,7 @@ func (p *CommonFateProvider) Resources(_ context.Context) []func() resource.Reso
 		NewGCPIntegrationResource,
 		NewSlackAlertResource,
 		NewWebhookProvisionerResource,
+		NewAWSIDCIntegrationResource,
 	}
 }
 
@@ -159,4 +160,8 @@ func NewAccessWorkflowResource() resource.Resource {
 
 func NewGCPIntegrationResource() resource.Resource {
 	return &GCPIntegrationResource{}
+}
+
+func NewAWSIDCIntegrationResource() resource.Resource {
+	return &AWSIDCIntegrationResource{}
 }
