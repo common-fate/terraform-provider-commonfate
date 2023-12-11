@@ -19,9 +19,9 @@ func TestAccAccessWorkflow(t *testing.T) {
 				  
 				  resource "commonfate_access_workflow" "test" {
 					name     = "test"
-					access_duration = "2h"
+					access_duration_seconds = 2000
 					priority = 1
-					try_extend_after="5m"
+					try_extend_after_seconds = 1000
 				  }
 				  
 
@@ -29,9 +29,9 @@ func TestAccAccessWorkflow(t *testing.T) {
 				Check: resource.ComposeAggregateTestCheckFunc(
 
 					resource.TestCheckResourceAttr("commonfate_access_workflow.test", "name", "test"),
-					resource.TestCheckResourceAttr("commonfate_access_workflow.test", "access_duration", "2h"),
+					resource.TestCheckResourceAttr("commonfate_access_workflow.test", "access_duration_seconds", "2000"),
 					resource.TestCheckResourceAttr("commonfate_access_workflow.test", "priority", "1"),
-					resource.TestCheckResourceAttr("commonfate_access_workflow.test", "try_extend_after", "5m"),
+					resource.TestCheckResourceAttr("commonfate_access_workflow.test", "try_extend_after_seconds", "1000"),
 
 					// Verify dynamic values have any value set in the state.
 					resource.TestCheckResourceAttrSet("commonfate_access_workflow.test", "id"),

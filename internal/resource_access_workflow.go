@@ -3,7 +3,6 @@ package internal
 import (
 	"context"
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/bufbuild/connect-go"
@@ -23,8 +22,8 @@ import (
 type AccessWorkflowModel struct {
 	ID             types.String `tfsdk:"id"`
 	Name           types.String `tfsdk:"name"`
-	AccessDuration types.String `tfsdk:"access_duration"`
-	TryExtendAfter types.String `tfsdk:"try_extend_after"`
+	AccessDuration types.Int64  `tfsdk:"access_duration_seconds"`
+	TryExtendAfter types.Int64  `tfsdk:"try_extend_after_seconds"`
 	Priority       types.Int64  `tfsdk:"priority"`
 }
 
@@ -83,12 +82,12 @@ func (r *AccessWorkflowResource) Schema(ctx context.Context, req resource.Schema
 				MarkdownDescription: "A unique name for the workflow so you know how to identify it.",
 				Optional:            true,
 			},
-			"access_duration": schema.StringAttribute{
+			"access_duration_seconds": schema.Int64Attribute{
 				MarkdownDescription: "The duration of the access workflow.",
 				Required:            true,
 			},
-			"try_extend_after": schema.StringAttribute{
-				MarkdownDescription: "The amount of time after access is activated that extending access can be attempted. As a starting point we recommend setting this to half of the `access_duration`.",
+			"try_extend_after_seconds": schema.Int64Attribute{
+				MarkdownDescription: "The amount of time after access is activated that extending access can be attempted. As a starting point we recommend setting this to half of the `access_duration_seconds`.",
 				Required:            true,
 			},
 			"priority": schema.Int64Attribute{
@@ -123,17 +122,9 @@ func (r *AccessWorkflowResource) Create(ctx context.Context, req resource.Create
 
 		return
 	}
-	accessDuration, err := time.ParseDuration(data.AccessDuration.ValueString())
-	if err != nil {
-		resp.Diagnostics.AddAttributeError(path.Root("access_duration"), "could not parse duration", err.Error())
-		return
-	}
 
-	tryExtendAfter, err := time.ParseDuration(data.TryExtendAfter.ValueString())
-	if err != nil {
-		resp.Diagnostics.AddAttributeError(path.Root("try_extend_after"), "could not parse duration", err.Error())
-		return
-	}
+	accessDuration := time.Second * time.Duration(data.AccessDuration.ValueInt64())
+	tryExtendAfter := time.Second * time.Duration(data.TryExtendAfter.ValueInt64())
 
 	res, err := r.client.CreateAccessWorkflow(ctx, connect.NewRequest(&configv1alpha1.CreateAccessWorkflowRequest{
 		Name:           data.Name.ValueString(),
@@ -195,19 +186,13 @@ func (r *AccessWorkflowResource) Read(ctx context.Context, req resource.ReadRequ
 		return
 	}
 
-	//Due to how go handles durations something input as '1hr' is accepted.
-	//But interally will be converted to '1hr0m0s'
-	//The refresh state would then attempt to refresh it with the updated zero values.
-	//https://github.com/golang/go/issues/39064
-	//to combat this we will trim these values if they are added.
-	accessDuration, tryExtendAfter := HandleDurationStrings(res.Msg.Workflow.AccessDuration, res.Msg.Workflow.TryExtendAfter)
 	//refresh state
 	state = AccessWorkflowModel{
 		ID:             types.StringValue(res.Msg.Workflow.Id),
 		Name:           types.StringValue(res.Msg.Workflow.Name),
-		AccessDuration: types.StringValue(accessDuration),
+		AccessDuration: types.Int64Value(res.Msg.Workflow.AccessDuration.Seconds),
 		Priority:       types.Int64Value(int64(res.Msg.Workflow.Priority)),
-		TryExtendAfter: types.StringValue(tryExtendAfter),
+		TryExtendAfter: types.Int64Value(res.Msg.Workflow.TryExtendAfter.Seconds),
 	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
@@ -233,17 +218,8 @@ func (r *AccessWorkflowResource) Update(ctx context.Context, req resource.Update
 		return
 	}
 
-	accessDuration, err := time.ParseDuration(data.AccessDuration.ValueString())
-	if err != nil {
-		resp.Diagnostics.AddAttributeError(path.Root("access_duration"), "could not parse duration", err.Error())
-		return
-	}
-
-	tryExtendAfter, err := time.ParseDuration(data.TryExtendAfter.ValueString())
-	if err != nil {
-		resp.Diagnostics.AddAttributeError(path.Root("try_extend_after"), "could not parse duration", err.Error())
-		return
-	}
+	accessDuration := time.Second * time.Duration(data.AccessDuration.ValueInt64())
+	tryExtendAfter := time.Second * time.Duration(data.TryExtendAfter.ValueInt64())
 
 	res, err := r.client.UpdateAccessWorkflow(ctx, connect.NewRequest(&configv1alpha1.UpdateAccessWorkflowRequest{
 		Workflow: &configv1alpha1.AccessWorkflow{
@@ -267,13 +243,11 @@ func (r *AccessWorkflowResource) Update(ctx context.Context, req resource.Update
 
 	}
 
-	ad, tea := HandleDurationStrings(res.Msg.Workflow.AccessDuration, res.Msg.Workflow.TryExtendAfter)
-
-	// // Convert from the API data model to the Terraform data model
-	// // and set any unknown attribute values.
+	// Convert from the API data model to the Terraform data model
+	// and set any unknown attribute values.
 	data.ID = types.StringValue(res.Msg.Workflow.Id)
-	data.AccessDuration = types.StringValue(ad)
-	data.TryExtendAfter = types.StringValue(tea)
+	data.AccessDuration = types.Int64Value(res.Msg.Workflow.AccessDuration.Seconds)
+	data.TryExtendAfter = types.Int64Value(res.Msg.Workflow.TryExtendAfter.Seconds)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
@@ -317,29 +291,4 @@ func (r *AccessWorkflowResource) Delete(ctx context.Context, req resource.Delete
 func (r *AccessWorkflowResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	// Retrieve import ID and save to id attribute
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
-}
-
-func HandleDurationStrings(AccessDuration *durationpb.Duration, TryExtendAfter *durationpb.Duration) (string, string) {
-	//Due to how go handles durations something input as '1hr' is accepted.
-	//But interally will be converted to '1hr0m0s'
-	//The refresh state would then attempt to refresh it with the updated zero values.
-	//https://github.com/golang/go/issues/39064
-	//to combat this we will trim these values if they are added.
-	accessDuration := AccessDuration.AsDuration().String()
-	if AccessDuration.AsDuration().Seconds() == 0 {
-		accessDuration = strings.TrimSuffix(accessDuration, "0s")
-	}
-	if AccessDuration.AsDuration().Minutes() == 0 {
-		accessDuration = strings.TrimSuffix(accessDuration, "0m")
-	}
-
-	tryExtendAfter := TryExtendAfter.AsDuration().String()
-	if TryExtendAfter.AsDuration().Seconds() == 0 {
-		tryExtendAfter = strings.TrimSuffix(tryExtendAfter, "0s")
-	}
-	if TryExtendAfter.AsDuration().Minutes() == 0 {
-		tryExtendAfter = strings.TrimSuffix(tryExtendAfter, "0m")
-	}
-
-	return accessDuration, tryExtendAfter
 }

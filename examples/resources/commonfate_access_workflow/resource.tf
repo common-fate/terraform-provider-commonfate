@@ -1,7 +1,7 @@
 resource "commonfate-access_workflow" "workflow-demo" {
-  
-  name="demo"
-  access_duration="2h"
-  try_extend_after="5m"
-  priority="100"
+
+  name                    = "demo"
+  access_duration_seconds = 60 * 60
+  try_extend_after        = 10 * 60
+  priority                = "100"
 }
