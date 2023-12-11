@@ -201,7 +201,7 @@ func (r *AccessSelectorResource) Read(ctx context.Context, req resource.ReadRequ
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
 
 	//read the state from the client
-	_, err := r.client.ReadAccessSelector(ctx, connect.NewRequest(&configv1alpha1.GetAccessSelectorRequest{
+	res, err := r.client.ReadAccessSelector(ctx, connect.NewRequest(&configv1alpha1.GetAccessSelectorRequest{
 		Id: state.ID.ValueString(),
 	}))
 
@@ -211,6 +211,24 @@ func (r *AccessSelectorResource) Read(ctx context.Context, req resource.ReadRequ
 			err.Error(),
 		)
 		return
+	}
+
+	targets := []TargetType{}
+
+	for _, t := range res.Msg.Selector.Targets {
+		targets = append(targets, TargetType{
+			Type: types.StringValue(t.Type),
+			Name: types.StringValue(t.Name),
+		})
+	}
+
+	state = AccessSelector{
+		ID:           types.StringValue(res.Msg.Selector.Id),
+		Role:         types.StringValue(res.Msg.Selector.Role),
+		Name:         types.StringValue(res.Msg.Selector.Name),
+		SelectorType: types.StringValue(res.Msg.Selector.SelectorType),
+		WorkFlowId:   types.StringValue(res.Msg.Selector.WorkflowId),
+		Targets:      targets,
 	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)

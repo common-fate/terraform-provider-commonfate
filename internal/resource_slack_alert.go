@@ -151,7 +151,7 @@ func (r *SlackAlertResource) Read(ctx context.Context, req resource.ReadRequest,
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
 
 	//read the state from the client
-	_, err := r.client.ReadSlackAlert(ctx, connect.NewRequest(&configv1alpha1.ReadSlackAlertRequest{
+	res, err := r.client.ReadSlackAlert(ctx, connect.NewRequest(&configv1alpha1.ReadSlackAlertRequest{
 		Id: state.ID.ValueString(),
 	}))
 
@@ -161,6 +161,13 @@ func (r *SlackAlertResource) Read(ctx context.Context, req resource.ReadRequest,
 			err.Error(),
 		)
 		return
+	}
+
+	//refresh state
+	state = SlackAlertModel{
+		ID:           types.StringValue(res.Msg.Id),
+		WorkflowId:   types.StringValue(res.Msg.WorkflowId),
+		SlackChannel: types.StringValue(res.Msg.SlackChannel),
 	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)

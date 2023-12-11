@@ -169,7 +169,7 @@ func (r *AccessWorkflowResource) Read(ctx context.Context, req resource.ReadRequ
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
 
 	//read the state from the client
-	_, err := r.client.ReadAccessWorkflow(ctx, connect.NewRequest(&configv1alpha1.ReadAccessWorkflowRequest{
+	res, err := r.client.ReadAccessWorkflow(ctx, connect.NewRequest(&configv1alpha1.ReadAccessWorkflowRequest{
 		Id: state.ID.ValueString(),
 	}))
 
@@ -180,6 +180,14 @@ func (r *AccessWorkflowResource) Read(ctx context.Context, req resource.ReadRequ
 		)
 		return
 	}
+
+	//refresh state
+	state = AccessWorkflowModel{
+		ID:       types.StringValue(res.Msg.Id),
+		Duration: types.StringValue(res.Msg.AccessDuration.AsDuration().String()),
+		Priority: types.Int64Value(int64(res.Msg.Priority)),
+	}
+
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }
 
