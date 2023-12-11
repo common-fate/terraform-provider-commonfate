@@ -18,9 +18,10 @@ import (
 )
 
 type SlackAlertModel struct {
-	ID           types.String `tfsdk:"id"`
-	WorkflowId   types.String `tfsdk:"workflow_id"`
-	SlackChannel types.String `tfsdk:"slack_channel"`
+	ID               types.String `tfsdk:"id"`
+	WorkflowID       types.String `tfsdk:"workflow_id"`
+	SlackChannelID   types.String `tfsdk:"slack_channel_id"`
+	SlackWorkspaceID types.String `tfsdk:"slack_workspace_id"`
 }
 
 // AccessRuleResource is the data source implementation.
@@ -64,7 +65,7 @@ func (r *SlackAlertResource) Configure(_ context.Context, req resource.Configure
 func (r *SlackAlertResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 
 	resp.Schema = schema.Schema{
-		Description: `Creates a access SlackAlert with the specified cedar SlackAlert used that Common Fate will use to use in the approval engine when users request access using Common Fate.
+		Description: `Creates a Slack Alert.
 `,
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
@@ -75,15 +76,19 @@ func (r *SlackAlertResource) Schema(ctx context.Context, req resource.SchemaRequ
 				},
 			},
 			"workflow_id": schema.StringAttribute{
-				MarkdownDescription: "The Cedar SlackAlert to define permissions as policies in your Common Fate instance.",
+				MarkdownDescription: "The Access Workflow ID.",
 				Required:            true,
 			},
-			"slack_channel": schema.StringAttribute{
-				MarkdownDescription: "If slack is connected, it will send notifications to this slack channel. Must be the ID of the channel and not the name. See below on how to find this ID.",
+			"slack_channel_id": schema.StringAttribute{
+				MarkdownDescription: "If Slack is connected, it will send notifications to this slack channel. Must be the ID of the channel and not the name. See below on how to find this ID.",
+				Required:            true,
+			},
+			"slack_workspace_id": schema.StringAttribute{
+				MarkdownDescription: "The Slack Workspace ID. In Slack URLs, such as `https://app.slack.com/client/TXXXXXXX/CXXXXXXX` it is the string beginning with T.",
 				Required:            true,
 			},
 		},
-		MarkdownDescription: `Creates a access SlackAlert with the specified cedar SlackAlert used that Common Fate will use to use in the approval engine when users request access using Common Fate.`,
+		MarkdownDescription: `Creates a Slack Alert`,
 	}
 }
 
@@ -112,8 +117,9 @@ func (r *SlackAlertResource) Create(ctx context.Context, req resource.CreateRequ
 	}
 
 	res, err := r.client.CreateSlackAlert(ctx, connect.NewRequest(&configv1alpha1.CreateSlackAlertRequest{
-		WorkflowId:   data.WorkflowId.ValueString(),
-		SlackChannel: data.SlackChannel.ValueString(),
+		WorkflowId:       data.WorkflowID.ValueString(),
+		SlackChannelId:   data.SlackChannelID.ValueString(),
+		SlackWorkspaceId: data.SlackWorkspaceID.ValueString(),
 	}))
 
 	if err != nil {
@@ -129,7 +135,7 @@ func (r *SlackAlertResource) Create(ctx context.Context, req resource.CreateRequ
 
 	// // Convert from the API data model to the Terraform data model
 	// // and set any unknown attribute values.
-	data.ID = types.StringValue(res.Msg.Id)
+	data.ID = types.StringValue(res.Msg.Alert.Id)
 
 	// Save data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -151,13 +157,13 @@ func (r *SlackAlertResource) Read(ctx context.Context, req resource.ReadRequest,
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
 
 	//read the state from the client
-	res, err := r.client.ReadSlackAlert(ctx, connect.NewRequest(&configv1alpha1.ReadSlackAlertRequest{
+	res, err := r.client.GetSlackAlert(ctx, connect.NewRequest(&configv1alpha1.GetSlackAlertRequest{
 		Id: state.ID.ValueString(),
 	}))
 
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Failed to Read access SlackAlert",
+			"Failed to read SlackAlert",
 			err.Error(),
 		)
 		return
@@ -165,9 +171,10 @@ func (r *SlackAlertResource) Read(ctx context.Context, req resource.ReadRequest,
 
 	//refresh state
 	state = SlackAlertModel{
-		ID:           types.StringValue(res.Msg.Id),
-		WorkflowId:   types.StringValue(res.Msg.WorkflowId),
-		SlackChannel: types.StringValue(res.Msg.SlackChannel),
+		ID:               types.StringValue(res.Msg.Alert.Id),
+		WorkflowID:       types.StringValue(res.Msg.Alert.WorkflowId),
+		SlackChannelID:   types.StringValue(res.Msg.Alert.SlackChannelId),
+		SlackWorkspaceID: types.StringValue(res.Msg.Alert.SlackWorkspaceId),
 	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
@@ -194,9 +201,12 @@ func (r *SlackAlertResource) Update(ctx context.Context, req resource.UpdateRequ
 	}
 
 	res, err := r.client.UpdateSlackAlert(ctx, connect.NewRequest(&configv1alpha1.UpdateSlackAlertRequest{
-		Id:           data.ID.ValueString(),
-		WorkflowId:   data.WorkflowId.ValueString(),
-		SlackChannel: data.SlackChannel.ValueString(),
+		Alert: &configv1alpha1.SlackAlert{
+			Id:               data.ID.ValueString(),
+			WorkflowId:       data.WorkflowID.ValueString(),
+			SlackChannelId:   data.SlackChannelID.ValueString(),
+			SlackWorkspaceId: data.SlackWorkspaceID.ValueString(),
+		},
 	}))
 
 	if err != nil {
@@ -210,7 +220,7 @@ func (r *SlackAlertResource) Update(ctx context.Context, req resource.UpdateRequ
 
 	}
 
-	data.ID = types.StringValue(res.Msg.Id)
+	data.ID = types.StringValue(res.Msg.Alert.Id)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }

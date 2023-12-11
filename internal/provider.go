@@ -29,8 +29,8 @@ type CommonFateProvider struct {
 
 // commonfateProviderModel maps provider schema data to a Go type.
 type CommonFateProviderModel struct {
-	DeploymentAPIURL types.String `tfsdk:"deployment_api_url"`
-	IssuerURL        types.String `tfsdk:"issuer_url"`
+	APIURL           types.String `tfsdk:"api_url"`
+	AuthzURL         types.String `tfsdk:"authz_url"`
 	OIDCClientId     types.String `tfsdk:"oidc_client_id"`
 	OIDCClientSecret types.String `tfsdk:"oidc_client_secret"`
 	OIDCIssuer       types.String `tfsdk:"oidc_issuer"`
@@ -46,13 +46,13 @@ func (p *CommonFateProvider) Schema(ctx context.Context, req provider.SchemaRequ
 	resp.Schema = schema.Schema{
 		Description: "",
 		Attributes: map[string]schema.Attribute{
-			"deployment_api_url": schema.StringAttribute{
+			"api_url": schema.StringAttribute{
 				Description: "The API url of your Common Fate deployment.",
 				Required:    true,
 			},
-			"issuer_url": schema.StringAttribute{
-				Description: "The API  of your app client.",
-				Required:    true,
+			"authz_url": schema.StringAttribute{
+				Description: "The base URL of the Common Fate authz service. If not provided, will default to the same URL as the api_url",
+				Optional:    true,
 			},
 			"oidc_client_id": schema.StringAttribute{
 				Required: true,
@@ -81,14 +81,13 @@ func (p *CommonFateProvider) Configure(ctx context.Context, req provider.Configu
 	//using context.Background() here causes a cancelled context issue
 	//see https://github.com/databricks/databricks-sdk-go/issues/671
 	cfg, err := config_client.NewServerContext(context.Background(), config_client.Opts{
-		APIURL:       config.DeploymentAPIURL.ValueString(),
-		AccessURL:    config.IssuerURL.ValueString(),
+		APIURL:       config.APIURL.ValueString(),
 		ClientID:     config.OIDCClientId.ValueString(),
 		ClientSecret: config.OIDCClientSecret.ValueString(),
 		// @TODO consider changing this to use a direct issuer env var
 		OIDCIssuer: strings.TrimSuffix(config.OIDCIssuer.ValueString(), "/"),
+		AuthzURL:   config.AuthzURL.ValueString(),
 	})
-
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Failed to load config",
@@ -103,49 +102,61 @@ func (p *CommonFateProvider) Configure(ctx context.Context, req provider.Configu
 	resp.DataSourceData = cfg
 	resp.ResourceData = cfg
 
-	tflog.Info(ctx, "Configured Common Fate client", map[string]any{"success": true})
+	tflog.Debug(ctx, "Configured Common Fate client", map[string]any{"success": true})
 }
 
 // DataSources defines the data sources implemented in the provider.
 func (p *CommonFateProvider) DataSources(_ context.Context) []func() datasource.DataSource {
-	return []func() datasource.DataSource{
-		NewPagerDutyScheduleDataSource,
-	}
+	return []func() datasource.DataSource{}
 }
 
 func (p *CommonFateProvider) Resources(_ context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
-		NewAccessPolicyResource,
-		NewScheduleResource,
+		NewPolicySetResource,
 		NewAccessWorkflowResource,
-		NewAccessSelectorResource,
-		NewGCPConnectionsResource,
+		NewSelectorResource,
+		NewGCPProjectSelectorResource,
+		NewGCPProjectAvailabilitiesResource,
+		NewAvailabilitySpecResource,
+		NewGCPIntegrationResource,
 		NewSlackAlertResource,
+		NewWebhookProvisionerResource,
 	}
 }
 
 // With the resource.Resource implementation
-func NewAccessPolicyResource() resource.Resource {
-	return &PolicyResource{}
+func NewPolicySetResource() resource.Resource {
+	return &PolicySetResource{}
 }
 
-func NewAccessSelectorResource() resource.Resource {
-	return &AccessSelectorResource{}
+func NewSelectorResource() resource.Resource {
+	return &SelectorResource{}
 }
+
+func NewGCPProjectSelectorResource() resource.Resource {
+	return &GCPProjectSelectorResource{}
+}
+
+func NewGCPProjectAvailabilitiesResource() resource.Resource {
+	return &GCPProjectAvailabilitiesResource{}
+}
+
+func NewWebhookProvisionerResource() resource.Resource {
+	return &WebhookProvisionerResource{}
+}
+
+func NewAvailabilitySpecResource() resource.Resource {
+	return &AvailabilitySpecResource{}
+}
+
 func NewSlackAlertResource() resource.Resource {
 	return &SlackAlertResource{}
 }
+
 func NewAccessWorkflowResource() resource.Resource {
 	return &AccessWorkflowResource{}
 }
-func NewScheduleResource() resource.Resource {
-	return &ScheduleResource{}
-}
 
-func NewGCPConnectionsResource() resource.Resource {
-	return &GCPOrganizationResource{}
-}
-
-func NewPagerDutyScheduleDataSource() datasource.DataSource {
-	return &PagerdutyScheduleDataSource{}
+func NewGCPIntegrationResource() resource.Resource {
+	return &GCPIntegrationResource{}
 }

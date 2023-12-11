@@ -6,38 +6,40 @@ import (
 
 	"github.com/bufbuild/connect-go"
 	config_client "github.com/common-fate/sdk/config"
-	configv1alpha1 "github.com/common-fate/sdk/gen/commonfate/control/config/v1alpha1"
-	configv1alpha1connect "github.com/common-fate/sdk/gen/commonfate/control/config/v1alpha1/configv1alpha1connect"
-	gcp_handler "github.com/common-fate/sdk/service/control/config/gcporg"
+	integrationv1alpha1 "github.com/common-fate/sdk/gen/commonfate/control/integration/v1alpha1"
+	"github.com/common-fate/sdk/gen/commonfate/control/integration/v1alpha1/integrationv1alpha1connect"
+	"github.com/common-fate/sdk/service/control/integration"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-type GCPOrganizationModel struct {
-	Id                   types.String `tfsdk:"id"`
-	WorkloadIdentityRole types.String `tfsdk:"workload_identity_role"`
+type GCPIntegrationModel struct {
+	Id                     types.String `tfsdk:"id"`
+	Name                   types.String `tfsdk:"name"`
+	WorkloadIdentityConfig types.String `tfsdk:"workload_identity_config"`
 }
 
-// AccessRuleResource is the data source implementation.
-type GCPOrganizationResource struct {
-	client configv1alpha1connect.GCPOrganizationServiceClient
+type GCPIntegrationResource struct {
+	client integrationv1alpha1connect.IntegrationServiceClient
 }
 
 var (
-	_ resource.Resource                = &GCPOrganizationResource{}
-	_ resource.ResourceWithConfigure   = &GCPOrganizationResource{}
-	_ resource.ResourceWithImportState = &GCPOrganizationResource{}
+	_ resource.Resource                = &GCPIntegrationResource{}
+	_ resource.ResourceWithConfigure   = &GCPIntegrationResource{}
+	_ resource.ResourceWithImportState = &GCPIntegrationResource{}
 )
 
 // Metadata returns the data source type name.
-func (r *GCPOrganizationResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_gcp_organization"
+func (r *GCPIntegrationResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_gcp_integration"
 }
 
 // Configure adds the provider configured client to the data source.
-func (r *GCPOrganizationResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *GCPIntegrationResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -51,33 +53,39 @@ func (r *GCPOrganizationResource) Configure(_ context.Context, req resource.Conf
 
 		return
 	}
-	client := gcp_handler.NewFromConfig(cfg)
+	client := integration.NewFromConfig(cfg)
 
 	r.client = client
 }
 
 // GetSchema defines the schema for the data source.
 // schema is based off the governance api
-func (r *GCPOrganizationResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *GCPIntegrationResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 
 	resp.Schema = schema.Schema{
-		Description: `Creates a access policy that Common Fate will use to use in the approval engine.
-`,
+		Description: `Registers an integration with Google Cloud`,
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
-				MarkdownDescription: "The ID of the GCP organization",
+				MarkdownDescription: "The internal Common Fate ID",
+				Computed:            true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"name": schema.StringAttribute{
+				MarkdownDescription: "The name of the integration: use a short label which is descriptive of the organization you're connecting to",
 				Required:            true,
 			},
-			"workload_identity_role": schema.StringAttribute{
-				MarkdownDescription: "aws role to be used to be able to pull resources from GCP through a federated workload identity.",
+			"workload_identity_config": schema.StringAttribute{
+				MarkdownDescription: "GCP Workload Identity Config as a JSON string",
 				Required:            true,
 			},
 		},
-		MarkdownDescription: `Creates a access policy that Common Fate will use to use in the approval engine.`,
+		MarkdownDescription: `Registers an integration with Google Cloud`,
 	}
 }
 
-func (r *GCPOrganizationResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+func (r *GCPIntegrationResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 
 	if r.client == nil {
 		resp.Diagnostics.AddError(
@@ -87,7 +95,7 @@ func (r *GCPOrganizationResource) Create(ctx context.Context, req resource.Creat
 
 		return
 	}
-	var data *GCPOrganizationModel
+	var data *GCPIntegrationModel
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -101,14 +109,18 @@ func (r *GCPOrganizationResource) Create(ctx context.Context, req resource.Creat
 		return
 	}
 
-	res, err := r.client.CreateGCPOrganization(ctx, connect.NewRequest(&configv1alpha1.CreateGCPOrganizationRequest{
-		Id:                   data.Id.ValueString(),
-		WorkloadIdentityRole: data.WorkloadIdentityRole.ValueString(),
+	res, err := r.client.CreateIntegration(ctx, connect.NewRequest(&integrationv1alpha1.CreateIntegrationRequest{
+		Name: data.Name.ValueString(),
+		Integration: &integrationv1alpha1.CreateIntegrationRequest_Gcp{
+			Gcp: &integrationv1alpha1.GCP{
+				WorkloadIdentityConfig: data.WorkloadIdentityConfig.ValueString(),
+			},
+		},
 	}))
 
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to Create Resource: Access Policy",
+			"Unable to Create Resource: GCP Integration",
 			"An unexpected error occurred while communicating with Common Fate API. "+
 				"Please report this issue to the provider developers.\n\n"+
 				"JSON Error: "+err.Error(),
@@ -124,7 +136,7 @@ func (r *GCPOrganizationResource) Create(ctx context.Context, req resource.Creat
 }
 
 // Read refreshes the Terraform state with the latest data.
-func (r *GCPOrganizationResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+func (r *GCPIntegrationResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	if r.client == nil {
 		resp.Diagnostics.AddError(
 			"Unconfigured HTTP Client",
@@ -133,19 +145,19 @@ func (r *GCPOrganizationResource) Read(ctx context.Context, req resource.ReadReq
 
 		return
 	}
-	var state GCPOrganizationModel
+	var state GCPIntegrationModel
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
 
 	//read the state from the client
-	_, err := r.client.ReadGCPOrganization(ctx, connect.NewRequest(&configv1alpha1.ReadGCPOrganizationRequest{
+	_, err := r.client.GetGCPIntegration(ctx, connect.NewRequest(&integrationv1alpha1.GetGCPIntegrationRequest{
 		Id: state.Id.ValueString(),
 	}))
 
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Failed to Read access policy",
+			"Failed to read GCP Integration",
 			err.Error(),
 		)
 		return
@@ -154,34 +166,39 @@ func (r *GCPOrganizationResource) Read(ctx context.Context, req resource.ReadReq
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }
 
-func (r *GCPOrganizationResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *GCPIntegrationResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	if r.client == nil {
 		resp.Diagnostics.AddError(
 			"Unconfigured HTTP Client",
 			"Expected configured HTTP client. Please report this issue to the provider developers.",
 		)
 	}
-	var data GCPOrganizationModel
+	var data GCPIntegrationModel
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		resp.Diagnostics.AddError(
-			"Unable to Create Resource",
-			"An unexpected error occurred while parsing the resource creation response.",
+			"Unable to update GCP Integration",
+			"An unexpected error occurred while parsing the resource update response.",
 		)
 
 		return
 	}
 
-	res, err := r.client.UpdateGCPOrganization(ctx, connect.NewRequest(&configv1alpha1.UpdateGCPOrganizationRequest{
-		Id:                   data.Id.ValueString(),
-		WorkloadIdentityRole: data.WorkloadIdentityRole.ValueString(),
+	res, err := r.client.UpdateIntegration(ctx, connect.NewRequest(&integrationv1alpha1.UpdateIntegrationRequest{
+		Id:   data.Id.ValueString(),
+		Name: data.Name.ValueString(),
+		Integration: &integrationv1alpha1.UpdateIntegrationRequest_Gcp{
+			Gcp: &integrationv1alpha1.GCP{
+				WorkloadIdentityConfig: data.WorkloadIdentityConfig.ValueString(),
+			},
+		},
 	}))
 
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to Update Resource",
+			"Unable to Update GCP Integration",
 			"An unexpected error occurred while communicating with Common Fate API. "+
 				"Please report this issue to the provider developers.\n\n"+
 				"JSON Error: "+err.Error(),
@@ -196,33 +213,33 @@ func (r *GCPOrganizationResource) Update(ctx context.Context, req resource.Updat
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *GCPOrganizationResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+func (r *GCPIntegrationResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	if r.client == nil {
 		resp.Diagnostics.AddError(
 			"Unconfigured HTTP Client",
 			"Expected configured HTTP client. Please report this issue to the provider developers.",
 		)
 	}
-	var data *GCPOrganizationModel
+	var data *GCPIntegrationModel
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		resp.Diagnostics.AddError(
-			"Unable to delete Resource",
+			"Unable to delete GCP Integration",
 			"An unexpected error occurred while parsing the resource creation response.",
 		)
 
 		return
 	}
 
-	_, err := r.client.DeleteGCPOrganization(ctx, connect.NewRequest(&configv1alpha1.DeleteGCPOrganizationRequest{
+	_, err := r.client.DeleteIntegration(ctx, connect.NewRequest(&integrationv1alpha1.DeleteIntegrationRequest{
 		Id: data.Id.ValueString(),
 	}))
 
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to delete Resource",
+			"Unable to delete GCP Integration",
 			"An unexpected error occurred while parsing the resource creation response. "+
 				"Please report this issue to the provider developers.\n\n"+
 				"JSON Error: "+err.Error(),
@@ -232,7 +249,7 @@ func (r *GCPOrganizationResource) Delete(ctx context.Context, req resource.Delet
 	}
 }
 
-func (r *GCPOrganizationResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *GCPIntegrationResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	// Retrieve import ID and save to id attribute
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }

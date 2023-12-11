@@ -20,10 +20,11 @@ import (
 )
 
 type AccessWorkflowModel struct {
-	ID       types.String `tfsdk:"id"`
-	Name     types.String `tfsdk:"name"`
-	Duration types.String `tfsdk:"duration"`
-	Priority types.Int64  `tfsdk:"priority"`
+	ID             types.String `tfsdk:"id"`
+	Name           types.String `tfsdk:"name"`
+	AccessDuration types.String `tfsdk:"access_duration"`
+	TryExtendAfter types.String `tfsdk:"try_extend_after"`
+	Priority       types.Int64  `tfsdk:"priority"`
 }
 
 // AccessRuleResource is the data source implementation.
@@ -81,13 +82,17 @@ func (r *AccessWorkflowResource) Schema(ctx context.Context, req resource.Schema
 				MarkdownDescription: "A unique name for the workflow so you know how to identify it.",
 				Optional:            true,
 			},
-			"duration": schema.StringAttribute{
+			"access_duration": schema.StringAttribute{
 				MarkdownDescription: "The duration of the access workflow.",
+				Required:            true,
+			},
+			"try_extend_after": schema.StringAttribute{
+				MarkdownDescription: "The amount of time after access is activated that extending access can be attempted. As a starting point we recommend setting this to half of the `access_duration`.",
 				Required:            true,
 			},
 			"priority": schema.Int64Attribute{
 				MarkdownDescription: "The priority that governs whether the policy will be used. If a different policy with a higher priority and the same role exists that one will be used over another.",
-				Required:            true,
+				Optional:            true,
 			},
 		},
 		MarkdownDescription: `Create`,
@@ -117,20 +122,22 @@ func (r *AccessWorkflowResource) Create(ctx context.Context, req resource.Create
 
 		return
 	}
-	duration, err := time.ParseDuration(data.Duration.ValueString())
+	accessDuration, err := time.ParseDuration(data.AccessDuration.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError(
-			"Unable to Create Resource: JIT Policy",
-			"There was an error handling the policy duration "+
-				"JSON Error: "+err.Error(),
-		)
+		resp.Diagnostics.AddAttributeError(path.Root("access_duration"), "could not parse duration", err.Error())
+		return
+	}
 
+	tryExtendAfter, err := time.ParseDuration(data.TryExtendAfter.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddAttributeError(path.Root("try_extend_after"), "could not parse duration", err.Error())
 		return
 	}
 
 	res, err := r.client.CreateAccessWorkflow(ctx, connect.NewRequest(&configv1alpha1.CreateAccessWorkflowRequest{
 		Name:           data.Name.ValueString(),
-		AccessDuration: durationpb.New(duration),
+		AccessDuration: durationpb.New(accessDuration),
+		TryExtendAfter: durationpb.New(tryExtendAfter),
 		Priority:       int32(data.Priority.ValueInt64()),
 	}))
 
@@ -147,7 +154,7 @@ func (r *AccessWorkflowResource) Create(ctx context.Context, req resource.Create
 
 	// // Convert from the API data model to the Terraform data model
 	// // and set any unknown attribute values.
-	data.ID = types.StringValue(res.Msg.Id)
+	data.ID = types.StringValue(res.Msg.Workflow.Id)
 
 	// Save data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -169,13 +176,15 @@ func (r *AccessWorkflowResource) Read(ctx context.Context, req resource.ReadRequ
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
 
 	//read the state from the client
-	res, err := r.client.ReadAccessWorkflow(ctx, connect.NewRequest(&configv1alpha1.ReadAccessWorkflowRequest{
+	res, err := r.client.GetAccessWorkflow(ctx, connect.NewRequest(&configv1alpha1.GetAccessWorkflowRequest{
 		Id: state.ID.ValueString(),
 	}))
-
-	if err != nil {
+	if connect.CodeOf(err) == connect.CodeNotFound {
+		resp.State.RemoveResource(ctx)
+		return
+	} else if err != nil {
 		resp.Diagnostics.AddError(
-			"Failed to Read Approval Workflow",
+			"Failed to read Access Workflow",
 			err.Error(),
 		)
 		return
@@ -183,9 +192,11 @@ func (r *AccessWorkflowResource) Read(ctx context.Context, req resource.ReadRequ
 
 	//refresh state
 	state = AccessWorkflowModel{
-		ID:       types.StringValue(res.Msg.Id),
-		Duration: types.StringValue(res.Msg.AccessDuration.AsDuration().String()),
-		Priority: types.Int64Value(int64(res.Msg.Priority)),
+		ID:             types.StringValue(res.Msg.Workflow.Id),
+		Name:           types.StringValue(res.Msg.Workflow.Name),
+		AccessDuration: types.StringValue(res.Msg.Workflow.AccessDuration.AsDuration().String()),
+		Priority:       types.Int64Value(int64(res.Msg.Workflow.Priority)),
+		TryExtendAfter: types.StringValue(res.Msg.Workflow.TryExtendAfter.AsDuration().String()),
 	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
@@ -211,10 +222,26 @@ func (r *AccessWorkflowResource) Update(ctx context.Context, req resource.Update
 		return
 	}
 
-	res, err := r.client.UpdateAccessWorkflow(ctx, connect.NewRequest(&configv1alpha1.UpdateAccessWorkflowRequest{
-		Id: data.ID.ValueString(),
+	accessDuration, err := time.ParseDuration(data.AccessDuration.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddAttributeError(path.Root("access_duration"), "could not parse duration", err.Error())
+		return
+	}
 
-		Name: data.Name.ValueString(),
+	tryExtendAfter, err := time.ParseDuration(data.TryExtendAfter.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddAttributeError(path.Root("try_extend_after"), "could not parse duration", err.Error())
+		return
+	}
+
+	res, err := r.client.UpdateAccessWorkflow(ctx, connect.NewRequest(&configv1alpha1.UpdateAccessWorkflowRequest{
+		Workflow: &configv1alpha1.AccessWorkflow{
+			Id:             data.ID.ValueString(),
+			Name:           data.Name.ValueString(),
+			AccessDuration: durationpb.New(accessDuration),
+			TryExtendAfter: durationpb.New(tryExtendAfter),
+			Priority:       int32(data.Priority.ValueInt64()),
+		},
 	}))
 
 	if err != nil {
@@ -229,7 +256,7 @@ func (r *AccessWorkflowResource) Update(ctx context.Context, req resource.Update
 
 	}
 
-	data.ID = types.StringValue(res.Msg.Id)
+	data.ID = types.StringValue(res.Msg.Workflow.Id)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }

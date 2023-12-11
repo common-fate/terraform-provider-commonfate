@@ -4,11 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/bufbuild/connect-go"
 	config_client "github.com/common-fate/sdk/config"
-	configv1alpha1 "github.com/common-fate/sdk/gen/commonfate/control/config/v1alpha1"
-	configv1alpha1connect "github.com/common-fate/sdk/gen/commonfate/control/config/v1alpha1/configv1alpha1connect"
-	policy_handler "github.com/common-fate/sdk/service/control/config/policy"
+	"github.com/common-fate/sdk/service/authz/policyset"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -16,28 +13,27 @@ import (
 )
 
 type PolicyModel struct {
-	ID    types.String `tfsdk:"id"`
-	Cedar types.String `tfsdk:"cedar"`
+	ID   types.String `tfsdk:"id"`
+	Text types.String `tfsdk:"text"`
 }
 
-// AccessRuleResource is the data source implementation.
-type PolicyResource struct {
-	client configv1alpha1connect.PolicyServiceClient
+type PolicySetResource struct {
+	client *policyset.Client
 }
 
 var (
-	_ resource.Resource                = &PolicyResource{}
-	_ resource.ResourceWithConfigure   = &PolicyResource{}
-	_ resource.ResourceWithImportState = &PolicyResource{}
+	_ resource.Resource                = &PolicySetResource{}
+	_ resource.ResourceWithConfigure   = &PolicySetResource{}
+	_ resource.ResourceWithImportState = &PolicySetResource{}
 )
 
 // Metadata returns the data source type name.
-func (r *PolicyResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_access_policy"
+func (r *PolicySetResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_policyset"
 }
 
 // Configure adds the provider configured client to the data source.
-func (r *PolicyResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *PolicySetResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -51,17 +47,17 @@ func (r *PolicyResource) Configure(_ context.Context, req resource.ConfigureRequ
 
 		return
 	}
-	client := policy_handler.NewFromConfig(cfg)
+	client := policyset.NewFromConfig(cfg)
 
-	r.client = client
+	r.client = &client
 }
 
 // GetSchema defines the schema for the data source.
 // schema is based off the governance api
-func (r *PolicyResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *PolicySetResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 
 	resp.Schema = schema.Schema{
-		Description: `Creates a access policy with the specified cedar policy used that Common Fate will use to use in the approval engine when users request access using Common Fate.
+		Description: `Creates a Cedar PolicySet used to authorize access decisions in Common Fate.
 `,
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
@@ -69,16 +65,16 @@ func (r *PolicyResource) Schema(ctx context.Context, req resource.SchemaRequest,
 				Required:            true,
 			},
 
-			"cedar": schema.StringAttribute{
+			"text": schema.StringAttribute{
 				MarkdownDescription: "The Cedar policy to define permissions as policies in your Common Fate instance.",
 				Required:            true,
 			},
 		},
-		MarkdownDescription: `Creates a access policy with the specified cedar policy used that Common Fate will use to use in the approval engine when users request access using Common Fate.`,
+		MarkdownDescription: `Creates a Cedar PolicySet used to authorize access decisions in Common Fate.`,
 	}
 }
 
-func (r *PolicyResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+func (r *PolicySetResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 
 	if r.client == nil {
 		resp.Diagnostics.AddError(
@@ -102,10 +98,12 @@ func (r *PolicyResource) Create(ctx context.Context, req resource.CreateRequest,
 		return
 	}
 
-	res, err := r.client.CreatePolicy(ctx, connect.NewRequest(&configv1alpha1.CreatePolicyRequest{
-		Id:          data.ID.ValueString(),
-		CedarPolicy: data.Cedar.ValueString(),
-	}))
+	_, err := r.client.Create(ctx, policyset.CreateInput{
+		PolicySet: policyset.Input{
+			ID:   data.ID.ValueString(),
+			Text: data.Text.ValueString(),
+		},
+	})
 
 	if err != nil {
 		resp.Diagnostics.AddError(
@@ -118,16 +116,12 @@ func (r *PolicyResource) Create(ctx context.Context, req resource.CreateRequest,
 		return
 	}
 
-	// // Convert from the API data model to the Terraform data model
-	// // and set any unknown attribute values.
-	data.ID = types.StringValue(res.Msg.Id)
-
 	// Save data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
 // Read refreshes the Terraform state with the latest data.
-func (r *PolicyResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+func (r *PolicySetResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	if r.client == nil {
 		resp.Diagnostics.AddError(
 			"Unconfigured HTTP Client",
@@ -142,22 +136,23 @@ func (r *PolicyResource) Read(ctx context.Context, req resource.ReadRequest, res
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
 
 	//read the state from the client
-	_, err := r.client.ReadPolicy(ctx, connect.NewRequest(&configv1alpha1.ReadPolicyRequest{
-		Id: state.ID.ValueString(),
-	}))
-
+	got, err := r.client.Get(ctx, policyset.GetInput{
+		ID: state.ID.ValueString(),
+	})
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Failed to Read access policy",
+			"Failed to read PolicySet",
 			err.Error(),
 		)
 		return
 	}
 
+	state.Text = types.StringValue(got.PolicySet.Text)
+
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }
 
-func (r *PolicyResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *PolicySetResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	if r.client == nil {
 		resp.Diagnostics.AddError(
 			"Unconfigured HTTP Client",
@@ -177,43 +172,28 @@ func (r *PolicyResource) Update(ctx context.Context, req resource.UpdateRequest,
 		return
 	}
 
-	//because we are saving straight to the authz db we have no good way to update the values while deleting the old policy.
-	//To make sure the delete occurs it is done in two calls on the terraform side.
-
-	_, err := r.client.DeletePolicy(ctx, connect.NewRequest(&configv1alpha1.DeletePolicyRequest{
-		Id: data.ID.ValueString(),
-	}))
+	got, err := r.client.Update(ctx, policyset.UpdateInput{
+		PolicySet: policyset.Input{
+			ID:   data.ID.ValueString(),
+			Text: data.Text.ValueString(),
+		},
+	})
 
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"access policy not found in Common Fate",
+			"error updating policy",
 			"JSON Error: "+err.Error(),
 		)
 
 		return
 	}
-	res, err := r.client.UpdatePolicy(ctx, connect.NewRequest(&configv1alpha1.UpdatePolicyRequest{
-		Id:          data.ID.ValueString(),
-		CedarPolicy: data.Cedar.ValueString(),
-	}))
 
-	if err != nil {
-		resp.Diagnostics.AddError(
-			"Unable to Update Resource",
-
-			"JSON Error: "+err.Error(),
-		)
-
-		return
-
-	}
-
-	data.ID = types.StringValue(res.Msg.Id)
+	data.Text = types.StringValue(got.PolicySet.Text)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *PolicyResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+func (r *PolicySetResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	if r.client == nil {
 		resp.Diagnostics.AddError(
 			"Unconfigured HTTP Client",
@@ -233,24 +213,21 @@ func (r *PolicyResource) Delete(ctx context.Context, req resource.DeleteRequest,
 		return
 	}
 
-	//TODO: call api to remove the identity source
-	_, err := r.client.DeletePolicy(ctx, connect.NewRequest(&configv1alpha1.DeletePolicyRequest{
-		Id: data.ID.ValueString(),
-	}))
+	_, err := r.client.Delete(ctx, policyset.DeleteInput{
+		ID: data.ID.ValueString(),
+	})
 
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to delete Resource",
-			"An unexpected error occurred while parsing the resource creation response. "+
-				"Please report this issue to the provider developers.\n\n"+
-				"JSON Error: "+err.Error(),
+			"Error deleting policy",
+			err.Error(),
 		)
 
 		return
 	}
 }
 
-func (r *PolicyResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *PolicySetResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	// Retrieve import ID and save to id attribute
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
