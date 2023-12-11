@@ -19,9 +19,9 @@ func TestAccAccessWorkflow(t *testing.T) {
 				  
 				  resource "commonfate_access_workflow" "test" {
 					name     = "test"
-					access_duration = "2h0m0s"
+					access_duration = "2h"
 					priority = 1
-					try_extend_after="5m0s"
+					try_extend_after="5m"
 				  }
 				  
 

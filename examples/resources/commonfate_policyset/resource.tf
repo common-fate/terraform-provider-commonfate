@@ -1,5 +1,6 @@
-resource "common-fate_access_policy" "policy-1" {
-  cedar = <<EOH
+resource "commonfate-policyset" "policy-1" {
+  id="demo"
+  text = <<EOH
     permit(
       principal == User::"jane@acme.com",
       action == Action::"GCP::AutoApproval::roles/accessapproval.approver",
