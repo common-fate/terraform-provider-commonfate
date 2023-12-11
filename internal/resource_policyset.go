@@ -188,6 +188,7 @@ func (r *PolicySetResource) Update(ctx context.Context, req resource.UpdateReque
 		return
 	}
 
+	data.ID = types.StringValue(got.PolicySet.Id)
 	data.Text = types.StringValue(got.PolicySet.Text)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)

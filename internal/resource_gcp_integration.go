@@ -151,7 +151,7 @@ func (r *GCPIntegrationResource) Read(ctx context.Context, req resource.ReadRequ
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
 
 	//read the state from the client
-	_, err := r.client.GetGCPIntegration(ctx, connect.NewRequest(&integrationv1alpha1.GetGCPIntegrationRequest{
+	res, err := r.client.GetGCPIntegration(ctx, connect.NewRequest(&integrationv1alpha1.GetGCPIntegrationRequest{
 		Id: state.Id.ValueString(),
 	}))
 
@@ -161,6 +161,12 @@ func (r *GCPIntegrationResource) Read(ctx context.Context, req resource.ReadRequ
 			err.Error(),
 		)
 		return
+	}
+
+	state = GCPIntegrationModel{
+		Id:                     types.StringValue(state.Id.ValueString()),
+		Name:                   types.StringValue(res.Msg.Name),
+		WorkloadIdentityConfig: types.StringValue(res.Msg.Gcp.WorkloadIdentityConfig),
 	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
