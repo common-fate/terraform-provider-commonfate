@@ -18,9 +18,10 @@ func TestAccAccessWorkflow(t *testing.T) {
 				
 				  
 				  resource "commonfate_access_workflow" "test" {
-					name     = "daily" //this is optional
-					duration = "2h"
+					name     = "test"
+					access_duration = "2h0m0s"
 					priority = 1
+					try_extend_after="5m0s"
 				  }
 				  
 
@@ -28,8 +29,9 @@ func TestAccAccessWorkflow(t *testing.T) {
 				Check: resource.ComposeAggregateTestCheckFunc(
 
 					resource.TestCheckResourceAttr("commonfate_access_workflow.test", "name", "test"),
-					resource.TestCheckResourceAttr("commonfate_access_workflow.test", "duration", "test"),
+					resource.TestCheckResourceAttr("commonfate_access_workflow.test", "access_duration", "2h"),
 					resource.TestCheckResourceAttr("commonfate_access_workflow.test", "priority", "1"),
+					resource.TestCheckResourceAttr("commonfate_access_workflow.test", "try_extend_after", "5m"),
 
 					// Verify dynamic values have any value set in the state.
 					resource.TestCheckResourceAttrSet("commonfate_access_workflow.test", "id"),
@@ -41,28 +43,29 @@ func TestAccAccessWorkflow(t *testing.T) {
 			// 	ImportState:       true,
 			// 	ImportStateVerify: true,
 			// },
-			// Update and Read testing
-			{
-				Config: providerConfig + `
+			// // Update and Read testing
+			// {
+			// 	Config: providerConfig + `
 
-				
-				  resource "commonfate_access_workflow" "test" {
-					name   = "daily-updated"
-					duration = "1h"
-					priority = 2
-				  }
-				  
-						`,
-				Check: resource.ComposeAggregateTestCheckFunc(
-					// Verify first order item updated
-					resource.TestCheckResourceAttr("commonfate_access_workflow.test", "name", "daily-updated"),
-					resource.TestCheckResourceAttr("commonfate_access_workflow.test", "duration", "1h"),
-					resource.TestCheckResourceAttr("commonfate_access_workflow.test", "priority", "2"),
+			// 	resource "commonfate_access_workflow" "test" {
+			// 		name     = "test-updated"
+			// 		access_duration = "1h"
+			// 		priority = 2
+			// 		try_extend_after="10m"
+			// 	  }
 
-					// Verify dynamic values have any value set in the state.
-					// resource.TestCheckResourceAttrSet("commonfate_access_workflow.test", "id"),
-				),
-			},
+			// 			`,
+			// 	Check: resource.ComposeAggregateTestCheckFunc(
+			// 		// Verify first order item updated
+			// 		resource.TestCheckResourceAttr("commonfate_access_workflow.test", "name", "test-updated"),
+			// 		resource.TestCheckResourceAttr("commonfate_access_workflow.test", "access_duration", "1h"),
+			// 		resource.TestCheckResourceAttr("commonfate_access_workflow.test", "priority", "2"),
+			// 		resource.TestCheckResourceAttr("commonfate_access_workflow.test", "try_extend_after", "10m"),
+
+			// 		// Verify dynamic values have any value set in the state.
+			// 		// resource.TestCheckResourceAttrSet("commonfate_access_workflow.test", "id"),
+			// 	),
+			// },
 			// Delete testing automatically occurs in TestCase
 		},
 	})

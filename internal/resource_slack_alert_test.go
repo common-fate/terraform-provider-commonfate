@@ -19,7 +19,8 @@ func TestAccSlackAlert(t *testing.T) {
 				  
 				  resource "commonfate_slack_alert" "test" {
 					workflow_id   = "test"
-					slack_channel = "test"
+					slack_channel_id = "test"
+					slack_workspace_id = "test"
 				  }
 				  
 
@@ -27,18 +28,19 @@ func TestAccSlackAlert(t *testing.T) {
 				Check: resource.ComposeAggregateTestCheckFunc(
 
 					resource.TestCheckResourceAttr("commonfate_slack_alert.test", "workflow_id", "test"),
-					resource.TestCheckResourceAttr("commonfate_slack_alert.test", "slack_channel", "test"),
+					resource.TestCheckResourceAttr("commonfate_slack_alert.test", "slack_channel_id", "test"),
+					resource.TestCheckResourceAttr("commonfate_slack_alert.test", "slack_workspace_id", "test"),
 
 					// Verify dynamic values have any value set in the state.
 					resource.TestCheckResourceAttrSet("commonfate_slack_alert.test", "id"),
 				),
 			},
 			// ImportState testing
-			// {
-			// 	ResourceName:      "commonfate_slack_alert.test",
-			// 	ImportState:       true,
-			// 	ImportStateVerify: true,
-			// },
+			{
+				ResourceName:      "commonfate_slack_alert.test",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 			// Update and Read testing
 			{
 				Config: providerConfig + `
@@ -47,14 +49,16 @@ func TestAccSlackAlert(t *testing.T) {
 				  
 				  resource "commonfate_slack_alert" "test" {
 					workflow_id   = "test-updated"
-					slack_channel = "test-updated"
+					slack_workspace_id = "test-updated"
+					slack_channel_id = "test-updated"
 				  }
 				  
 						`,
 				Check: resource.ComposeAggregateTestCheckFunc(
 					// Verify first order item updated
-					resource.TestCheckResourceAttr("commonfate_slack_alert.test", "workflow_id", "test-updateds"),
-					resource.TestCheckResourceAttr("commonfate_slack_alert.test", "slack_channel", "test-updated"),
+					resource.TestCheckResourceAttr("commonfate_slack_alert.test", "workflow_id", "test-updated"),
+					resource.TestCheckResourceAttr("commonfate_slack_alert.test", "slack_channel_id", "test-updated"),
+					resource.TestCheckResourceAttr("commonfate_slack_alert.test", "slack_workspace_id", "test-updated"),
 
 					// Verify dynamic values have any value set in the state.
 					// resource.TestCheckResourceAttrSet("commonfate_slack_alert.test", "id"),

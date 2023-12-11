@@ -3,6 +3,7 @@ package internal
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/bufbuild/connect-go"
@@ -152,9 +153,13 @@ func (r *AccessWorkflowResource) Create(ctx context.Context, req resource.Create
 		return
 	}
 
+	// ad, tea := HandleDurationStrings(res.Msg.Workflow.AccessDuration, res.Msg.Workflow.TryExtendAfter)
+
 	// // Convert from the API data model to the Terraform data model
 	// // and set any unknown attribute values.
 	data.ID = types.StringValue(res.Msg.Workflow.Id)
+	// data.AccessDuration = data.TryExtendAfter
+	// data.TryExtendAfter = data.TryExtendAfter
 
 	// Save data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -190,13 +195,19 @@ func (r *AccessWorkflowResource) Read(ctx context.Context, req resource.ReadRequ
 		return
 	}
 
+	//Due to how go handles durations something input as '1hr' is accepted.
+	//But interally will be converted to '1hr0m0s'
+	//The refresh state would then attempt to refresh it with the updated zero values.
+	//https://github.com/golang/go/issues/39064
+	//to combat this we will trim these values if they are added.
+	accessDuration, tryExtendAfter := HandleDurationStrings(res.Msg.Workflow.AccessDuration, res.Msg.Workflow.TryExtendAfter)
 	//refresh state
 	state = AccessWorkflowModel{
 		ID:             types.StringValue(res.Msg.Workflow.Id),
 		Name:           types.StringValue(res.Msg.Workflow.Name),
-		AccessDuration: types.StringValue(res.Msg.Workflow.AccessDuration.AsDuration().String()),
+		AccessDuration: types.StringValue(accessDuration),
 		Priority:       types.Int64Value(int64(res.Msg.Workflow.Priority)),
-		TryExtendAfter: types.StringValue(res.Msg.Workflow.TryExtendAfter.AsDuration().String()),
+		TryExtendAfter: types.StringValue(tryExtendAfter),
 	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
@@ -256,7 +267,13 @@ func (r *AccessWorkflowResource) Update(ctx context.Context, req resource.Update
 
 	}
 
+	ad, tea := HandleDurationStrings(res.Msg.Workflow.AccessDuration, res.Msg.Workflow.TryExtendAfter)
+
+	// // Convert from the API data model to the Terraform data model
+	// // and set any unknown attribute values.
 	data.ID = types.StringValue(res.Msg.Workflow.Id)
+	data.AccessDuration = types.StringValue(ad)
+	data.TryExtendAfter = types.StringValue(tea)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
@@ -300,4 +317,29 @@ func (r *AccessWorkflowResource) Delete(ctx context.Context, req resource.Delete
 func (r *AccessWorkflowResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	// Retrieve import ID and save to id attribute
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
+}
+
+func HandleDurationStrings(AccessDuration *durationpb.Duration, TryExtendAfter *durationpb.Duration) (string, string) {
+	//Due to how go handles durations something input as '1hr' is accepted.
+	//But interally will be converted to '1hr0m0s'
+	//The refresh state would then attempt to refresh it with the updated zero values.
+	//https://github.com/golang/go/issues/39064
+	//to combat this we will trim these values if they are added.
+	accessDuration := AccessDuration.AsDuration().String()
+	if AccessDuration.AsDuration().Seconds() == 0 {
+		accessDuration = strings.TrimSuffix(accessDuration, "0s")
+	}
+	if AccessDuration.AsDuration().Minutes() == 0 {
+		accessDuration = strings.TrimSuffix(accessDuration, "0m")
+	}
+
+	tryExtendAfter := TryExtendAfter.AsDuration().String()
+	if TryExtendAfter.AsDuration().Seconds() == 0 {
+		tryExtendAfter = strings.TrimSuffix(tryExtendAfter, "0s")
+	}
+	if TryExtendAfter.AsDuration().Minutes() == 0 {
+		tryExtendAfter = strings.TrimSuffix(tryExtendAfter, "0m")
+	}
+
+	return accessDuration, tryExtendAfter
 }
