@@ -18,9 +18,10 @@ import (
 )
 
 type GCPIntegrationModel struct {
-	Id                     types.String `tfsdk:"id"`
-	Name                   types.String `tfsdk:"name"`
-	WorkloadIdentityConfig types.String `tfsdk:"workload_identity_config"`
+	Id                                  types.String `tfsdk:"id"`
+	Name                                types.String `tfsdk:"name"`
+	WorkloadIdentityConfig              types.String `tfsdk:"workload_identity_config"`
+	ServiceAccountCredentialsSecretPath types.String `tfsdk:"service_account_credentials_secret_path"`
 }
 
 type GCPIntegrationResource struct {
@@ -78,7 +79,11 @@ func (r *GCPIntegrationResource) Schema(ctx context.Context, req resource.Schema
 			},
 			"workload_identity_config": schema.StringAttribute{
 				MarkdownDescription: "GCP Workload Identity Config as a JSON string",
-				Required:            true,
+				Optional:            true,
+			},
+			"service_account_credentials_secret_path": schema.StringAttribute{
+				MarkdownDescription: "Path to secret for Service account credentials",
+				Optional:            true,
 			},
 		},
 		MarkdownDescription: `Registers an integration with Google Cloud`,
@@ -113,7 +118,8 @@ func (r *GCPIntegrationResource) Create(ctx context.Context, req resource.Create
 		Name: data.Name.ValueString(),
 		Integration: &integrationv1alpha1.CreateIntegrationRequest_Gcp{
 			Gcp: &integrationv1alpha1.GCP{
-				WorkloadIdentityConfig: data.WorkloadIdentityConfig.ValueString(),
+				WorkloadIdentityConfig:              data.WorkloadIdentityConfig.ValueString(),
+				ServiceAccountCredentialsSecretPath: data.ServiceAccountCredentialsSecretPath.ValueString(),
 			},
 		},
 	}))
@@ -164,9 +170,10 @@ func (r *GCPIntegrationResource) Read(ctx context.Context, req resource.ReadRequ
 	}
 
 	state = GCPIntegrationModel{
-		Id:                     types.StringValue(state.Id.ValueString()),
-		Name:                   types.StringValue(res.Msg.Name),
-		WorkloadIdentityConfig: types.StringValue(res.Msg.Gcp.WorkloadIdentityConfig),
+		Id:                                  types.StringValue(state.Id.ValueString()),
+		Name:                                types.StringValue(res.Msg.Name),
+		WorkloadIdentityConfig:              types.StringValue(res.Msg.Gcp.WorkloadIdentityConfig),
+		ServiceAccountCredentialsSecretPath: types.StringValue(res.Msg.Gcp.ServiceAccountCredentialsSecretPath),
 	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
@@ -197,7 +204,8 @@ func (r *GCPIntegrationResource) Update(ctx context.Context, req resource.Update
 		Name: data.Name.ValueString(),
 		Integration: &integrationv1alpha1.UpdateIntegrationRequest_Gcp{
 			Gcp: &integrationv1alpha1.GCP{
-				WorkloadIdentityConfig: data.WorkloadIdentityConfig.ValueString(),
+				WorkloadIdentityConfig:              data.WorkloadIdentityConfig.ValueString(),
+				ServiceAccountCredentialsSecretPath: data.ServiceAccountCredentialsSecretPath.ValueString(),
 			},
 		},
 	}))
