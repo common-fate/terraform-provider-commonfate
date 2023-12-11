@@ -176,7 +176,7 @@ func (r *AccessWorkflowResource) Read(ctx context.Context, req resource.ReadRequ
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
 
 	//read the state from the client
-	_, err := r.client.GetAccessWorkflow(ctx, connect.NewRequest(&configv1alpha1.GetAccessWorkflowRequest{
+	res, err := r.client.GetAccessWorkflow(ctx, connect.NewRequest(&configv1alpha1.GetAccessWorkflowRequest{
 		Id: state.ID.ValueString(),
 	}))
 	if connect.CodeOf(err) == connect.CodeNotFound {
@@ -188,6 +188,14 @@ func (r *AccessWorkflowResource) Read(ctx context.Context, req resource.ReadRequ
 			err.Error(),
 		)
 		return
+	}
+
+	//refresh state
+	state = AccessWorkflowModel{
+		ID:             types.StringValue(res.Msg.Id),
+		Name:           types.StringValue(res.Msg.Name),
+		AccessDuration: types.StringValue(res.Msg.AccessDuration.AsDuration().String()),
+		Priority:       types.Int64Value(int64(res.Msg.Priority)),
 	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
