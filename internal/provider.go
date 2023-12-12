@@ -2,6 +2,7 @@ package internal
 
 import (
 	"context"
+	"os"
 	"strings"
 
 	config_client "github.com/common-fate/sdk/config"
@@ -58,7 +59,7 @@ func (p *CommonFateProvider) Schema(ctx context.Context, req provider.SchemaRequ
 				Required: true,
 			},
 			"oidc_client_secret": schema.StringAttribute{
-				Required:  true,
+				Optional:  true,
 				Sensitive: true,
 			},
 			"oidc_issuer": schema.StringAttribute{
@@ -78,12 +79,18 @@ func (p *CommonFateProvider) Configure(ctx context.Context, req provider.Configu
 		return
 	}
 
+	clientsecret := config.OIDCClientSecret.ValueString()
+
+	if os.Getenv("CF_OIDC_CLIENT_SECRET") != "" {
+		clientsecret = os.Getenv("CF_OIDC_CLIENT_SECRET")
+	}
+
 	//using context.Background() here causes a cancelled context issue
 	//see https://github.com/databricks/databricks-sdk-go/issues/671
 	cfg, err := config_client.NewServerContext(context.Background(), config_client.Opts{
 		APIURL:       config.APIURL.ValueString(),
 		ClientID:     config.OIDCClientId.ValueString(),
-		ClientSecret: config.OIDCClientSecret.ValueString(),
+		ClientSecret: clientsecret,
 		// @TODO consider changing this to use a direct issuer env var
 		OIDCIssuer: strings.TrimSuffix(config.OIDCIssuer.ValueString(), "/"),
 		AuthzURL:   config.AuthzURL.ValueString(),

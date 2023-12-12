@@ -135,7 +135,6 @@ func (r *GCPIntegrationResource) Create(ctx context.Context, req resource.Create
 			},
 		},
 	}))
-
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to Create Resource: GCP Integration",
@@ -146,6 +145,8 @@ func (r *GCPIntegrationResource) Create(ctx context.Context, req resource.Create
 
 		return
 	}
+
+	diagsToTerraform(res.Msg.Diagnostics, &resp.Diagnostics)
 
 	data.Id = types.StringValue(res.Msg.Id)
 
@@ -235,8 +236,9 @@ func (r *GCPIntegrationResource) Update(ctx context.Context, req resource.Update
 		)
 
 		return
-
 	}
+
+	diagsToTerraform(res.Msg.Diagnostics, &resp.Diagnostics)
 
 	data.Id = types.StringValue(res.Msg.Id)
 
