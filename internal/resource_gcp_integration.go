@@ -22,8 +22,10 @@ type GCPIntegrationModel struct {
 	Name                                types.String `tfsdk:"name"`
 	WorkloadIdentityConfig              types.String `tfsdk:"workload_identity_config"`
 	ServiceAccountCredentialsSecretPath types.String `tfsdk:"service_account_credentials_secret_path"`
-	OrganizationID                      types.String `tfsdk:"organization_id"`
-	GoogleWorkspaceCustomerID           types.String `tfsdk:"google_workspace_customer_id"`
+	// A user in gcp that has access to list users and groups, it will be assumed by the service account
+	DomainWideDelegationSubject types.String `tfsdk:"domain_wide_delegation_subject"`
+	OrganizationID              types.String `tfsdk:"organization_id"`
+	GoogleWorkspaceCustomerID   types.String `tfsdk:"google_workspace_customer_id"`
 }
 
 type GCPIntegrationResource struct {
@@ -87,6 +89,10 @@ func (r *GCPIntegrationResource) Schema(ctx context.Context, req resource.Schema
 				MarkdownDescription: "Path to secret for Service account credentials",
 				Optional:            true,
 			},
+			"domain_wide_delegation_subject": schema.StringAttribute{
+				MarkdownDescription: "A user email in GCP that has access to list users and groups, it will be assumed by the service account",
+				Required:            true,
+			},
 			"organization_id": schema.StringAttribute{
 				MarkdownDescription: "GCP organization ID",
 				Required:            true,
@@ -130,6 +136,7 @@ func (r *GCPIntegrationResource) Create(ctx context.Context, req resource.Create
 			Gcp: &integrationv1alpha1.GCP{
 				WorkloadIdentityConfig:              data.WorkloadIdentityConfig.ValueString(),
 				ServiceAccountCredentialsSecretPath: data.ServiceAccountCredentialsSecretPath.ValueString(),
+				DomainWideDelegationSubject:         data.DomainWideDelegationSubject.ValueString(),
 				OrganizationId:                      data.OrganizationID.ValueString(),
 				GoogleWorkspaceCustomerId:           data.GoogleWorkspaceCustomerID.ValueString(),
 			},
@@ -186,6 +193,7 @@ func (r *GCPIntegrationResource) Read(ctx context.Context, req resource.ReadRequ
 		Name:                                types.StringValue(res.Msg.Name),
 		WorkloadIdentityConfig:              types.StringValue(res.Msg.Gcp.WorkloadIdentityConfig),
 		ServiceAccountCredentialsSecretPath: types.StringValue(res.Msg.Gcp.ServiceAccountCredentialsSecretPath),
+		DomainWideDelegationSubject:         types.StringValue(res.Msg.Gcp.DomainWideDelegationSubject),
 		OrganizationID:                      types.StringValue(res.Msg.Gcp.OrganizationId),
 		GoogleWorkspaceCustomerID:           types.StringValue(res.Msg.Gcp.GoogleWorkspaceCustomerId),
 	}
@@ -220,6 +228,7 @@ func (r *GCPIntegrationResource) Update(ctx context.Context, req resource.Update
 			Gcp: &integrationv1alpha1.GCP{
 				WorkloadIdentityConfig:              data.WorkloadIdentityConfig.ValueString(),
 				ServiceAccountCredentialsSecretPath: data.ServiceAccountCredentialsSecretPath.ValueString(),
+				DomainWideDelegationSubject:         data.DomainWideDelegationSubject.ValueString(),
 				OrganizationId:                      data.OrganizationID.ValueString(),
 				GoogleWorkspaceCustomerId:           data.GoogleWorkspaceCustomerID.ValueString(),
 			},
