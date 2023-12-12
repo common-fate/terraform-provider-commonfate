@@ -15,8 +15,7 @@ const (
 	provider "commonfate" {
 		api_url = "http://localhost:8080"
 		authz_url = "http://localhost:5050"
-		oidc_client_id     = ""
-		oidc_client_secret = ""
+		oidc_client_id     = "5kb39g5pfvv5l6cqtm8boe5sru"
 		oidc_issuer        = "https://cognito-idp.ap-southeast-2.amazonaws.com/ap-southeast-2_RyXr9bHis"
 	  }
 

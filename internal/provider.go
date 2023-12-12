@@ -2,7 +2,11 @@ package internal
 
 import (
 	"context"
+	"os"
 	"strings"
+
+	"github.com/common-fate/grab"
+	sdk_config "github.com/common-fate/sdk/config"
 
 	config_client "github.com/common-fate/sdk/config"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
@@ -58,7 +62,7 @@ func (p *CommonFateProvider) Schema(ctx context.Context, req provider.SchemaRequ
 				Required: true,
 			},
 			"oidc_client_secret": schema.StringAttribute{
-				Required:  true,
+				Optional:  true,
 				Sensitive: true,
 			},
 			"oidc_issuer": schema.StringAttribute{
@@ -78,12 +82,40 @@ func (p *CommonFateProvider) Configure(ctx context.Context, req provider.Configu
 		return
 	}
 
+	//attempt to source the secret from the following places in order
+	// 1. passed in as a value to the provider in tf
+	// 2. pull from environment variable CF_OIDC_CLIENT_SECRET
+	// 3. lookup from ~/.commonfate/config
+
+	var OIDC_Secret string
+
+	if config.OIDCClientSecret.ValueString() != "" {
+		OIDC_Secret = config.OIDCClientSecret.ValueString()
+
+	}
+	if secret, exists := os.LookupEnv("CF_OIDC_CLIENT_SECRET"); exists {
+		OIDC_Secret = secret
+	}
+
+	cfCfg, err := sdk_config.LoadDefault(ctx)
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Failed to load cf config",
+			err.Error(),
+		)
+	}
+
+	if cfCfg.OIDCClientSecret != nil {
+		OIDC_Secret = grab.Value(cfCfg.OIDCClientSecret)
+
+	}
+
 	//using context.Background() here causes a cancelled context issue
 	//see https://github.com/databricks/databricks-sdk-go/issues/671
 	cfg, err := config_client.NewServerContext(context.Background(), config_client.Opts{
 		APIURL:       config.APIURL.ValueString(),
 		ClientID:     config.OIDCClientId.ValueString(),
-		ClientSecret: config.OIDCClientSecret.ValueString(),
+		ClientSecret: OIDC_Secret,
 		// @TODO consider changing this to use a direct issuer env var
 		OIDCIssuer: strings.TrimSuffix(config.OIDCIssuer.ValueString(), "/"),
 		AuthzURL:   config.AuthzURL.ValueString(),
