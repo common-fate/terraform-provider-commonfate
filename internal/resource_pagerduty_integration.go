@@ -17,32 +17,30 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-type AWSIDCIntegrationModel struct {
-	Id              types.String `tfsdk:"id"`
-	Name            types.String `tfsdk:"name"`
-	SSOInstanceARN  types.String `tfsdk:"sso_instance_arn"`
-	IdentityStoreID types.String `tfsdk:"identity_store_id"`
-	SSORegion       types.String `tfsdk:"sso_region"`
-	ReaderRoleARN   types.String `tfsdk:"reader_role_arn"`
+type PagerDutyIntegrationModel struct {
+	Id                     types.String `tfsdk:"id"`
+	Name                   types.String `tfsdk:"name"`
+	ClientID               types.String `tfsdk:"client_id"`
+	ClientSecretSecretPath types.String `tfsdk:"client_secret_secret_path"`
 }
 
-type AWSIDCIntegrationResource struct {
+type PagerDutyIntegrationResource struct {
 	client integrationv1alpha1connect.IntegrationServiceClient
 }
 
 var (
-	_ resource.Resource                = &AWSIDCIntegrationResource{}
-	_ resource.ResourceWithConfigure   = &AWSIDCIntegrationResource{}
-	_ resource.ResourceWithImportState = &AWSIDCIntegrationResource{}
+	_ resource.Resource                = &PagerDutyIntegrationResource{}
+	_ resource.ResourceWithConfigure   = &PagerDutyIntegrationResource{}
+	_ resource.ResourceWithImportState = &PagerDutyIntegrationResource{}
 )
 
 // Metadata returns the data source type name.
-func (r *AWSIDCIntegrationResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_aws_idc_integration"
+func (r *PagerDutyIntegrationResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_pagerduty_integration"
 }
 
 // Configure adds the provider configured client to the data source.
-func (r *AWSIDCIntegrationResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *PagerDutyIntegrationResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -63,10 +61,10 @@ func (r *AWSIDCIntegrationResource) Configure(_ context.Context, req resource.Co
 
 // GetSchema defines the schema for the data source.
 // schema is based off the governance api
-func (r *AWSIDCIntegrationResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *PagerDutyIntegrationResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 
 	resp.Schema = schema.Schema{
-		Description: `Registers an AWS IAM Identity Center integration with Google Cloud`,
+		Description: `Registers a PagerDuty integration`,
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				MarkdownDescription: "The internal Common Fate ID",
@@ -79,29 +77,20 @@ func (r *AWSIDCIntegrationResource) Schema(ctx context.Context, req resource.Sch
 				MarkdownDescription: "The name of the integration: use a short label which is descriptive of the organization you're connecting to",
 				Required:            true,
 			},
-			"sso_instance_arn": schema.StringAttribute{
-				MarkdownDescription: "The ARN of the IAM Identity Center SSO instance",
+			"client_id": schema.StringAttribute{
+				MarkdownDescription: "The PagerDuty application Client ID",
 				Required:            true,
 			},
-			"sso_region": schema.StringAttribute{
-				MarkdownDescription: "The AWS region that the SSO instance is hosted in",
-				Required:            true,
-			},
-			"identity_store_id": schema.StringAttribute{
-				MarkdownDescription: "The IAM Identity Center identity store ID",
-				Required:            true,
-			},
-			"reader_role_arn": schema.StringAttribute{
-				MarkdownDescription: "The ARN of the role to assume in order to read AWS IAM Identity Store data",
+			"client_secret_secret_path": schema.StringAttribute{
+				MarkdownDescription: "Path to secret for Client Secret",
 				Required:            true,
 			},
 		},
-		MarkdownDescription: `Registers an AWS IAM Identity Center  integration with Google Cloud`,
+		MarkdownDescription: `Registers a PagerDuty integration`,
 	}
 }
 
-func (r *AWSIDCIntegrationResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-
+func (r *PagerDutyIntegrationResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	if r.client == nil {
 		resp.Diagnostics.AddError(
 			"Unconfigured HTTP Client",
@@ -110,7 +99,7 @@ func (r *AWSIDCIntegrationResource) Create(ctx context.Context, req resource.Cre
 
 		return
 	}
-	var data *AWSIDCIntegrationModel
+	var data *PagerDutyIntegrationModel
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -127,20 +116,17 @@ func (r *AWSIDCIntegrationResource) Create(ctx context.Context, req resource.Cre
 	res, err := r.client.CreateIntegration(ctx, connect.NewRequest(&integrationv1alpha1.CreateIntegrationRequest{
 		Name: data.Name.ValueString(),
 		Config: &integrationv1alpha1.Config{
-			Config: &integrationv1alpha1.Config_AwsIdc{
-				AwsIdc: &integrationv1alpha1.AWSIDC{
-					SsoInstanceArn:  data.SSOInstanceARN.ValueString(),
-					IdentityStoreId: data.IdentityStoreID.ValueString(),
-					SsoRegion:       data.SSORegion.ValueString(),
-					ReaderRoleArn:   data.ReaderRoleARN.ValueString(),
+			Config: &integrationv1alpha1.Config_Pagerduty{
+				Pagerduty: &integrationv1alpha1.PagerDuty{
+					ClientId:               data.ClientID.ValueString(),
+					ClientSecretSecretPath: data.ClientSecretSecretPath.ValueString(),
 				},
 			},
 		},
 	}))
-
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to Create Resource: AWS IAM Identity Store Integration",
+			"Unable to Create Resource: PagerDuty Integration",
 			"An unexpected error occurred while communicating with Common Fate API. "+
 				"Please report this issue to the provider developers.\n\n"+
 				"JSON Error: "+err.Error(),
@@ -149,6 +135,8 @@ func (r *AWSIDCIntegrationResource) Create(ctx context.Context, req resource.Cre
 		return
 	}
 
+	diagsToTerraform(res.Msg.Integration.Diagnostics, &resp.Diagnostics)
+
 	data.Id = types.StringValue(res.Msg.Integration.Id)
 
 	// Save data into Terraform state
@@ -156,7 +144,7 @@ func (r *AWSIDCIntegrationResource) Create(ctx context.Context, req resource.Cre
 }
 
 // Read refreshes the Terraform state with the latest data.
-func (r *AWSIDCIntegrationResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+func (r *PagerDutyIntegrationResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	if r.client == nil {
 		resp.Diagnostics.AddError(
 			"Unconfigured HTTP Client",
@@ -165,41 +153,57 @@ func (r *AWSIDCIntegrationResource) Read(ctx context.Context, req resource.ReadR
 
 		return
 	}
-	var state AWSIDCIntegrationModel
+	var state PagerDutyIntegrationModel
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
 
 	//read the state from the client
-	_, err := r.client.GetIntegration(ctx, connect.NewRequest(&integrationv1alpha1.GetIntegrationRequest{
+	res, err := r.client.GetIntegration(ctx, connect.NewRequest(&integrationv1alpha1.GetIntegrationRequest{
 		Id: state.Id.ValueString(),
 	}))
 
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Failed to read AWS IAM Identity Store Integration",
+			"Failed to read PagerDuty Integration",
 			err.Error(),
 		)
 		return
 	}
 
+	integ := res.Msg.Integration.Config.GetPagerduty()
+	if integ == nil {
+		resp.Diagnostics.AddError(
+			"Returned integration did not contain any PagerDuty configuration",
+			"",
+		)
+		return
+	}
+
+	state = PagerDutyIntegrationModel{
+		Id:                     types.StringValue(state.Id.ValueString()),
+		Name:                   types.StringValue(res.Msg.Integration.Name),
+		ClientID:               types.StringValue(integ.ClientId),
+		ClientSecretSecretPath: types.StringValue(integ.ClientSecretSecretPath),
+	}
+
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }
 
-func (r *AWSIDCIntegrationResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *PagerDutyIntegrationResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	if r.client == nil {
 		resp.Diagnostics.AddError(
 			"Unconfigured HTTP Client",
 			"Expected configured HTTP client. Please report this issue to the provider developers.",
 		)
 	}
-	var data AWSIDCIntegrationModel
+	var data PagerDutyIntegrationModel
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		resp.Diagnostics.AddError(
-			"Unable to update AWS IAM Identity Store Integration",
+			"Unable to update PagerDuty Integration",
 			"An unexpected error occurred while parsing the resource update response.",
 		)
 
@@ -211,12 +215,10 @@ func (r *AWSIDCIntegrationResource) Update(ctx context.Context, req resource.Upd
 			Id:   data.Id.ValueString(),
 			Name: data.Name.ValueString(),
 			Config: &integrationv1alpha1.Config{
-				Config: &integrationv1alpha1.Config_AwsIdc{
-					AwsIdc: &integrationv1alpha1.AWSIDC{
-						SsoInstanceArn:  data.SSOInstanceARN.ValueString(),
-						IdentityStoreId: data.IdentityStoreID.ValueString(),
-						SsoRegion:       data.SSORegion.ValueString(),
-						ReaderRoleArn:   data.ReaderRoleARN.ValueString(),
+				Config: &integrationv1alpha1.Config_Pagerduty{
+					Pagerduty: &integrationv1alpha1.PagerDuty{
+						ClientId:               data.ClientID.ValueString(),
+						ClientSecretSecretPath: data.ClientSecretSecretPath.ValueString(),
 					},
 				},
 			},
@@ -225,35 +227,36 @@ func (r *AWSIDCIntegrationResource) Update(ctx context.Context, req resource.Upd
 
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to Update AWS IAM Identity Store Integration",
+			"Unable to Update PagerDuty Integration",
 			"An unexpected error occurred while communicating with Common Fate API. "+
 				"Please report this issue to the provider developers.\n\n"+
 				"JSON Error: "+err.Error(),
 		)
 
 		return
-
 	}
+
+	diagsToTerraform(res.Msg.Integration.Diagnostics, &resp.Diagnostics)
 
 	data.Id = types.StringValue(res.Msg.Integration.Id)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *AWSIDCIntegrationResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+func (r *PagerDutyIntegrationResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	if r.client == nil {
 		resp.Diagnostics.AddError(
 			"Unconfigured HTTP Client",
 			"Expected configured HTTP client. Please report this issue to the provider developers.",
 		)
 	}
-	var data *AWSIDCIntegrationModel
+	var data *PagerDutyIntegrationModel
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		resp.Diagnostics.AddError(
-			"Unable to delete AWS IAM Identity Store Integration",
+			"Unable to delete PagerDuty Integration",
 			"An unexpected error occurred while parsing the resource creation response.",
 		)
 
@@ -266,7 +269,7 @@ func (r *AWSIDCIntegrationResource) Delete(ctx context.Context, req resource.Del
 
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to delete AWS IAM Identity Store Integration",
+			"Unable to delete PagerDuty Integration",
 			"An unexpected error occurred while parsing the resource creation response. "+
 				"Please report this issue to the provider developers.\n\n"+
 				"JSON Error: "+err.Error(),
@@ -276,7 +279,7 @@ func (r *AWSIDCIntegrationResource) Delete(ctx context.Context, req resource.Del
 	}
 }
 
-func (r *AWSIDCIntegrationResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *PagerDutyIntegrationResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	// Retrieve import ID and save to id attribute
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }

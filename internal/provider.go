@@ -129,6 +129,8 @@ func (p *CommonFateProvider) Resources(_ context.Context) []func() resource.Reso
 		NewSlackAlertResource,
 		NewWebhookProvisionerResource,
 		NewAWSIDCIntegrationResource,
+		NewSlackIntegrationResource,
+		NewPagerDutyIntegrationResource,
 	}
 }
 
@@ -171,4 +173,12 @@ func NewGCPIntegrationResource() resource.Resource {
 
 func NewAWSIDCIntegrationResource() resource.Resource {
 	return &AWSIDCIntegrationResource{}
+}
+
+func NewSlackIntegrationResource() resource.Resource {
+	return &SlackIntegrationResource{}
+}
+
+func NewPagerDutyIntegrationResource() resource.Resource {
+	return &PagerDutyIntegrationResource{}
 }
