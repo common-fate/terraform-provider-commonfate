@@ -5,7 +5,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 )
 
-// diagsToTerraform maps Common Fate API diagnostics to Terraform diagnostics
+// helpers.DiagsToTerraform maps Common Fate API diagnostics to Terraform diagnostics
 func DiagsToTerraform(apiDiags []*accessv1alpha1.Diagnostic, tfDiags *diag.Diagnostics) {
 	for _, d := range apiDiags {
 		if d.Level == accessv1alpha1.DiagnosticLevel_DIAGNOSTIC_LEVEL_WARNING {
