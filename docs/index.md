@@ -58,7 +58,9 @@ resource "commonfate_access_workflow" "demo" {
 resource "commonfate_gcp_project_selector" "demo" {
   name="demo"
   gcp_organization_id="organization/29034834894"
-  when=`resource.tag_keys contains \"production\" && resource in GCP::Folder::\"folders/342982723\"`
+  when = <<EOF`
+  resource.tag_keys contains "production" && resource in GCP::Folder::"folders/342982723"
+ EOF
   
 }
 
