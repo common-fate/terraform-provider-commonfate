@@ -4,9 +4,21 @@ description: |-
   The Common Fate provider is used to configure and manage access to your cloud.
 ---
 
-
 The Common Fate provider is used to configure and customize your Common Fate deployment. 
 Manage things like identitity, creating access policies and just-in-time (JIT) access workflows for permission to resources ranging across all cloud providers.
+
+## Configuration
+
+To get your provider set up you will need some essential variables, these are:
+- Deployment API URL
+- Deployment Authz URL
+- OIDC Client ID
+- OIDC Client Secret
+- OIDC Issuer
+
+All of these can be sourced from your Common Fate's deployment Terraform outputs.
+For more information on how to find these variables checkout our official documentation [here](https://enterprise.docs.commonfate.io/deploy)
+
 
 ## Example Usage
 - This example is a basic Common Fate setup with integrations with GCP, PagerDuty, and Slack.
@@ -87,18 +99,10 @@ resource "commonfate_slack_integration" "demo" {
   signing_secret_secret_path=""
 }
 
+resource "commonfate_slack_alert" "demo" {
+  workflow_id=var.commonfate_access_workflow.demo.id
+  slack_channel_id="C2044RFJMWMS"
+}
+
 ```
-
-## Configuration
-
-To get your provider set up you will need some essential variables, these are:
-- Issuer URL
-- Deployment API URL
-- Deployment Authz URL
-- OIDC Client ID
-- OIDC Client Secret
-- OIDC Issuer
-
-All of these can be sourced from your Common Fate's deployment Terraform outputs.
-For more information on how to fine these variables checkout our official documentation [here](https://enterprise.docs.commonfate.io/deploy)
 

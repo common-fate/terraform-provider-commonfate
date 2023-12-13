@@ -2,12 +2,12 @@
 page_title: "commonfate_access_workflow Resource - commonfate"
 subcategory: ""
 description: |-
-  Create
+  Access Workflows are used to describe how long access should be applied. Created Workflows can be referenced in other resources created.
 ---
 
 # commonfate_access_workflow (Resource)
 
-Create
+Access Workflows are used to describe how long access should be applied. Created Workflows can be referenced in other resources created.
 
 
 

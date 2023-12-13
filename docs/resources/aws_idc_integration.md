@@ -19,8 +19,8 @@ Registers an AWS IAM Identity Center  integration with Google Cloud
 
 - `identity_store_id` (String) The IAM Identity Center identity store ID
 - `name` (String) The name of the integration: use a short label which is descriptive of the organization you're connecting to
+- `reader_role_arn` (String) The ARN of the role to assume in order to read AWS IAM Identity Store data
 - `sso_instance_arn` (String) The ARN of the IAM Identity Center SSO instance
-- `sso_read_role_arn` (String) The ARN of the role to assume in order to read AWS IAM Identity Store data
 - `sso_region` (String) The AWS region that the SSO instance is hosted in
 
 ### Read-Only

@@ -27,7 +27,7 @@ A specifier to make resources available for selection under a particular Access 
 
 ### Read-Only
 
-- `id` (String) The internal Common Fate ID
+- `id` (String) The helpers Common Fate ID
 
 <a id="nestedatt--role"></a>
 ### Nested Schema for `role`

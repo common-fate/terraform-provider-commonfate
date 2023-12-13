@@ -65,8 +65,7 @@ func (r *SlackAlertResource) Configure(_ context.Context, req resource.Configure
 func (r *SlackAlertResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 
 	resp.Schema = schema.Schema{
-		Description: `Creates a Slack Alert.
-`,
+		Description: `Links a Slack message being send to a particular channel or workspace based on actions made against a workflow. Slack Integration resource is required before creaing a Slack Alert.`,
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				MarkdownDescription: "The internal approval workflow ID",
@@ -85,10 +84,10 @@ func (r *SlackAlertResource) Schema(ctx context.Context, req resource.SchemaRequ
 			},
 			"slack_workspace_id": schema.StringAttribute{
 				MarkdownDescription: "The Slack Workspace ID. In Slack URLs, such as `https://app.slack.com/client/TXXXXXXX/CXXXXXXX` it is the string beginning with T.",
-				Required:            true,
+				Optional:            true,
 			},
 		},
-		MarkdownDescription: `Creates a Slack Alert`,
+		MarkdownDescription: `Links a Slack message being send to a particular channel or workspace based on actions made against a workflow.`,
 	}
 }
 

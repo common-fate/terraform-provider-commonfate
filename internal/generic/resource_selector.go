@@ -78,7 +78,7 @@ func (r *SelectorResource) Configure(_ context.Context, req resource.ConfigureRe
 func (r *SelectorResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 
 	resp.Schema = schema.Schema{
-		Description: "Access Selectors select resources matching a criteria specified in the 'when' parameter. Resources matching this criteria can be made available for Access Worfklows.",
+		Description: "Access Selectors select resources matching a criteria specified in the 'when' parameter. Resources matching this criteria can be made available for Access Worklows.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				MarkdownDescription: "The ID of the selector",

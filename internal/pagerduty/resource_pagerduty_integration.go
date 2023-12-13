@@ -65,7 +65,7 @@ func (r *PagerDutyIntegrationResource) Configure(_ context.Context, req resource
 func (r *PagerDutyIntegrationResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 
 	resp.Schema = schema.Schema{
-		Description: `Registers a PagerDuty integration`,
+		Description: `Registers a PagerDuty integration. PagerDuty itegrations are required if you want to create access policies based on on-call users.`,
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				MarkdownDescription: "The internal Common Fate ID",

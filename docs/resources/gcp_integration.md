@@ -35,8 +35,8 @@ resource "commonfate_gcp_integration" "demo" {
 
 ### Optional
 
-- `service_account_credentials_secret_path` (String) Path to secret for Service account credentials
-- `workload_identity_config` (String) GCP Workload Identity Config as a JSON string
+- `reader_service_account_credentials_secret_path` (String) Path to secret for Service account credentials
+- `reader_workload_identity_config` (String) GCP Workload Identity Config as a JSON string. If you don't know where to find this, check out our documentation [here](https://enterprise.docs.commonfate.io/deploy)
 
 ### Read-Only
 
