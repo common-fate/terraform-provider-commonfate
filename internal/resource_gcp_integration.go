@@ -20,8 +20,8 @@ import (
 type GCPIntegrationModel struct {
 	Id                                  types.String `tfsdk:"id"`
 	Name                                types.String `tfsdk:"name"`
-	WorkloadIdentityConfig              types.String `tfsdk:"workload_identity_config"`
-	ServiceAccountCredentialsSecretPath types.String `tfsdk:"service_account_credentials_secret_path"`
+	WorkloadIdentityConfig              types.String `tfsdk:"reader_workload_identity_config"`
+	ServiceAccountCredentialsSecretPath types.String `tfsdk:"reader_service_account_credentials_secret_path"`
 	OrganizationID                      types.String `tfsdk:"organization_id"`
 	GoogleWorkspaceCustomerID           types.String `tfsdk:"google_workspace_customer_id"`
 }
@@ -79,11 +79,11 @@ func (r *GCPIntegrationResource) Schema(ctx context.Context, req resource.Schema
 				MarkdownDescription: "The name of the integration: use a short label which is descriptive of the organization you're connecting to",
 				Required:            true,
 			},
-			"workload_identity_config": schema.StringAttribute{
+			"reader_workload_identity_config": schema.StringAttribute{
 				MarkdownDescription: "GCP Workload Identity Config as a JSON string",
 				Optional:            true,
 			},
-			"service_account_credentials_secret_path": schema.StringAttribute{
+			"reader_service_account_credentials_secret_path": schema.StringAttribute{
 				MarkdownDescription: "Path to secret for Service account credentials",
 				Optional:            true,
 			},
@@ -126,12 +126,14 @@ func (r *GCPIntegrationResource) Create(ctx context.Context, req resource.Create
 
 	res, err := r.client.CreateIntegration(ctx, connect.NewRequest(&integrationv1alpha1.CreateIntegrationRequest{
 		Name: data.Name.ValueString(),
-		Integration: &integrationv1alpha1.CreateIntegrationRequest_Gcp{
-			Gcp: &integrationv1alpha1.GCP{
-				WorkloadIdentityConfig:              data.WorkloadIdentityConfig.ValueString(),
-				ServiceAccountCredentialsSecretPath: data.ServiceAccountCredentialsSecretPath.ValueString(),
-				OrganizationId:                      data.OrganizationID.ValueString(),
-				GoogleWorkspaceCustomerId:           data.GoogleWorkspaceCustomerID.ValueString(),
+		Config: &integrationv1alpha1.Config{
+			Config: &integrationv1alpha1.Config_Gcp{
+				Gcp: &integrationv1alpha1.GCP{
+					ReaderWorkloadIdentityConfig:              data.WorkloadIdentityConfig.ValueString(),
+					ReaderServiceAccountCredentialsSecretPath: data.ServiceAccountCredentialsSecretPath.ValueString(),
+					OrganizationId:                            data.OrganizationID.ValueString(),
+					GoogleWorkspaceCustomerId:                 data.GoogleWorkspaceCustomerID.ValueString(),
+				},
 			},
 		},
 	}))
@@ -146,9 +148,9 @@ func (r *GCPIntegrationResource) Create(ctx context.Context, req resource.Create
 		return
 	}
 
-	diagsToTerraform(res.Msg.Diagnostics, &resp.Diagnostics)
+	diagsToTerraform(res.Msg.Integration.Diagnostics, &resp.Diagnostics)
 
-	data.Id = types.StringValue(res.Msg.Id)
+	data.Id = types.StringValue(res.Msg.Integration.Id)
 
 	// Save data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -170,7 +172,7 @@ func (r *GCPIntegrationResource) Read(ctx context.Context, req resource.ReadRequ
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
 
 	//read the state from the client
-	res, err := r.client.GetGCPIntegration(ctx, connect.NewRequest(&integrationv1alpha1.GetGCPIntegrationRequest{
+	res, err := r.client.GetIntegration(ctx, connect.NewRequest(&integrationv1alpha1.GetIntegrationRequest{
 		Id: state.Id.ValueString(),
 	}))
 
@@ -182,13 +184,22 @@ func (r *GCPIntegrationResource) Read(ctx context.Context, req resource.ReadRequ
 		return
 	}
 
+	integ := res.Msg.Integration.Config.GetGcp()
+	if integ == nil {
+		resp.Diagnostics.AddError(
+			"Returned integration did not contain any GCP configuration",
+			"",
+		)
+		return
+	}
+
 	state = GCPIntegrationModel{
 		Id:                                  types.StringValue(state.Id.ValueString()),
-		Name:                                types.StringValue(res.Msg.Name),
-		WorkloadIdentityConfig:              types.StringValue(res.Msg.Gcp.WorkloadIdentityConfig),
-		ServiceAccountCredentialsSecretPath: types.StringValue(res.Msg.Gcp.ServiceAccountCredentialsSecretPath),
-		OrganizationID:                      types.StringValue(res.Msg.Gcp.OrganizationId),
-		GoogleWorkspaceCustomerID:           types.StringValue(res.Msg.Gcp.GoogleWorkspaceCustomerId),
+		Name:                                types.StringValue(res.Msg.Integration.Name),
+		WorkloadIdentityConfig:              types.StringValue(integ.ReaderWorkloadIdentityConfig),
+		ServiceAccountCredentialsSecretPath: types.StringValue(integ.ReaderServiceAccountCredentialsSecretPath),
+		OrganizationID:                      types.StringValue(integ.OrganizationId),
+		GoogleWorkspaceCustomerID:           types.StringValue(integ.GoogleWorkspaceCustomerId),
 	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
@@ -215,14 +226,18 @@ func (r *GCPIntegrationResource) Update(ctx context.Context, req resource.Update
 	}
 
 	res, err := r.client.UpdateIntegration(ctx, connect.NewRequest(&integrationv1alpha1.UpdateIntegrationRequest{
-		Id:   data.Id.ValueString(),
-		Name: data.Name.ValueString(),
-		Integration: &integrationv1alpha1.UpdateIntegrationRequest_Gcp{
-			Gcp: &integrationv1alpha1.GCP{
-				WorkloadIdentityConfig:              data.WorkloadIdentityConfig.ValueString(),
-				ServiceAccountCredentialsSecretPath: data.ServiceAccountCredentialsSecretPath.ValueString(),
-				OrganizationId:                      data.OrganizationID.ValueString(),
-				GoogleWorkspaceCustomerId:           data.GoogleWorkspaceCustomerID.ValueString(),
+		Integration: &integrationv1alpha1.Integration{
+			Id:   data.Id.ValueString(),
+			Name: data.Name.ValueString(),
+			Config: &integrationv1alpha1.Config{
+				Config: &integrationv1alpha1.Config_Gcp{
+					Gcp: &integrationv1alpha1.GCP{
+						ReaderWorkloadIdentityConfig:              data.WorkloadIdentityConfig.ValueString(),
+						ReaderServiceAccountCredentialsSecretPath: data.ServiceAccountCredentialsSecretPath.ValueString(),
+						OrganizationId:                            data.OrganizationID.ValueString(),
+						GoogleWorkspaceCustomerId:                 data.GoogleWorkspaceCustomerID.ValueString(),
+					},
+				},
 			},
 		},
 	}))
@@ -238,9 +253,9 @@ func (r *GCPIntegrationResource) Update(ctx context.Context, req resource.Update
 		return
 	}
 
-	diagsToTerraform(res.Msg.Diagnostics, &resp.Diagnostics)
+	diagsToTerraform(res.Msg.Integration.Diagnostics, &resp.Diagnostics)
 
-	data.Id = types.StringValue(res.Msg.Id)
+	data.Id = types.StringValue(res.Msg.Integration.Id)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
