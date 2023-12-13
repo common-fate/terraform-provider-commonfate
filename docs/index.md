@@ -11,7 +11,6 @@ Manage things like identitity, creating access policies and just-in-time (JIT) a
 
 To get your provider set up you will need some essential variables, these are:
 - Deployment API URL
-- Deployment Authz URL
 - OIDC Client ID
 - OIDC Client Secret
 - OIDC Issuer
@@ -21,7 +20,6 @@ For more information on how to find these variables checkout our official docume
 
 
 ## Example Usage
-- This example is a basic Common Fate setup with integrations with GCP, PagerDuty, and Slack.
 
 ```terraform
 terraform {
@@ -35,8 +33,7 @@ terraform {
 
 
 provider "commonfate" {
-  authz_url          = "https://acme-web-app-client.auth.ap-southeast-2.amazoncognito.com"
-  api_url            = "http://acme.dev.io"
+  api_url            = "http://commonfate.example.com"
   oidc_client_id     = "349dfdfkljwerpoizxckf3fds345xcvv"
   oidc_issuer        = "https://cognito-idp.ap-southeast-2.amazonaws.com/ap-southeast-2_jieDxjtS"
 }
