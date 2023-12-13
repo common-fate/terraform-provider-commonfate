@@ -68,7 +68,7 @@ func (r *AccessWorkflowResource) Configure(_ context.Context, req resource.Confi
 func (r *AccessWorkflowResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 
 	resp.Schema = schema.Schema{
-		Description: `Approval Workflows are used to describe where to send Approval messages to.
+		Description: `Access Workflows are used to describe how long access should be applied. Created Workflows can be referenced in other resources created.
 `,
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
@@ -95,7 +95,7 @@ func (r *AccessWorkflowResource) Schema(ctx context.Context, req resource.Schema
 				Optional:            true,
 			},
 		},
-		MarkdownDescription: `Create`,
+		MarkdownDescription: `Access Workflows are used to describe how long access should be applied. Created Workflows can be referenced in other resources created.`,
 	}
 }
 

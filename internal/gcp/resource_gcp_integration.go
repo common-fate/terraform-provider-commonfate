@@ -81,7 +81,7 @@ func (r *GCPIntegrationResource) Schema(ctx context.Context, req resource.Schema
 				Required:            true,
 			},
 			"reader_workload_identity_config": schema.StringAttribute{
-				MarkdownDescription: "GCP Workload Identity Config as a JSON string",
+				MarkdownDescription: "GCP Workload Identity Config as a JSON string. If you don't know where to find this, check out our documentation [here](https://enterprise.docs.commonfate.io/deploy)",
 				Optional:            true,
 			},
 			"reader_service_account_credentials_secret_path": schema.StringAttribute{
