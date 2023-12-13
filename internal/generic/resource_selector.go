@@ -1,4 +1,4 @@
-package internal
+package generic
 
 import (
 	"context"
@@ -9,50 +9,52 @@ import (
 	configv1alpha1 "github.com/common-fate/sdk/gen/commonfate/control/config/v1alpha1"
 	entityv1alpha1 "github.com/common-fate/sdk/gen/commonfate/entity/v1alpha1"
 	"github.com/common-fate/sdk/service/control/configsvc"
+	"github.com/common-fate/terraform-provider-commonfate/internal/helpers"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-type GCPProjectSelector struct {
-	ID    types.String `tfsdk:"id"`
-	Name  types.String `tfsdk:"name"`
-	OrgID types.String `tfsdk:"gcp_organization_id"`
-	When  types.String `tfsdk:"when"`
+type Selector struct {
+	ID           types.String `tfsdk:"id"`
+	Name         types.String `tfsdk:"name"`
+	ResourceType types.String `tfsdk:"resource_type"`
+	BelongingTo  helpers.EID  `tfsdk:"belonging_to"`
+	When         types.String `tfsdk:"when"`
 }
 
-func (s GCPProjectSelector) ToAPI() *configv1alpha1.Selector {
+func (s Selector) ToAPI() *configv1alpha1.Selector {
 	return &configv1alpha1.Selector{
 		Id:           s.ID.ValueString(),
 		Name:         s.Name.ValueString(),
-		ResourceType: "GCP::Project",
+		ResourceType: s.ResourceType.ValueString(),
 		BelongingTo: &entityv1alpha1.EID{
-			Type: "GCP::Organization",
-			Id:   s.OrgID.ValueString(),
+			Type: s.BelongingTo.Type.ValueString(),
+			Id:   s.BelongingTo.ID.ValueString(),
 		},
 		When: s.When.ValueString(),
 	}
 }
 
 // AccessRuleResource is the data source implementation.
-type GCPProjectSelectorResource struct {
+type SelectorResource struct {
 	client *configsvc.Client
 }
 
 var (
-	_ resource.Resource                = &GCPProjectSelectorResource{}
-	_ resource.ResourceWithConfigure   = &GCPProjectSelectorResource{}
-	_ resource.ResourceWithImportState = &GCPProjectSelectorResource{}
+	_ resource.Resource                = &SelectorResource{}
+	_ resource.ResourceWithConfigure   = &SelectorResource{}
+	_ resource.ResourceWithImportState = &SelectorResource{}
 )
 
 // Metadata returns the data source type name.
-func (r *GCPProjectSelectorResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_gcp_project_selector"
+func (r *SelectorResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_selector"
 }
 
 // Configure adds the provider configured client to the data source.
-func (r *GCPProjectSelectorResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *SelectorResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -73,10 +75,10 @@ func (r *GCPProjectSelectorResource) Configure(_ context.Context, req resource.C
 
 // GetSchema defines the schema for the data source.
 // schema is based off the governance api
-func (r *GCPProjectSelectorResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *SelectorResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 
 	resp.Schema = schema.Schema{
-		Description: "A Selector to match GCP projects with a criteria based on the 'when' field.",
+		Description: "Access Selectors select resources matching a criteria specified in the 'when' parameter. Resources matching this criteria can be made available for Access Worklows.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				MarkdownDescription: "The ID of the selector",
@@ -88,21 +90,37 @@ func (r *GCPProjectSelectorResource) Schema(ctx context.Context, req resource.Sc
 				Optional:            true,
 			},
 
-			"gcp_organization_id": schema.StringAttribute{
-				MarkdownDescription: "The GCP organization ID",
+			"resource_type": schema.StringAttribute{
+				MarkdownDescription: "The type of resource that the selector will query for",
 				Required:            true,
+			},
+
+			"belonging_to": schema.SingleNestedAttribute{
+				MarkdownDescription: "The overall parent that the selected resources must be a descendent of",
+				Required:            true,
+
+				Attributes: map[string]schema.Attribute{
+					"type": schema.StringAttribute{
+						Required:            true,
+						MarkdownDescription: "The entity type",
+					},
+					"id": schema.StringAttribute{
+						Required:            true,
+						MarkdownDescription: "The entity ID",
+					},
+				},
 			},
 
 			"when": schema.StringAttribute{
-				MarkdownDescription: "A Cedar expression with the criteria to match projects on, e.g: `resource.tag_keys contains \"production\" && resource in GCP::Folder::\"folders/342982723\"`",
+				MarkdownDescription: "A Cedar expression to use to match resources. For example: `resource in AWS::OrgUnit::\"ou-123\"` or `resource.tag_keys contains \"prod\"",
 				Required:            true,
 			},
 		},
-		MarkdownDescription: `A Selector to match GCP projects with a criteria based on the 'when' field.`,
+		MarkdownDescription: `Access Selectors select resources matching a criteria specified in the 'when' parameter. Resources matching this criteria can be made available for Access Worfklows.`,
 	}
 }
 
-func (r *GCPProjectSelectorResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+func (r *SelectorResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 
 	if r.client == nil {
 		resp.Diagnostics.AddError(
@@ -112,7 +130,7 @@ func (r *GCPProjectSelectorResource) Create(ctx context.Context, req resource.Cr
 
 		return
 	}
-	var data *GCPProjectSelector
+	var data *Selector
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -141,7 +159,7 @@ func (r *GCPProjectSelectorResource) Create(ctx context.Context, req resource.Cr
 		return
 	}
 
-	diagsToTerraform(res.Msg.Diagnostics, &resp.Diagnostics)
+	helpers.DiagsToTerraform(res.Msg.Diagnostics, &resp.Diagnostics)
 
 	// Convert from the API data model to the Terraform data model
 	// and set any unknown attribute values.
@@ -152,7 +170,7 @@ func (r *GCPProjectSelectorResource) Create(ctx context.Context, req resource.Cr
 }
 
 // Read refreshes the Terraform state with the latest data.
-func (r *GCPProjectSelectorResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+func (r *SelectorResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	if r.client == nil {
 		resp.Diagnostics.AddError(
 			"Unconfigured HTTP Client",
@@ -161,7 +179,7 @@ func (r *GCPProjectSelectorResource) Read(ctx context.Context, req resource.Read
 
 		return
 	}
-	var state GCPProjectSelector
+	var state Selector
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
@@ -183,20 +201,22 @@ func (r *GCPProjectSelectorResource) Read(ctx context.Context, req resource.Read
 	}
 
 	state.Name = types.StringValue(res.Msg.Selector.Name)
-	state.OrgID = types.StringValue(res.Msg.Selector.BelongingTo.Id)
+	state.ResourceType = types.StringValue(res.Msg.Selector.ResourceType)
+	state.BelongingTo.ID = types.StringValue(res.Msg.Selector.BelongingTo.Id)
+	state.BelongingTo.Type = types.StringValue(res.Msg.Selector.BelongingTo.Type)
 	state.When = types.StringValue(res.Msg.Selector.When)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }
 
-func (r *GCPProjectSelectorResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *SelectorResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	if r.client == nil {
 		resp.Diagnostics.AddError(
 			"Unconfigured HTTP Client",
 			"Expected configured HTTP client. Please report this issue to the provider developers.",
 		)
 	}
-	var data GCPProjectSelector
+	var data Selector
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -223,7 +243,7 @@ func (r *GCPProjectSelectorResource) Update(ctx context.Context, req resource.Up
 		return
 	}
 
-	diagsToTerraform(res.Msg.Diagnostics, &resp.Diagnostics)
+	helpers.DiagsToTerraform(res.Msg.Diagnostics, &resp.Diagnostics)
 
 	// Convert from the API data model to the Terraform data model
 	// and set any unknown attribute values.
@@ -232,14 +252,14 @@ func (r *GCPProjectSelectorResource) Update(ctx context.Context, req resource.Up
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *GCPProjectSelectorResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+func (r *SelectorResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	if r.client == nil {
 		resp.Diagnostics.AddError(
 			"Unconfigured HTTP Client",
 			"Expected configured HTTP client. Please report this issue to the provider developers.",
 		)
 	}
-	var data *GCPProjectSelector
+	var data *Selector
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -268,7 +288,7 @@ func (r *GCPProjectSelectorResource) Delete(ctx context.Context, req resource.De
 	}
 }
 
-func (r *GCPProjectSelectorResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *SelectorResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	// Retrieve import ID and save to id attribute
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }

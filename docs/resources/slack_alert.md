@@ -2,12 +2,12 @@
 page_title: "commonfate_slack_alert Resource - commonfate"
 subcategory: ""
 description: |-
-  Creates a Slack Alert
+  Links a Slack message being send to a particular channel or workspace based on actions made against a workflow.
 ---
 
 # commonfate_slack_alert (Resource)
 
-Creates a Slack Alert
+Links a Slack message being send to a particular channel or workspace based on actions made against a workflow.
 
 
 
@@ -15,10 +15,10 @@ Creates a Slack Alert
 
 ```terraform
 resource "commonfate-slack_alert" "demo" {
-  id="demo"
-  workflow_id="wrk_123"
-  slack_channel_id="demo"
-  slack_workspace_id="123"
+  id                 = "demo"
+  workflow_id        = "wrk_123"
+  slack_channel_id   = "demo"
+  slack_workspace_id = "123"
 }
 ```
 
@@ -29,8 +29,11 @@ resource "commonfate-slack_alert" "demo" {
 ### Required
 
 - `slack_channel_id` (String) If Slack is connected, it will send notifications to this slack channel. Must be the ID of the channel and not the name. See below on how to find this ID.
-- `slack_workspace_id` (String) The Slack Workspace ID. In Slack URLs, such as `https://app.slack.com/client/TXXXXXXX/CXXXXXXX` it is the string beginning with T.
 - `workflow_id` (String) The Access Workflow ID.
+
+### Optional
+
+- `slack_workspace_id` (String) The Slack Workspace ID. In Slack URLs, such as `https://app.slack.com/client/TXXXXXXX/CXXXXXXX` it is the string beginning with T.
 
 ### Read-Only
 

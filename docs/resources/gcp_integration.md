@@ -15,11 +15,8 @@ Registers an integration with Google Cloud
 
 ```terraform
 resource "commonfate_gcp_integration" "demo" {
-  
-  name="demo"
-  workload_identity_config=<<EOH
-  {}
-  EOH
+  name                     = "demo"
+  workload_identity_config = jsonencode({}) # include your Workload Identity Federation config here
 }
 ```
 
@@ -29,8 +26,14 @@ resource "commonfate_gcp_integration" "demo" {
 
 ### Required
 
+- `google_workspace_customer_id` (String) The Google Workspace Customer ID
 - `name` (String) The name of the integration: use a short label which is descriptive of the organization you're connecting to
-- `workload_identity_config` (String) GCP Workload Identity Config as a JSON string
+- `organization_id` (String) GCP organization ID
+
+### Optional
+
+- `reader_service_account_credentials_secret_path` (String) Path to secret for Service account credentials
+- `reader_workload_identity_config` (String) GCP Workload Identity Config as a JSON string. If you don't know where to find this, check out our documentation [here](https://enterprise.docs.commonfate.io/deploy)
 
 ### Read-Only
 

@@ -1,4 +1,4 @@
-package internal
+package helpers
 
 import (
 	entityv1alpha1 "github.com/common-fate/sdk/gen/commonfate/entity/v1alpha1"
@@ -29,7 +29,7 @@ func (u EID) ToAPI() *entityv1alpha1.EID {
 	}
 }
 
-func uidFromAPI(input *entityv1alpha1.EID) EID {
+func UidFromAPI(input *entityv1alpha1.EID) EID {
 	if input == nil {
 		return EID{}
 	}
@@ -40,7 +40,7 @@ func uidFromAPI(input *entityv1alpha1.EID) EID {
 	}
 }
 
-func uidPtrFromAPI(input *entityv1alpha1.EID) *EID {
+func UidPtrFromAPI(input *entityv1alpha1.EID) *EID {
 	if input == nil {
 		return nil
 	}

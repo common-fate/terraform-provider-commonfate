@@ -2,12 +2,12 @@
 page_title: "commonfate_access_workflow Resource - commonfate"
 subcategory: ""
 description: |-
-  Create
+  Access Workflows are used to describe how long access should be applied. Created Workflows can be referenced in other resources created.
 ---
 
 # commonfate_access_workflow (Resource)
 
-Create
+Access Workflows are used to describe how long access should be applied. Created Workflows can be referenced in other resources created.
 
 
 
@@ -15,11 +15,10 @@ Create
 
 ```terraform
 resource "commonfate-access_workflow" "workflow-demo" {
-  
-  name="demo"
-  access_duration="2h"
-  try_extend_after="5m"
-  priority="100"
+  name                     = "demo"
+  access_duration_seconds  = 60 * 60
+  try_extend_after_seconds = 10 * 60
+  priority                 = "100"
 }
 ```
 
@@ -29,8 +28,8 @@ resource "commonfate-access_workflow" "workflow-demo" {
 
 ### Required
 
-- `access_duration` (String) The duration of the access workflow.
-- `try_extend_after` (String) The amount of time after access is activated that extending access can be attempted. As a starting point we recommend setting this to half of the `access_duration`.
+- `access_duration_seconds` (Number) The duration of the access workflow.
+- `try_extend_after_seconds` (Number) The amount of time after access is activated that extending access can be attempted. As a starting point we recommend setting this to half of the `access_duration_seconds`.
 
 ### Optional
 
