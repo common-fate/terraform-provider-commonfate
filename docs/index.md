@@ -4,12 +4,13 @@ description: |-
   The Common Fate provider is used to configure and manage access to your cloud.
 ---
 
-The Common Fate provider is used to configure and customize your Common Fate deployment. 
+The Common Fate provider is used to configure and customize your Common Fate deployment.
 Manage things like identitity, creating access policies and just-in-time (JIT) access workflows for permission to resources ranging across all cloud providers.
 
 ## Configuration
 
 To get your provider set up you will need some essential variables, these are:
+
 - Deployment API URL
 - OIDC Client ID
 - OIDC Client Secret
@@ -17,7 +18,6 @@ To get your provider set up you will need some essential variables, these are:
 
 All of these can be sourced from your Common Fate's deployment Terraform outputs.
 For more information on how to find these variables checkout our official documentation [here](https://enterprise.docs.commonfate.io/deploy)
-
 
 ## Example Usage
 
@@ -45,7 +45,6 @@ resource "commonfate_gcp_integration" "demo" {
   reader_service_account_credentials_secret_path=""
   organization_id=""
   google_workspace_customer_id=""
-
 }
 
 resource "commonfate_access_workflow" "demo" {
@@ -58,30 +57,27 @@ resource "commonfate_access_workflow" "demo" {
 resource "commonfate_gcp_project_selector" "demo" {
   name="demo"
   gcp_organization_id="organization/29034834894"
-  when = <<EOF`
+  when = <<EOF
   resource.tag_keys contains "production" && resource in GCP::Folder::"folders/342982723"
- EOF
-  
+  EOF
+
 }
 
 resource "commonfate_gcp_project_availabilities" "demo" {
   workflow_id=var.commonfate_access_workflow.demo.id
-  role= {
-    type="GCP::Role"
-    id="roles/owner"
-  }
-  gcp_project_selector_id=var.commonfate_gcp_project_selector.demo.id
-  google_workspace_customer_id="34dFHJ3H4H"
+  role = "roles/owner"
+  gcp_project_selector_id = var.commonfate_gcp_project_selector.demo.id
+  google_workspace_customer_id = "34dFHJ3H4H"
 }
 
 resource "commonfate_policyset" "demo" {
-  id="demo"
-  text=<<EOH
+  id = "demo"
+  text = <<EOH
     permit(
-      principal == User::"jane@acme.com",
+      principal,
       action == Access::Action::"Request",
-      resource == GCP::Project::"dev"
-    )
+      resource
+    );
     EOH
 }
 
@@ -102,6 +98,5 @@ resource "commonfate_slack_alert" "demo" {
   workflow_id=var.commonfate_access_workflow.demo.id
   slack_channel_id="C2044RFJMWMS"
 }
-
 ```
 

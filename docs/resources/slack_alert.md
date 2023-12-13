@@ -15,10 +15,10 @@ Links a Slack message being send to a particular channel or workspace based on a
 
 ```terraform
 resource "commonfate-slack_alert" "demo" {
-  id="demo"
-  workflow_id="wrk_123"
-  slack_channel_id="demo"
-  slack_workspace_id="123"
+  id                 = "demo"
+  workflow_id        = "wrk_123"
+  slack_channel_id   = "demo"
+  slack_workspace_id = "123"
 }
 ```
 
