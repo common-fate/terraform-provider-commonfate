@@ -135,8 +135,8 @@ func (r *WebhookProvisionerResource) Create(ctx context.Context, req resource.Cr
 
 	for _, c := range data.Capabilities {
 		capabilities = append(capabilities, &configv1alpha1.Capability{
-			TargetType:  c.TargetType.String(),
-			RoleType:    c.RoleType.String(),
+			TargetType:  c.TargetType.ValueString(),
+			RoleType:    c.RoleType.ValueString(),
 			BelongingTo: c.BelongingTo.ToAPI(),
 		})
 	}
@@ -222,8 +222,8 @@ func (r *WebhookProvisionerResource) Update(ctx context.Context, req resource.Up
 
 	for _, c := range data.Capabilities {
 		capabilities = append(capabilities, &configv1alpha1.Capability{
-			TargetType:  c.TargetType.String(),
-			RoleType:    c.RoleType.String(),
+			TargetType:  c.TargetType.ValueString(),
+			RoleType:    c.RoleType.ValueString(),
 			BelongingTo: c.BelongingTo.ToAPI(),
 		})
 	}
