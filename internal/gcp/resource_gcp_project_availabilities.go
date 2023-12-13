@@ -1,4 +1,4 @@
-package internal
+package gcp
 
 import (
 	"context"

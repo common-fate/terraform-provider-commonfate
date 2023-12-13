@@ -1,4 +1,4 @@
-package internal
+package pagerduty
 
 import (
 	"context"
@@ -9,6 +9,7 @@ import (
 	integrationv1alpha1 "github.com/common-fate/sdk/gen/commonfate/control/integration/v1alpha1"
 	"github.com/common-fate/sdk/gen/commonfate/control/integration/v1alpha1/integrationv1alpha1connect"
 	"github.com/common-fate/sdk/service/control/integration"
+	"github.com/common-fate/terraform-provider-commonfate/internal/helpers"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -17,31 +18,30 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-type SlackIntegrationModel struct {
-	Id                      types.String `tfsdk:"id"`
-	Name                    types.String `tfsdk:"name"`
-	ClientID                types.String `tfsdk:"client_id"`
-	ClientSecretSecretPath  types.String `tfsdk:"client_secret_secret_path"`
-	SigningSecretSecretPath types.String `tfsdk:"signing_secret_secret_path"`
+type PagerDutyIntegrationModel struct {
+	Id                     types.String `tfsdk:"id"`
+	Name                   types.String `tfsdk:"name"`
+	ClientID               types.String `tfsdk:"client_id"`
+	ClientSecretSecretPath types.String `tfsdk:"client_secret_secret_path"`
 }
 
-type SlackIntegrationResource struct {
+type PagerDutyIntegrationResource struct {
 	client integrationv1alpha1connect.IntegrationServiceClient
 }
 
 var (
-	_ resource.Resource                = &SlackIntegrationResource{}
-	_ resource.ResourceWithConfigure   = &SlackIntegrationResource{}
-	_ resource.ResourceWithImportState = &SlackIntegrationResource{}
+	_ resource.Resource                = &PagerDutyIntegrationResource{}
+	_ resource.ResourceWithConfigure   = &PagerDutyIntegrationResource{}
+	_ resource.ResourceWithImportState = &PagerDutyIntegrationResource{}
 )
 
 // Metadata returns the data source type name.
-func (r *SlackIntegrationResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_slack_integration"
+func (r *PagerDutyIntegrationResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_pagerduty_integration"
 }
 
 // Configure adds the provider configured client to the data source.
-func (r *SlackIntegrationResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *PagerDutyIntegrationResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -62,10 +62,10 @@ func (r *SlackIntegrationResource) Configure(_ context.Context, req resource.Con
 
 // GetSchema defines the schema for the data source.
 // schema is based off the governance api
-func (r *SlackIntegrationResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *PagerDutyIntegrationResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 
 	resp.Schema = schema.Schema{
-		Description: `Registers a Slack integration`,
+		Description: `Registers a PagerDuty integration`,
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				MarkdownDescription: "The internal Common Fate ID",
@@ -79,23 +79,19 @@ func (r *SlackIntegrationResource) Schema(ctx context.Context, req resource.Sche
 				Required:            true,
 			},
 			"client_id": schema.StringAttribute{
-				MarkdownDescription: "The Slack application Client ID",
+				MarkdownDescription: "The PagerDuty application Client ID",
 				Required:            true,
 			},
 			"client_secret_secret_path": schema.StringAttribute{
 				MarkdownDescription: "Path to secret for Client Secret",
 				Required:            true,
 			},
-			"signing_secret_secret_path": schema.StringAttribute{
-				MarkdownDescription: "Path to secret for Signing Secret",
-				Required:            true,
-			},
 		},
-		MarkdownDescription: `Registers a Slack integration`,
+		MarkdownDescription: `Registers a PagerDuty integration`,
 	}
 }
 
-func (r *SlackIntegrationResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+func (r *PagerDutyIntegrationResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	if r.client == nil {
 		resp.Diagnostics.AddError(
 			"Unconfigured HTTP Client",
@@ -104,7 +100,7 @@ func (r *SlackIntegrationResource) Create(ctx context.Context, req resource.Crea
 
 		return
 	}
-	var data *SlackIntegrationModel
+	var data *PagerDutyIntegrationModel
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -121,18 +117,17 @@ func (r *SlackIntegrationResource) Create(ctx context.Context, req resource.Crea
 	res, err := r.client.CreateIntegration(ctx, connect.NewRequest(&integrationv1alpha1.CreateIntegrationRequest{
 		Name: data.Name.ValueString(),
 		Config: &integrationv1alpha1.Config{
-			Config: &integrationv1alpha1.Config_Slack{
-				Slack: &integrationv1alpha1.Slack{
-					ClientId:                data.ClientID.ValueString(),
-					ClientSecretSecretPath:  data.ClientSecretSecretPath.ValueString(),
-					SigningSecretSecretPath: data.SigningSecretSecretPath.ValueString(),
+			Config: &integrationv1alpha1.Config_Pagerduty{
+				Pagerduty: &integrationv1alpha1.PagerDuty{
+					ClientId:               data.ClientID.ValueString(),
+					ClientSecretSecretPath: data.ClientSecretSecretPath.ValueString(),
 				},
 			},
 		},
 	}))
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to Create Resource: Slack Integration",
+			"Unable to Create Resource: PagerDuty Integration",
 			"An unexpected error occurred while communicating with Common Fate API. "+
 				"Please report this issue to the provider developers.\n\n"+
 				"JSON Error: "+err.Error(),
@@ -141,7 +136,7 @@ func (r *SlackIntegrationResource) Create(ctx context.Context, req resource.Crea
 		return
 	}
 
-	diagsToTerraform(res.Msg.Integration.Diagnostics, &resp.Diagnostics)
+	helpers.DiagsToTerraform(res.Msg.Integration.Diagnostics, &resp.Diagnostics)
 
 	data.Id = types.StringValue(res.Msg.Integration.Id)
 
@@ -150,7 +145,7 @@ func (r *SlackIntegrationResource) Create(ctx context.Context, req resource.Crea
 }
 
 // Read refreshes the Terraform state with the latest data.
-func (r *SlackIntegrationResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+func (r *PagerDutyIntegrationResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	if r.client == nil {
 		resp.Diagnostics.AddError(
 			"Unconfigured HTTP Client",
@@ -159,7 +154,7 @@ func (r *SlackIntegrationResource) Read(ctx context.Context, req resource.ReadRe
 
 		return
 	}
-	var state SlackIntegrationModel
+	var state PagerDutyIntegrationModel
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
@@ -171,46 +166,45 @@ func (r *SlackIntegrationResource) Read(ctx context.Context, req resource.ReadRe
 
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Failed to read Slack Integration",
+			"Failed to read PagerDuty Integration",
 			err.Error(),
 		)
 		return
 	}
 
-	integ := res.Msg.Integration.Config.GetSlack()
+	integ := res.Msg.Integration.Config.GetPagerduty()
 	if integ == nil {
 		resp.Diagnostics.AddError(
-			"Returned integration did not contain any Slack configuration",
+			"Returned integration did not contain any PagerDuty configuration",
 			"",
 		)
 		return
 	}
 
-	state = SlackIntegrationModel{
-		Id:                      types.StringValue(state.Id.ValueString()),
-		Name:                    types.StringValue(res.Msg.Integration.Name),
-		ClientID:                types.StringValue(integ.ClientId),
-		ClientSecretSecretPath:  types.StringValue(integ.ClientSecretSecretPath),
-		SigningSecretSecretPath: types.StringValue(integ.SigningSecretSecretPath),
+	state = PagerDutyIntegrationModel{
+		Id:                     types.StringValue(state.Id.ValueString()),
+		Name:                   types.StringValue(res.Msg.Integration.Name),
+		ClientID:               types.StringValue(integ.ClientId),
+		ClientSecretSecretPath: types.StringValue(integ.ClientSecretSecretPath),
 	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }
 
-func (r *SlackIntegrationResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *PagerDutyIntegrationResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	if r.client == nil {
 		resp.Diagnostics.AddError(
 			"Unconfigured HTTP Client",
 			"Expected configured HTTP client. Please report this issue to the provider developers.",
 		)
 	}
-	var data SlackIntegrationModel
+	var data PagerDutyIntegrationModel
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		resp.Diagnostics.AddError(
-			"Unable to update Slack Integration",
+			"Unable to update PagerDuty Integration",
 			"An unexpected error occurred while parsing the resource update response.",
 		)
 
@@ -222,11 +216,10 @@ func (r *SlackIntegrationResource) Update(ctx context.Context, req resource.Upda
 			Id:   data.Id.ValueString(),
 			Name: data.Name.ValueString(),
 			Config: &integrationv1alpha1.Config{
-				Config: &integrationv1alpha1.Config_Slack{
-					Slack: &integrationv1alpha1.Slack{
-						ClientId:                data.ClientID.ValueString(),
-						ClientSecretSecretPath:  data.ClientSecretSecretPath.ValueString(),
-						SigningSecretSecretPath: data.SigningSecretSecretPath.ValueString(),
+				Config: &integrationv1alpha1.Config_Pagerduty{
+					Pagerduty: &integrationv1alpha1.PagerDuty{
+						ClientId:               data.ClientID.ValueString(),
+						ClientSecretSecretPath: data.ClientSecretSecretPath.ValueString(),
 					},
 				},
 			},
@@ -235,7 +228,7 @@ func (r *SlackIntegrationResource) Update(ctx context.Context, req resource.Upda
 
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to Update Slack Integration",
+			"Unable to Update PagerDuty Integration",
 			"An unexpected error occurred while communicating with Common Fate API. "+
 				"Please report this issue to the provider developers.\n\n"+
 				"JSON Error: "+err.Error(),
@@ -244,27 +237,27 @@ func (r *SlackIntegrationResource) Update(ctx context.Context, req resource.Upda
 		return
 	}
 
-	diagsToTerraform(res.Msg.Integration.Diagnostics, &resp.Diagnostics)
+	helpers.DiagsToTerraform(res.Msg.Integration.Diagnostics, &resp.Diagnostics)
 
 	data.Id = types.StringValue(res.Msg.Integration.Id)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *SlackIntegrationResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+func (r *PagerDutyIntegrationResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	if r.client == nil {
 		resp.Diagnostics.AddError(
 			"Unconfigured HTTP Client",
 			"Expected configured HTTP client. Please report this issue to the provider developers.",
 		)
 	}
-	var data *SlackIntegrationModel
+	var data *PagerDutyIntegrationModel
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		resp.Diagnostics.AddError(
-			"Unable to delete Slack Integration",
+			"Unable to delete PagerDuty Integration",
 			"An unexpected error occurred while parsing the resource creation response.",
 		)
 
@@ -277,7 +270,7 @@ func (r *SlackIntegrationResource) Delete(ctx context.Context, req resource.Dele
 
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to delete Slack Integration",
+			"Unable to delete PagerDuty Integration",
 			"An unexpected error occurred while parsing the resource creation response. "+
 				"Please report this issue to the provider developers.\n\n"+
 				"JSON Error: "+err.Error(),
@@ -287,7 +280,7 @@ func (r *SlackIntegrationResource) Delete(ctx context.Context, req resource.Dele
 	}
 }
 
-func (r *SlackIntegrationResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *PagerDutyIntegrationResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	// Retrieve import ID and save to id attribute
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }

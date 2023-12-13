@@ -29,7 +29,13 @@ resource "commonfate_gcp_integration" "demo" {
 
 ### Required
 
+- `google_workspace_customer_id` (String) The Google Workspace Customer ID
 - `name` (String) The name of the integration: use a short label which is descriptive of the organization you're connecting to
+- `organization_id` (String) GCP organization ID
+
+### Optional
+
+- `service_account_credentials_secret_path` (String) Path to secret for Service account credentials
 - `workload_identity_config` (String) GCP Workload Identity Config as a JSON string
 
 ### Read-Only
