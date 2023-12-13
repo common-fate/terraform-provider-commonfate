@@ -79,7 +79,7 @@ resource "commonfate_policyset" "demo" {
   text=<<EOH
     permit(
       principal == User::"jane@acme.com",
-      action == Action::"GCP::AutoApproval::roles/owner",
+      action == Access::Action::"Request",
       resource == GCP::Project::"dev"
     )
     EOH
