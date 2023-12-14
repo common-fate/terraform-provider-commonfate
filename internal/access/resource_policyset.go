@@ -6,7 +6,6 @@ import (
 
 	config_client "github.com/common-fate/sdk/config"
 	"github.com/common-fate/sdk/service/authz/policyset"
-	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -22,9 +21,8 @@ type PolicySetResource struct {
 }
 
 var (
-	_ resource.Resource                = &PolicySetResource{}
-	_ resource.ResourceWithConfigure   = &PolicySetResource{}
-	_ resource.ResourceWithImportState = &PolicySetResource{}
+	_ resource.Resource              = &PolicySetResource{}
+	_ resource.ResourceWithConfigure = &PolicySetResource{}
 )
 
 // Metadata returns the data source type name.
@@ -147,6 +145,7 @@ func (r *PolicySetResource) Read(ctx context.Context, req resource.ReadRequest, 
 		return
 	}
 
+	state.ID = types.StringValue(got.PolicySet.ID)
 	state.Text = types.StringValue(got.PolicySet.Text)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
@@ -226,9 +225,4 @@ func (r *PolicySetResource) Delete(ctx context.Context, req resource.DeleteReque
 
 		return
 	}
-}
-
-func (r *PolicySetResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	// Retrieve import ID and save to id attribute
-	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
