@@ -18,11 +18,11 @@ import (
 )
 
 type AWSIDCAccountAvailabilities struct {
-	ID                types.String `tfsdk:"id"`
-	WorkflowID        types.String `tfsdk:"workflow_id"`
-	Role              types.String `tfsdk:"aws_permission_set"`
-	AccountSelectorID types.String `tfsdk:"aws_account_selector_id"`
-	AWSOrganizationID types.String `tfsdk:"aws_organization_id"`
+	ID                 types.String `tfsdk:"id"`
+	WorkflowID         types.String `tfsdk:"workflow_id"`
+	Role               types.String `tfsdk:"aws_permission_set"`
+	AccountSelectorID  types.String `tfsdk:"aws_account_selector_id"`
+	AWSIdentityStoreID types.String `tfsdk:"aws_identity_store_id"`
 }
 
 type AWSIDCAccountAvailabilitiesResource struct {
@@ -134,8 +134,8 @@ func (r *AWSIDCAccountAvailabilitiesResource) Create(ctx context.Context, req re
 			Id:   data.AccountSelectorID.ValueString(),
 		},
 		IdentityDomain: &entityv1alpha1.EID{
-			Type: "AWS::Organization",
-			Id:   data.AWSOrganizationID.ValueString(),
+			Type: "AWS::IDC::IdentityStore",
+			Id:   data.AWSIdentityStoreID.ValueString(),
 		},
 	}
 
@@ -197,7 +197,7 @@ func (r *AWSIDCAccountAvailabilitiesResource) Read(ctx context.Context, req reso
 	state.AccountSelectorID = types.StringValue(res.Msg.AvailabilitySpec.Target.Id)
 
 	if res.Msg.AvailabilitySpec.IdentityDomain != nil {
-		state.AWSOrganizationID = types.StringValue(res.Msg.AvailabilitySpec.IdentityDomain.Id)
+		state.AWSIdentityStoreID = types.StringValue(res.Msg.AvailabilitySpec.IdentityDomain.Id)
 	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
@@ -234,8 +234,8 @@ func (r *AWSIDCAccountAvailabilitiesResource) Update(ctx context.Context, req re
 			Id:   data.AccountSelectorID.ValueString(),
 		},
 		IdentityDomain: &entityv1alpha1.EID{
-			Type: "AWS::Organization",
-			Id:   data.AWSOrganizationID.ValueString(),
+			Type: "AWS::IDC::IdentityStore",
+			Id:   data.AWSIdentityStoreID.ValueString(),
 		},
 	}
 
