@@ -204,6 +204,7 @@ func (r *SelectorResource) Read(ctx context.Context, req resource.ReadRequest, r
 	state.BelongingTo.ID = types.StringValue(res.Msg.Selector.BelongingTo.Id)
 	state.BelongingTo.Type = types.StringValue(res.Msg.Selector.BelongingTo.Type)
 	state.When = types.StringValue(res.Msg.Selector.When)
+	state.ID = types.StringValue(res.Msg.Selector.Id)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }
