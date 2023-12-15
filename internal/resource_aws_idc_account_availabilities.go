@@ -20,9 +20,10 @@ import (
 type AWSIDCAccountAvailabilities struct {
 	ID                 types.String `tfsdk:"id"`
 	WorkflowID         types.String `tfsdk:"workflow_id"`
-	Role               types.String `tfsdk:"aws_permission_set"`
+	PermissionSetARN   types.String `tfsdk:"aws_permission_set_arn"`
 	AccountSelectorID  types.String `tfsdk:"aws_account_selector_id"`
 	AWSIdentityStoreID types.String `tfsdk:"aws_identity_store_id"`
+	AWSOrganizationID  types.String `tfsdk:"aws_organization_id"`
 }
 
 type AWSIDCAccountAvailabilitiesResource struct {
@@ -80,7 +81,7 @@ func (r *AWSIDCAccountAvailabilitiesResource) Schema(ctx context.Context, req re
 				Required:            true,
 			},
 
-			"aws_permission_set": schema.StringAttribute{
+			"aws_permission_set_arn": schema.StringAttribute{
 				MarkdownDescription: "The AWS Permission Set to make available",
 				Required:            true,
 			},
@@ -92,6 +93,10 @@ func (r *AWSIDCAccountAvailabilitiesResource) Schema(ctx context.Context, req re
 
 			"aws_organization_id": schema.StringAttribute{
 				MarkdownDescription: "The ID of the AWS Organization associated with the accounts",
+				Required:            true,
+			},
+			"aws_identity_store_id": schema.StringAttribute{
+				MarkdownDescription: "The IAM Identity Center identity store ID",
 				Required:            true,
 			},
 		},
@@ -126,7 +131,7 @@ func (r *AWSIDCAccountAvailabilitiesResource) Create(ctx context.Context, req re
 	input := &configv1alpha1.CreateAvailabilitySpecRequest{
 		Role: &entityv1alpha1.EID{
 			Type: "AWS::IDC::PermissionSet",
-			Id:   data.Role.ValueString(),
+			Id:   data.PermissionSetARN.ValueString(),
 		},
 		WorkflowId: data.WorkflowID.ValueString(),
 		Target: &entityv1alpha1.EID{
@@ -193,7 +198,7 @@ func (r *AWSIDCAccountAvailabilitiesResource) Read(ctx context.Context, req reso
 
 	state.ID = types.StringValue(res.Msg.AvailabilitySpec.Id)
 	state.WorkflowID = types.StringValue(res.Msg.AvailabilitySpec.WorkflowId)
-	state.Role = types.StringValue(res.Msg.AvailabilitySpec.Role.Id)
+	state.PermissionSetARN = types.StringValue(res.Msg.AvailabilitySpec.Role.Id)
 	state.AccountSelectorID = types.StringValue(res.Msg.AvailabilitySpec.Target.Id)
 
 	if res.Msg.AvailabilitySpec.IdentityDomain != nil {
@@ -226,7 +231,7 @@ func (r *AWSIDCAccountAvailabilitiesResource) Update(ctx context.Context, req re
 	input := &configv1alpha1.AvailabilitySpec{
 		Role: &entityv1alpha1.EID{
 			Type: "AWS::IDC::PermissionSet",
-			Id:   data.Role.ValueString(),
+			Id:   data.PermissionSetARN.ValueString(),
 		},
 		WorkflowId: data.WorkflowID.ValueString(),
 		Target: &entityv1alpha1.EID{
