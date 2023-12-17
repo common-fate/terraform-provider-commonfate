@@ -1,4 +1,4 @@
-package internal
+package pagerduty
 
 import (
 	"context"
@@ -9,6 +9,7 @@ import (
 	integrationv1alpha1 "github.com/common-fate/sdk/gen/commonfate/control/integration/v1alpha1"
 	"github.com/common-fate/sdk/gen/commonfate/control/integration/v1alpha1/integrationv1alpha1connect"
 	"github.com/common-fate/sdk/service/control/integration"
+	"github.com/common-fate/terraform-provider-commonfate/internal/helpers"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -64,7 +65,7 @@ func (r *PagerDutyIntegrationResource) Configure(_ context.Context, req resource
 func (r *PagerDutyIntegrationResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 
 	resp.Schema = schema.Schema{
-		Description: `Registers a PagerDuty integration`,
+		Description: `Registers a PagerDuty integration. PagerDuty itegrations are required if you want to create access policies based on on-call users.`,
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				MarkdownDescription: "The internal Common Fate ID",
@@ -135,7 +136,7 @@ func (r *PagerDutyIntegrationResource) Create(ctx context.Context, req resource.
 		return
 	}
 
-	diagsToTerraform(res.Msg.Integration.Diagnostics, &resp.Diagnostics)
+	helpers.DiagsToTerraform(res.Msg.Integration.Diagnostics, &resp.Diagnostics)
 
 	data.Id = types.StringValue(res.Msg.Integration.Id)
 
@@ -236,7 +237,7 @@ func (r *PagerDutyIntegrationResource) Update(ctx context.Context, req resource.
 		return
 	}
 
-	diagsToTerraform(res.Msg.Integration.Diagnostics, &resp.Diagnostics)
+	helpers.DiagsToTerraform(res.Msg.Integration.Diagnostics, &resp.Diagnostics)
 
 	data.Id = types.StringValue(res.Msg.Integration.Id)
 

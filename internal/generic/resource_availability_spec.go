@@ -1,4 +1,4 @@
-package internal
+package generic
 
 import (
 	"context"
@@ -7,53 +7,42 @@ import (
 	"github.com/bufbuild/connect-go"
 	config_client "github.com/common-fate/sdk/config"
 	configv1alpha1 "github.com/common-fate/sdk/gen/commonfate/control/config/v1alpha1"
-	entityv1alpha1 "github.com/common-fate/sdk/gen/commonfate/entity/v1alpha1"
 	"github.com/common-fate/sdk/service/control/configsvc"
+	"github.com/common-fate/terraform-provider-commonfate/internal/helpers"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-type Selector struct {
-	ID           types.String `tfsdk:"id"`
-	Name         types.String `tfsdk:"name"`
-	ResourceType types.String `tfsdk:"resource_type"`
-	BelongingTo  EID          `tfsdk:"belonging_to"`
-	When         types.String `tfsdk:"when"`
-}
-
-func (s Selector) ToAPI() *configv1alpha1.Selector {
-	return &configv1alpha1.Selector{
-		Id:           s.ID.ValueString(),
-		Name:         s.Name.ValueString(),
-		ResourceType: s.ResourceType.ValueString(),
-		BelongingTo: &entityv1alpha1.EID{
-			Type: s.BelongingTo.Type.ValueString(),
-			Id:   s.BelongingTo.ID.ValueString(),
-		},
-		When: s.When.ValueString(),
-	}
+type AvailabilitySpec struct {
+	ID             types.String `tfsdk:"id"`
+	WorkflowID     types.String `tfsdk:"workflow_id"`
+	Role           helpers.EID  `tfsdk:"role"`
+	Target         helpers.EID  `tfsdk:"target"`
+	IdentityDomain *helpers.EID `tfsdk:"identity_domain"`
 }
 
 // AccessRuleResource is the data source implementation.
-type SelectorResource struct {
+type AvailabilitySpecResource struct {
 	client *configsvc.Client
 }
 
 var (
-	_ resource.Resource                = &SelectorResource{}
-	_ resource.ResourceWithConfigure   = &SelectorResource{}
-	_ resource.ResourceWithImportState = &SelectorResource{}
+	_ resource.Resource                = &AvailabilitySpecResource{}
+	_ resource.ResourceWithConfigure   = &AvailabilitySpecResource{}
+	_ resource.ResourceWithImportState = &AvailabilitySpecResource{}
 )
 
 // Metadata returns the data source type name.
-func (r *SelectorResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_selector"
+func (r *AvailabilitySpecResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_availability_spec"
 }
 
 // Configure adds the provider configured client to the data source.
-func (r *SelectorResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *AvailabilitySpecResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -74,52 +63,47 @@ func (r *SelectorResource) Configure(_ context.Context, req resource.ConfigureRe
 
 // GetSchema defines the schema for the data source.
 // schema is based off the governance api
-func (r *SelectorResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *AvailabilitySpecResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 
 	resp.Schema = schema.Schema{
-		Description: "Access Selectors select resources matching a criteria specified in the 'when' parameter. Resources matching this criteria can be made available for Access Worfklows.",
+		Description: "A specifier to make resources available for selection under a particular Access Workflow",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
-				MarkdownDescription: "The ID of the selector",
-				Required:            true,
-			},
-
-			"name": schema.StringAttribute{
-				MarkdownDescription: "The unique name of the selector. Call this something memorable and relevant to the resources being selected. For example: `prod-data-eng`",
-				Optional:            true,
-			},
-
-			"resource_type": schema.StringAttribute{
-				MarkdownDescription: "The type of resource that the selector will query for",
-				Required:            true,
-			},
-
-			"belonging_to": schema.SingleNestedAttribute{
-				MarkdownDescription: "The overall parent that the selected resources must be a descendent of",
-				Required:            true,
-
-				Attributes: map[string]schema.Attribute{
-					"type": schema.StringAttribute{
-						Required:            true,
-						MarkdownDescription: "The entity type",
-					},
-					"id": schema.StringAttribute{
-						Required:            true,
-						MarkdownDescription: "The entity ID",
-					},
+				MarkdownDescription: "The helpers Common Fate ID",
+				Computed:            true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
 
-			"when": schema.StringAttribute{
-				MarkdownDescription: "A Cedar expression to use to match resources. For example: `resource in AWS::OrgUnit::\"ou-123\"` or `resource.tag_keys contains \"prod\"",
+			"workflow_id": schema.StringAttribute{
+				MarkdownDescription: "The Access Workflow ID",
 				Required:            true,
 			},
+
+			"role": schema.SingleNestedAttribute{
+				MarkdownDescription: "The role to make available",
+				Required:            true,
+				Attributes:          helpers.EIDAttrs,
+			},
+
+			"target": schema.SingleNestedAttribute{
+				MarkdownDescription: "The target to make available. Should be a Selector entity.",
+				Required:            true,
+				Attributes:          helpers.EIDAttrs,
+			},
+
+			"identity_domain": schema.SingleNestedAttribute{
+				MarkdownDescription: "The identity domain associated with the integration",
+				Optional:            true,
+				Attributes:          helpers.EIDAttrs,
+			},
 		},
-		MarkdownDescription: `Access Selectors select resources matching a criteria specified in the 'when' parameter. Resources matching this criteria can be made available for Access Worfklows.`,
+		MarkdownDescription: `A specifier to make resources available for selection under a particular Access Workflow`,
 	}
 }
 
-func (r *SelectorResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+func (r *AvailabilitySpecResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 
 	if r.client == nil {
 		resp.Diagnostics.AddError(
@@ -129,7 +113,7 @@ func (r *SelectorResource) Create(ctx context.Context, req resource.CreateReques
 
 		return
 	}
-	var data *Selector
+	var data *AvailabilitySpec
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -143,13 +127,21 @@ func (r *SelectorResource) Create(ctx context.Context, req resource.CreateReques
 		return
 	}
 
-	res, err := r.client.Selector().CreateSelector(ctx, connect.NewRequest(&configv1alpha1.CreateSelectorRequest{
-		Selector: data.ToAPI(),
-	}))
+	input := &configv1alpha1.CreateAvailabilitySpecRequest{
+		Role:       data.Role.ToAPI(),
+		WorkflowId: data.WorkflowID.ValueString(),
+		Target:     data.Target.ToAPI(),
+	}
+
+	if data.IdentityDomain != nil {
+		input.IdentityDomain = data.IdentityDomain.ToAPI()
+	}
+
+	res, err := r.client.AvailabilitySpec().CreateAvailabilitySpec(ctx, connect.NewRequest(input))
 
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to Create Resource: Access Selector",
+			"Unable to Create Resource: AvailabilitySpec",
 			"An unexpected error occurred while communicating with Common Fate API. "+
 				"Please report this issue to the provider developers.\n\n"+
 				"JSON Error: "+err.Error(),
@@ -158,18 +150,16 @@ func (r *SelectorResource) Create(ctx context.Context, req resource.CreateReques
 		return
 	}
 
-	diagsToTerraform(res.Msg.Diagnostics, &resp.Diagnostics)
-
 	// Convert from the API data model to the Terraform data model
 	// and set any unknown attribute values.
-	data.ID = types.StringValue(res.Msg.Selector.Id)
+	data.ID = types.StringValue(res.Msg.AvailabilitySpec.Id)
 
 	// Save data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
 // Read refreshes the Terraform state with the latest data.
-func (r *SelectorResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+func (r *AvailabilitySpecResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	if r.client == nil {
 		resp.Diagnostics.AddError(
 			"Unconfigured HTTP Client",
@@ -178,13 +168,13 @@ func (r *SelectorResource) Read(ctx context.Context, req resource.ReadRequest, r
 
 		return
 	}
-	var state Selector
+	var state AvailabilitySpec
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
 
 	//read the state from the client
-	res, err := r.client.Selector().GetSelector(ctx, connect.NewRequest(&configv1alpha1.GetSelectorRequest{
+	res, err := r.client.AvailabilitySpec().GetAvailabilitySpec(ctx, connect.NewRequest(&configv1alpha1.GetAvailabilitySpecRequest{
 		Id: state.ID.ValueString(),
 	}))
 
@@ -193,30 +183,29 @@ func (r *SelectorResource) Read(ctx context.Context, req resource.ReadRequest, r
 		return
 	} else if err != nil {
 		resp.Diagnostics.AddError(
-			"Failed to read Selector",
+			"Failed to read Availability Spec",
 			err.Error(),
 		)
 		return
 	}
 
-	state.Name = types.StringValue(res.Msg.Selector.Name)
-	state.ResourceType = types.StringValue(res.Msg.Selector.ResourceType)
-	state.BelongingTo.ID = types.StringValue(res.Msg.Selector.BelongingTo.Id)
-	state.BelongingTo.Type = types.StringValue(res.Msg.Selector.BelongingTo.Type)
-	state.When = types.StringValue(res.Msg.Selector.When)
-	state.ID = types.StringValue(res.Msg.Selector.Id)
+	state.ID = types.StringValue(res.Msg.AvailabilitySpec.Id)
+	state.WorkflowID = types.StringValue(res.Msg.AvailabilitySpec.WorkflowId)
+	state.Role = helpers.UidFromAPI(res.Msg.AvailabilitySpec.Role)
+	state.Target = helpers.UidFromAPI(res.Msg.AvailabilitySpec.Target)
+	state.IdentityDomain = helpers.UidPtrFromAPI(res.Msg.AvailabilitySpec.IdentityDomain)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }
 
-func (r *SelectorResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *AvailabilitySpecResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	if r.client == nil {
 		resp.Diagnostics.AddError(
 			"Unconfigured HTTP Client",
 			"Expected configured HTTP client. Please report this issue to the provider developers.",
 		)
 	}
-	var data Selector
+	var data AvailabilitySpec
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -229,12 +218,22 @@ func (r *SelectorResource) Update(ctx context.Context, req resource.UpdateReques
 		return
 	}
 
-	res, err := r.client.Selector().UpdateSelector(ctx, connect.NewRequest(&configv1alpha1.UpdateSelectorRequest{
-		Selector: data.ToAPI(),
+	input := &configv1alpha1.AvailabilitySpec{
+		Role:       data.Role.ToAPI(),
+		WorkflowId: data.WorkflowID.ValueString(),
+		Target:     data.Target.ToAPI(),
+	}
+
+	if data.IdentityDomain != nil {
+		input.IdentityDomain = data.IdentityDomain.ToAPI()
+	}
+
+	res, err := r.client.AvailabilitySpec().UpdateAvailabilitySpec(ctx, connect.NewRequest(&configv1alpha1.UpdateAvailabilitySpecRequest{
+		AvailabilitySpec: input,
 	}))
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to Create Resource: Access Selector",
+			"Unable to Update Resource: AvailabilitySpec",
 			"An unexpected error occurred while communicating with Common Fate API. "+
 				"Please report this issue to the provider developers.\n\n"+
 				"JSON Error: "+err.Error(),
@@ -243,23 +242,21 @@ func (r *SelectorResource) Update(ctx context.Context, req resource.UpdateReques
 		return
 	}
 
-	diagsToTerraform(res.Msg.Diagnostics, &resp.Diagnostics)
-
 	// Convert from the API data model to the Terraform data model
 	// and set any unknown attribute values.
-	data.ID = types.StringValue(res.Msg.Selector.Id)
+	data.ID = types.StringValue(res.Msg.AvailabilitySpec.Id)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *SelectorResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+func (r *AvailabilitySpecResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	if r.client == nil {
 		resp.Diagnostics.AddError(
 			"Unconfigured HTTP Client",
 			"Expected configured HTTP client. Please report this issue to the provider developers.",
 		)
 	}
-	var data *Selector
+	var data *AvailabilitySpec
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -272,7 +269,7 @@ func (r *SelectorResource) Delete(ctx context.Context, req resource.DeleteReques
 		return
 	}
 
-	_, err := r.client.Selector().DeleteSelector(ctx, connect.NewRequest(&configv1alpha1.DeleteSelectorRequest{
+	_, err := r.client.AvailabilitySpec().DeleteAvailabilitySpec(ctx, connect.NewRequest(&configv1alpha1.DeleteAvailabilitySpecRequest{
 		Id: data.ID.ValueString(),
 	}))
 
@@ -288,7 +285,7 @@ func (r *SelectorResource) Delete(ctx context.Context, req resource.DeleteReques
 	}
 }
 
-func (r *SelectorResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *AvailabilitySpecResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	// Retrieve import ID and save to id attribute
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }

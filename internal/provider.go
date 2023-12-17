@@ -6,6 +6,12 @@ import (
 	"strings"
 
 	config_client "github.com/common-fate/sdk/config"
+	"github.com/common-fate/terraform-provider-commonfate/internal/access"
+	"github.com/common-fate/terraform-provider-commonfate/internal/aws"
+	"github.com/common-fate/terraform-provider-commonfate/internal/gcp"
+	"github.com/common-fate/terraform-provider-commonfate/internal/generic"
+	"github.com/common-fate/terraform-provider-commonfate/internal/pagerduty"
+	"github.com/common-fate/terraform-provider-commonfate/internal/slack"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
@@ -138,51 +144,51 @@ func (p *CommonFateProvider) Resources(_ context.Context) []func() resource.Reso
 
 // With the resource.Resource implementation
 func NewPolicySetResource() resource.Resource {
-	return &PolicySetResource{}
+	return &access.PolicySetResource{}
 }
 
 func NewSelectorResource() resource.Resource {
-	return &SelectorResource{}
+	return &generic.SelectorResource{}
 }
 
 func NewGCPProjectSelectorResource() resource.Resource {
-	return &GCPProjectSelectorResource{}
+	return &gcp.GCPProjectSelectorResource{}
 }
 
 func NewGCPProjectAvailabilitiesResource() resource.Resource {
-	return &GCPProjectAvailabilitiesResource{}
+	return &gcp.GCPProjectAvailabilitiesResource{}
 }
 
 func NewWebhookProvisionerResource() resource.Resource {
-	return &WebhookProvisionerResource{}
+	return &access.WebhookProvisionerResource{}
 }
 
 func NewAvailabilitySpecResource() resource.Resource {
-	return &AvailabilitySpecResource{}
+	return &generic.AvailabilitySpecResource{}
 }
 
 func NewSlackAlertResource() resource.Resource {
-	return &SlackAlertResource{}
+	return &slack.SlackAlertResource{}
 }
 
 func NewAccessWorkflowResource() resource.Resource {
-	return &AccessWorkflowResource{}
+	return &access.AccessWorkflowResource{}
 }
 
 func NewGCPIntegrationResource() resource.Resource {
-	return &GCPIntegrationResource{}
+	return &gcp.GCPIntegrationResource{}
 }
 
 func NewAWSIDCIntegrationResource() resource.Resource {
-	return &AWSIDCIntegrationResource{}
+	return &aws.AWSIDCIntegrationResource{}
 }
 
 func NewSlackIntegrationResource() resource.Resource {
-	return &SlackIntegrationResource{}
+	return &slack.SlackIntegrationResource{}
 }
 
 func NewPagerDutyIntegrationResource() resource.Resource {
-	return &PagerDutyIntegrationResource{}
+	return &pagerduty.PagerDutyIntegrationResource{}
 }
 func NewAWSIDCAccountAvailabilitiesResource() resource.Resource {
 	return &AWSIDCAccountAvailabilitiesResource{}

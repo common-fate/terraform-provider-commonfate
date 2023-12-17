@@ -1,4 +1,4 @@
-package internal
+package slack
 
 import (
 	"context"
@@ -9,6 +9,7 @@ import (
 	integrationv1alpha1 "github.com/common-fate/sdk/gen/commonfate/control/integration/v1alpha1"
 	"github.com/common-fate/sdk/gen/commonfate/control/integration/v1alpha1/integrationv1alpha1connect"
 	"github.com/common-fate/sdk/service/control/integration"
+	"github.com/common-fate/terraform-provider-commonfate/internal/helpers"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -141,7 +142,7 @@ func (r *SlackIntegrationResource) Create(ctx context.Context, req resource.Crea
 		return
 	}
 
-	diagsToTerraform(res.Msg.Integration.Diagnostics, &resp.Diagnostics)
+	helpers.DiagsToTerraform(res.Msg.Integration.Diagnostics, &resp.Diagnostics)
 
 	data.Id = types.StringValue(res.Msg.Integration.Id)
 
@@ -244,7 +245,7 @@ func (r *SlackIntegrationResource) Update(ctx context.Context, req resource.Upda
 		return
 	}
 
-	diagsToTerraform(res.Msg.Integration.Diagnostics, &resp.Diagnostics)
+	helpers.DiagsToTerraform(res.Msg.Integration.Diagnostics, &resp.Diagnostics)
 
 	data.Id = types.StringValue(res.Msg.Integration.Id)
 

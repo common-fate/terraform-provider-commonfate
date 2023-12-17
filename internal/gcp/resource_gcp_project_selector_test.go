@@ -1,4 +1,4 @@
-package internal
+package gcp
 
 // func TestAccAccessSelector(t *testing.T) {
 // 	resource.Test(t, resource.TestCase{

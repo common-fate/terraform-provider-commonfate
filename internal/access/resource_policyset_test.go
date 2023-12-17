@@ -1,4 +1,4 @@
-package internal
+package access
 
 // func TestAccPolicySet(t *testing.T) {
 // 	resource.Test(t, resource.TestCase{

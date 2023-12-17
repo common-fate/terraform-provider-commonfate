@@ -14,19 +14,12 @@ A Selector to match GCP projects with a criteria based on the 'when' field.
 ## Example Usage
 
 ```terraform
-resource "commonfate_gcp_jit_policy" "jit-policy-1" {
-  name="demo"
-  priority=100
-  duration="2h"
-  notify_slack_channel="R023FDHJ34"
-  role="roles/editor"
-  match_project_ids=[
-    "sandbox-1"
-  ]
-  match_project_folders= [
-    "4443422451"
-  ]
-
+resource "commonfate_gcp_project_selector" "example" {
+  name                = "gcp-prod"
+  gcp_organization_id = "organization/29034834894"
+  when                = <<EOF
+  resource.tag_keys contains "production" && resource in GCP::Folder::"folders/342982723"
+  EOF
 }
 ```
 
