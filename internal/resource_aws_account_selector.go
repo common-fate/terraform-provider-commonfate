@@ -1,4 +1,4 @@
-package generic
+package internal
 
 import (
 	"context"
@@ -16,45 +16,44 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-type Selector struct {
-	ID           types.String `tfsdk:"id"`
-	Name         types.String `tfsdk:"name"`
-	ResourceType types.String `tfsdk:"resource_type"`
-	BelongingTo  helpers.EID  `tfsdk:"belonging_to"`
-	When         types.String `tfsdk:"when"`
+type AWSAccountSelector struct {
+	ID    types.String `tfsdk:"id"`
+	Name  types.String `tfsdk:"name"`
+	OrgID types.String `tfsdk:"aws_organization_id"`
+	When  types.String `tfsdk:"when"`
 }
 
-func (s Selector) ToAPI() *configv1alpha1.Selector {
+func (s AWSAccountSelector) ToAPI() *configv1alpha1.Selector {
 	return &configv1alpha1.Selector{
 		Id:           s.ID.ValueString(),
 		Name:         s.Name.ValueString(),
-		ResourceType: s.ResourceType.ValueString(),
+		ResourceType: "AWS::Account",
 		BelongingTo: &entityv1alpha1.EID{
-			Type: s.BelongingTo.Type.ValueString(),
-			Id:   s.BelongingTo.ID.ValueString(),
+			Type: "AWS::Organization",
+			Id:   s.OrgID.ValueString(),
 		},
 		When: s.When.ValueString(),
 	}
 }
 
 // AccessRuleResource is the data source implementation.
-type SelectorResource struct {
+type AWSAccountSelectorResource struct {
 	client *configsvc.Client
 }
 
 var (
-	_ resource.Resource                = &SelectorResource{}
-	_ resource.ResourceWithConfigure   = &SelectorResource{}
-	_ resource.ResourceWithImportState = &SelectorResource{}
+	_ resource.Resource                = &AWSAccountSelectorResource{}
+	_ resource.ResourceWithConfigure   = &AWSAccountSelectorResource{}
+	_ resource.ResourceWithImportState = &AWSAccountSelectorResource{}
 )
 
 // Metadata returns the data source type name.
-func (r *SelectorResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_selector"
+func (r *AWSAccountSelectorResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_aws_account_selector"
 }
 
 // Configure adds the provider configured client to the data source.
-func (r *SelectorResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *AWSAccountSelectorResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -75,10 +74,10 @@ func (r *SelectorResource) Configure(_ context.Context, req resource.ConfigureRe
 
 // GetSchema defines the schema for the data source.
 // schema is based off the governance api
-func (r *SelectorResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *AWSAccountSelectorResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 
 	resp.Schema = schema.Schema{
-		Description: "Access Selectors select resources matching a criteria specified in the 'when' parameter. Resources matching this criteria can be made available for Access Worklows.",
+		Description: "A Selector to match AWS Accounts with a criteria based on the 'when' field.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				MarkdownDescription: "The ID of the selector",
@@ -90,37 +89,21 @@ func (r *SelectorResource) Schema(ctx context.Context, req resource.SchemaReques
 				Optional:            true,
 			},
 
-			"resource_type": schema.StringAttribute{
-				MarkdownDescription: "The type of resource that the selector will query for",
+			"aws_organization_id": schema.StringAttribute{
+				MarkdownDescription: "The AWS organization ID",
 				Required:            true,
-			},
-
-			"belonging_to": schema.SingleNestedAttribute{
-				MarkdownDescription: "The overall parent that the selected resources must be a descendent of",
-				Required:            true,
-
-				Attributes: map[string]schema.Attribute{
-					"type": schema.StringAttribute{
-						Required:            true,
-						MarkdownDescription: "The entity type",
-					},
-					"id": schema.StringAttribute{
-						Required:            true,
-						MarkdownDescription: "The entity ID",
-					},
-				},
 			},
 
 			"when": schema.StringAttribute{
-				MarkdownDescription: "A Cedar expression to use to match resources. For example: `resource in AWS::OrgUnit::\"ou-123\"` or `resource.tag_keys contains \"prod\"",
+				MarkdownDescription: "A Cedar expression with the criteria to match accounts on, e.g: `resource.tag_keys contains \"production\" && resource in AWS::OrgUnit::\"example\"`",
 				Required:            true,
 			},
 		},
-		MarkdownDescription: `Access Selectors select resources matching a criteria specified in the 'when' parameter. Resources matching this criteria can be made available for Access Worfklows.`,
+		MarkdownDescription: `A Selector to match AWS Accounts with a criteria based on the 'when' field.`,
 	}
 }
 
-func (r *SelectorResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+func (r *AWSAccountSelectorResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 
 	if r.client == nil {
 		resp.Diagnostics.AddError(
@@ -130,7 +113,7 @@ func (r *SelectorResource) Create(ctx context.Context, req resource.CreateReques
 
 		return
 	}
-	var data *Selector
+	var data *AWSAccountSelector
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -170,7 +153,7 @@ func (r *SelectorResource) Create(ctx context.Context, req resource.CreateReques
 }
 
 // Read refreshes the Terraform state with the latest data.
-func (r *SelectorResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+func (r *AWSAccountSelectorResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	if r.client == nil {
 		resp.Diagnostics.AddError(
 			"Unconfigured HTTP Client",
@@ -179,7 +162,7 @@ func (r *SelectorResource) Read(ctx context.Context, req resource.ReadRequest, r
 
 		return
 	}
-	var state Selector
+	var state AWSAccountSelector
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
@@ -201,23 +184,20 @@ func (r *SelectorResource) Read(ctx context.Context, req resource.ReadRequest, r
 	}
 
 	state.Name = types.StringValue(res.Msg.Selector.Name)
-	state.ResourceType = types.StringValue(res.Msg.Selector.ResourceType)
-	state.BelongingTo.ID = types.StringValue(res.Msg.Selector.BelongingTo.Id)
-	state.BelongingTo.Type = types.StringValue(res.Msg.Selector.BelongingTo.Type)
+	state.OrgID = types.StringValue(res.Msg.Selector.BelongingTo.Id)
 	state.When = types.StringValue(res.Msg.Selector.When)
-	state.ID = types.StringValue(res.Msg.Selector.Id)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }
 
-func (r *SelectorResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *AWSAccountSelectorResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	if r.client == nil {
 		resp.Diagnostics.AddError(
 			"Unconfigured HTTP Client",
 			"Expected configured HTTP client. Please report this issue to the provider developers.",
 		)
 	}
-	var data Selector
+	var data AWSAccountSelector
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -253,14 +233,14 @@ func (r *SelectorResource) Update(ctx context.Context, req resource.UpdateReques
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *SelectorResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+func (r *AWSAccountSelectorResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	if r.client == nil {
 		resp.Diagnostics.AddError(
 			"Unconfigured HTTP Client",
 			"Expected configured HTTP client. Please report this issue to the provider developers.",
 		)
 	}
-	var data *Selector
+	var data *AWSAccountSelector
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -289,7 +269,7 @@ func (r *SelectorResource) Delete(ctx context.Context, req resource.DeleteReques
 	}
 }
 
-func (r *SelectorResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *AWSAccountSelectorResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	// Retrieve import ID and save to id attribute
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
