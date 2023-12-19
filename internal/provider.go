@@ -10,6 +10,7 @@ import (
 	"github.com/common-fate/terraform-provider-commonfate/internal/aws"
 	"github.com/common-fate/terraform-provider-commonfate/internal/gcp"
 	"github.com/common-fate/terraform-provider-commonfate/internal/generic"
+	"github.com/common-fate/terraform-provider-commonfate/internal/opsgenie"
 	"github.com/common-fate/terraform-provider-commonfate/internal/pagerduty"
 	"github.com/common-fate/terraform-provider-commonfate/internal/slack"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
@@ -139,6 +140,7 @@ func (p *CommonFateProvider) Resources(_ context.Context) []func() resource.Reso
 		NewPagerDutyIntegrationResource,
 		NewAWSAccountSelectorResource,
 		NewAWSIDCAccountAvailabilitiesResource,
+		NewOpsGenieIntegrationResource,
 	}
 }
 
@@ -195,4 +197,7 @@ func NewAWSIDCAccountAvailabilitiesResource() resource.Resource {
 }
 func NewAWSAccountSelectorResource() resource.Resource {
 	return &aws.AWSAccountSelectorResource{}
+}
+func NewOpsGenieIntegrationResource() resource.Resource {
+	return &opsgenie.OpsGenieIntegrationResource{}
 }
