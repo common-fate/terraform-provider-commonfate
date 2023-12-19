@@ -66,7 +66,7 @@ func (r *AWSIDCIntegrationResource) Configure(_ context.Context, req resource.Co
 func (r *AWSIDCIntegrationResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 
 	resp.Schema = schema.Schema{
-		Description: `Registers an AWS IAM Identity Center integration with Google Cloud`,
+		Description: `Registers an AWS IAM Identity Center integration`,
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				MarkdownDescription: "The internal Common Fate ID",
@@ -96,7 +96,7 @@ func (r *AWSIDCIntegrationResource) Schema(ctx context.Context, req resource.Sch
 				Required:            true,
 			},
 		},
-		MarkdownDescription: `Registers an AWS IAM Identity Center  integration with Google Cloud`,
+		MarkdownDescription: `Registers an AWS IAM Identity Center  integration`,
 	}
 }
 

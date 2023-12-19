@@ -191,8 +191,8 @@ func NewPagerDutyIntegrationResource() resource.Resource {
 	return &pagerduty.PagerDutyIntegrationResource{}
 }
 func NewAWSIDCAccountAvailabilitiesResource() resource.Resource {
-	return &AWSIDCAccountAvailabilitiesResource{}
+	return &aws.AWSIDCAccountAvailabilitiesResource{}
 }
 func NewAWSAccountSelectorResource() resource.Resource {
-	return &AWSAccountSelectorResource{}
+	return &aws.AWSAccountSelectorResource{}
 }
