@@ -23,7 +23,6 @@ type AWSIDCAccountAvailabilities struct {
 	PermissionSetARN   types.String `tfsdk:"aws_permission_set_arn"`
 	AccountSelectorID  types.String `tfsdk:"aws_account_selector_id"`
 	AWSIdentityStoreID types.String `tfsdk:"aws_identity_store_id"`
-	AWSOrganizationID  types.String `tfsdk:"aws_organization_id"`
 }
 
 type AWSIDCAccountAvailabilitiesResource struct {
@@ -75,7 +74,6 @@ func (r *AWSIDCAccountAvailabilitiesResource) Schema(ctx context.Context, req re
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
-
 			"workflow_id": schema.StringAttribute{
 				MarkdownDescription: "The Access Workflow ID",
 				Required:            true,
@@ -85,14 +83,8 @@ func (r *AWSIDCAccountAvailabilitiesResource) Schema(ctx context.Context, req re
 				MarkdownDescription: "The AWS Permission Set to make available",
 				Required:            true,
 			},
-
 			"aws_account_selector_id": schema.StringAttribute{
 				MarkdownDescription: "The target to make available. Should be a Selector entity.",
-				Required:            true,
-			},
-
-			"aws_organization_id": schema.StringAttribute{
-				MarkdownDescription: "The ID of the AWS Organization associated with the accounts",
 				Required:            true,
 			},
 			"aws_identity_store_id": schema.StringAttribute{
@@ -229,6 +221,7 @@ func (r *AWSIDCAccountAvailabilitiesResource) Update(ctx context.Context, req re
 	}
 
 	input := &configv1alpha1.AvailabilitySpec{
+		Id: data.ID.ValueString(),
 		Role: &entityv1alpha1.EID{
 			Type: "AWS::IDC::PermissionSet",
 			Id:   data.PermissionSetARN.ValueString(),

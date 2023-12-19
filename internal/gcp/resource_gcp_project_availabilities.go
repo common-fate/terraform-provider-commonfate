@@ -224,6 +224,7 @@ func (r *GCPProjectAvailabilitiesResource) Update(ctx context.Context, req resou
 	}
 
 	input := &configv1alpha1.AvailabilitySpec{
+		Id: data.ID.ValueString(),
 		Role: &entityv1alpha1.EID{
 			Type: "GCP::Role",
 			Id:   data.Role.ValueString(),
