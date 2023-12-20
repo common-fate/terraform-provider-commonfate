@@ -9,7 +9,7 @@ import (
 	configv1alpha1 "github.com/common-fate/sdk/gen/commonfate/control/config/v1alpha1"
 	entityv1alpha1 "github.com/common-fate/sdk/gen/commonfate/entity/v1alpha1"
 	"github.com/common-fate/sdk/service/control/configsvc"
-	"github.com/common-fate/terraform-provider-commonfate/internal/helpers"
+	"github.com/common-fate/terraform-provider-commonfate/internal/utilities/diags"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -142,7 +142,7 @@ func (r *AWSAccountSelectorResource) Create(ctx context.Context, req resource.Cr
 		return
 	}
 
-	helpers.DiagsToTerraform(res.Msg.Diagnostics, &resp.Diagnostics)
+	diags.ToTerraform(res.Msg.Diagnostics, &resp.Diagnostics)
 
 	// Convert from the API data model to the Terraform data model
 	// and set any unknown attribute values.
@@ -224,7 +224,7 @@ func (r *AWSAccountSelectorResource) Update(ctx context.Context, req resource.Up
 		return
 	}
 
-	helpers.DiagsToTerraform(res.Msg.Diagnostics, &resp.Diagnostics)
+	diags.ToTerraform(res.Msg.Diagnostics, &resp.Diagnostics)
 
 	// Convert from the API data model to the Terraform data model
 	// and set any unknown attribute values.

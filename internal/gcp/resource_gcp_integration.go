@@ -9,7 +9,7 @@ import (
 	integrationv1alpha1 "github.com/common-fate/sdk/gen/commonfate/control/integration/v1alpha1"
 	"github.com/common-fate/sdk/gen/commonfate/control/integration/v1alpha1/integrationv1alpha1connect"
 	"github.com/common-fate/sdk/service/control/integration"
-	"github.com/common-fate/terraform-provider-commonfate/internal/helpers"
+	"github.com/common-fate/terraform-provider-commonfate/internal/utilities/diags"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -149,7 +149,7 @@ func (r *GCPIntegrationResource) Create(ctx context.Context, req resource.Create
 		return
 	}
 
-	helpers.DiagsToTerraform(res.Msg.Integration.Diagnostics, &resp.Diagnostics)
+	diags.ToTerraform(res.Msg.Integration.Diagnostics, &resp.Diagnostics)
 
 	data.Id = types.StringValue(res.Msg.Integration.Id)
 
@@ -177,7 +177,10 @@ func (r *GCPIntegrationResource) Read(ctx context.Context, req resource.ReadRequ
 		Id: state.Id.ValueString(),
 	}))
 
-	if err != nil {
+	if connect.CodeOf(err) == connect.CodeNotFound {
+		resp.State.RemoveResource(ctx)
+		return
+	} else if err != nil {
 		resp.Diagnostics.AddError(
 			"Failed to read GCP Integration",
 			err.Error(),
@@ -254,7 +257,7 @@ func (r *GCPIntegrationResource) Update(ctx context.Context, req resource.Update
 		return
 	}
 
-	helpers.DiagsToTerraform(res.Msg.Integration.Diagnostics, &resp.Diagnostics)
+	diags.ToTerraform(res.Msg.Integration.Diagnostics, &resp.Diagnostics)
 
 	data.Id = types.StringValue(res.Msg.Integration.Id)
 
