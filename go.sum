@@ -35,12 +35,10 @@ github.com/cloudflare/circl v1.3.3 h1:fE/Qz0QdIGqeWfnwq0RE0R7MI51s0M2E4Ga9kq5AEM
 github.com/cloudflare/circl v1.3.3/go.mod h1:5XYMA4rFBvNIrhs50XuiBJ15vF2pZn4nnUKZrLbUZFA=
 github.com/common-fate/clio v1.2.3 h1:hHwUYZjn66qGYDpgANl0EB/92hyi/Jsnd07qB09rvn4=
 github.com/common-fate/clio v1.2.3/go.mod h1:NkozaS15SA+6Y9zb+82eIj1i41aWShorTqA01GKQ7A8=
-github.com/common-fate/grab v1.0.0 h1:uRtMdWJcxWHdawIjlI7Q65BFfPrquKKKCiLd6ezfbhQ=
-github.com/common-fate/grab v1.0.0/go.mod h1:L0qa03RwqOMZz9PrrWw9eI145i5FQRf+iLtNSJypQvY=
-github.com/common-fate/sdk v0.0.0-20231212221836-47858c8cade4 h1:aXqVg816cSUOzOnwBUXu2zEdTgQIw49MyLre+R8vD44=
-github.com/common-fate/sdk v0.0.0-20231212221836-47858c8cade4/go.mod h1:u16/09qqao49kNZVMjnj/gpSUhw9kOgi51Tg3vWjEKc=
-github.com/common-fate/sdk v0.0.0-20231219024321-4a3559a524c1 h1:FK2hjnhGp2P3tYglatNlWCnG345nrLvQzBxO3i8acdo=
-github.com/common-fate/sdk v0.0.0-20231219024321-4a3559a524c1/go.mod h1:u16/09qqao49kNZVMjnj/gpSUhw9kOgi51Tg3vWjEKc=
+github.com/common-fate/grab v1.1.0 h1:HLZPtltdHScYu6qtt/UC78rvwylCTWuyoZoiQXV4QHc=
+github.com/common-fate/grab v1.1.0/go.mod h1:L0qa03RwqOMZz9PrrWw9eI145i5FQRf+iLtNSJypQvY=
+github.com/common-fate/sdk v0.0.0-20231220035133-bb5054138b26 h1:aZeov0ATnbAqi+J/MFtK9sYfmQ+V1LW9dl1pXp4jNv0=
+github.com/common-fate/sdk v0.0.0-20231220035133-bb5054138b26/go.mod h1:MmxpKwAVtrEl6ANF8zllGZ+TI/tT9zVPDweSYDzo3RE=
 github.com/cyphar/filepath-securejoin v0.2.4 h1:Ugdm7cg7i6ZK6x3xDF1oEu1nfkyfH53EtKeQYTC3kyg=
 github.com/cyphar/filepath-securejoin v0.2.4/go.mod h1:aPGpWjXOXUn2NCNjFvBE6aRxGGx79pTxQpKOJNYHHl4=
 github.com/danieljoos/wincred v1.1.2 h1:QLdCxFs1/Yl4zduvBdcHB8goaYk9RARS2SgLLRuAyr0=
