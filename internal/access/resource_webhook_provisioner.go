@@ -8,7 +8,7 @@ import (
 	config_client "github.com/common-fate/sdk/config"
 	configv1alpha1 "github.com/common-fate/sdk/gen/commonfate/control/config/v1alpha1"
 	"github.com/common-fate/sdk/service/control/configsvc"
-	"github.com/common-fate/terraform-provider-commonfate/internal/helpers"
+	"github.com/common-fate/terraform-provider-commonfate/internal/utilities/eid"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -26,7 +26,7 @@ type WebhookProvisionerModel struct {
 type CapabilityModel struct {
 	TargetType  types.String `tfsdk:"target_type"`
 	RoleType    types.String `tfsdk:"role_type"`
-	BelongingTo helpers.EID  `tfsdk:"belonging_to"`
+	BelongingTo eid.EID      `tfsdk:"belonging_to"`
 }
 
 // AccessRuleResource is the data source implementation.
@@ -97,7 +97,7 @@ func (r *WebhookProvisionerResource) Schema(ctx context.Context, req resource.Sc
 							MarkdownDescription: "The type of target such as `GCP::Project` or `AWS::Account`",
 						},
 						"belonging_to": schema.SingleNestedAttribute{
-							Attributes: helpers.EIDAttrs,
+							Attributes: eid.EIDAttrs,
 							Required:   true,
 						},
 					},

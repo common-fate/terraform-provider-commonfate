@@ -175,7 +175,10 @@ func (r *AWSIDCIntegrationResource) Read(ctx context.Context, req resource.ReadR
 		Id: state.Id.ValueString(),
 	}))
 
-	if err != nil {
+	if connect.CodeOf(err) == connect.CodeNotFound {
+		resp.State.RemoveResource(ctx)
+		return
+	} else if err != nil {
 		resp.Diagnostics.AddError(
 			"Failed to read AWS IAM Identity Store Integration",
 			err.Error(),

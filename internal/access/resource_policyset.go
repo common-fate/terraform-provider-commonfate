@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/bufbuild/connect-go"
 	config_client "github.com/common-fate/sdk/config"
 	"github.com/common-fate/sdk/service/authz/policyset"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -137,7 +138,10 @@ func (r *PolicySetResource) Read(ctx context.Context, req resource.ReadRequest, 
 	got, err := r.client.Get(ctx, policyset.GetInput{
 		ID: state.ID.ValueString(),
 	})
-	if err != nil {
+	if connect.CodeOf(err) == connect.CodeNotFound {
+		resp.State.RemoveResource(ctx)
+		return
+	} else if err != nil {
 		resp.Diagnostics.AddError(
 			"Failed to read PolicySet",
 			err.Error(),

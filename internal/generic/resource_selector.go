@@ -9,7 +9,8 @@ import (
 	configv1alpha1 "github.com/common-fate/sdk/gen/commonfate/control/config/v1alpha1"
 	entityv1alpha1 "github.com/common-fate/sdk/gen/commonfate/entity/v1alpha1"
 	"github.com/common-fate/sdk/service/control/configsvc"
-	"github.com/common-fate/terraform-provider-commonfate/internal/helpers"
+	"github.com/common-fate/terraform-provider-commonfate/internal/utilities/diags"
+	"github.com/common-fate/terraform-provider-commonfate/internal/utilities/eid"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -20,7 +21,7 @@ type Selector struct {
 	ID           types.String `tfsdk:"id"`
 	Name         types.String `tfsdk:"name"`
 	ResourceType types.String `tfsdk:"resource_type"`
-	BelongingTo  helpers.EID  `tfsdk:"belonging_to"`
+	BelongingTo  eid.EID      `tfsdk:"belonging_to"`
 	When         types.String `tfsdk:"when"`
 }
 
@@ -159,7 +160,7 @@ func (r *SelectorResource) Create(ctx context.Context, req resource.CreateReques
 		return
 	}
 
-	helpers.DiagsToTerraform(res.Msg.Diagnostics, &resp.Diagnostics)
+	diags.ToTerraform(res.Msg.Diagnostics, &resp.Diagnostics)
 
 	// Convert from the API data model to the Terraform data model
 	// and set any unknown attribute values.
@@ -244,7 +245,7 @@ func (r *SelectorResource) Update(ctx context.Context, req resource.UpdateReques
 		return
 	}
 
-	helpers.DiagsToTerraform(res.Msg.Diagnostics, &resp.Diagnostics)
+	diags.ToTerraform(res.Msg.Diagnostics, &resp.Diagnostics)
 
 	// Convert from the API data model to the Terraform data model
 	// and set any unknown attribute values.

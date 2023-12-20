@@ -9,7 +9,7 @@ import (
 	integrationv1alpha1 "github.com/common-fate/sdk/gen/commonfate/control/integration/v1alpha1"
 	"github.com/common-fate/sdk/gen/commonfate/control/integration/v1alpha1/integrationv1alpha1connect"
 	"github.com/common-fate/sdk/service/control/integration"
-	"github.com/common-fate/terraform-provider-commonfate/internal/helpers"
+	"github.com/common-fate/terraform-provider-commonfate/internal/utilities/diags"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -142,7 +142,7 @@ func (r *SlackIntegrationResource) Create(ctx context.Context, req resource.Crea
 		return
 	}
 
-	helpers.DiagsToTerraform(res.Msg.Integration.Diagnostics, &resp.Diagnostics)
+	diags.ToTerraform(res.Msg.Integration.Diagnostics, &resp.Diagnostics)
 
 	data.Id = types.StringValue(res.Msg.Integration.Id)
 
@@ -169,8 +169,10 @@ func (r *SlackIntegrationResource) Read(ctx context.Context, req resource.ReadRe
 	res, err := r.client.GetIntegration(ctx, connect.NewRequest(&integrationv1alpha1.GetIntegrationRequest{
 		Id: state.Id.ValueString(),
 	}))
-
-	if err != nil {
+	if connect.CodeOf(err) == connect.CodeNotFound {
+		resp.State.RemoveResource(ctx)
+		return
+	} else if err != nil {
 		resp.Diagnostics.AddError(
 			"Failed to read Slack Integration",
 			err.Error(),
@@ -245,7 +247,7 @@ func (r *SlackIntegrationResource) Update(ctx context.Context, req resource.Upda
 		return
 	}
 
-	helpers.DiagsToTerraform(res.Msg.Integration.Diagnostics, &resp.Diagnostics)
+	diags.ToTerraform(res.Msg.Integration.Diagnostics, &resp.Diagnostics)
 
 	data.Id = types.StringValue(res.Msg.Integration.Id)
 

@@ -8,7 +8,7 @@ import (
 	config_client "github.com/common-fate/sdk/config"
 	configv1alpha1 "github.com/common-fate/sdk/gen/commonfate/control/config/v1alpha1"
 	"github.com/common-fate/sdk/service/control/configsvc"
-	"github.com/common-fate/terraform-provider-commonfate/internal/helpers"
+	"github.com/common-fate/terraform-provider-commonfate/internal/utilities/eid"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -20,9 +20,9 @@ import (
 type AvailabilitySpec struct {
 	ID             types.String `tfsdk:"id"`
 	WorkflowID     types.String `tfsdk:"workflow_id"`
-	Role           helpers.EID  `tfsdk:"role"`
-	Target         helpers.EID  `tfsdk:"target"`
-	IdentityDomain *helpers.EID `tfsdk:"identity_domain"`
+	Role           eid.EID      `tfsdk:"role"`
+	Target         eid.EID      `tfsdk:"target"`
+	IdentityDomain *eid.EID     `tfsdk:"identity_domain"`
 }
 
 // AccessRuleResource is the data source implementation.
@@ -84,19 +84,19 @@ func (r *AvailabilitySpecResource) Schema(ctx context.Context, req resource.Sche
 			"role": schema.SingleNestedAttribute{
 				MarkdownDescription: "The role to make available",
 				Required:            true,
-				Attributes:          helpers.EIDAttrs,
+				Attributes:          eid.EIDAttrs,
 			},
 
 			"target": schema.SingleNestedAttribute{
 				MarkdownDescription: "The target to make available. Should be a Selector entity.",
 				Required:            true,
-				Attributes:          helpers.EIDAttrs,
+				Attributes:          eid.EIDAttrs,
 			},
 
 			"identity_domain": schema.SingleNestedAttribute{
 				MarkdownDescription: "The identity domain associated with the integration",
 				Optional:            true,
-				Attributes:          helpers.EIDAttrs,
+				Attributes:          eid.EIDAttrs,
 			},
 		},
 		MarkdownDescription: `A specifier to make resources available for selection under a particular Access Workflow`,
@@ -191,9 +191,9 @@ func (r *AvailabilitySpecResource) Read(ctx context.Context, req resource.ReadRe
 
 	state.ID = types.StringValue(res.Msg.AvailabilitySpec.Id)
 	state.WorkflowID = types.StringValue(res.Msg.AvailabilitySpec.WorkflowId)
-	state.Role = helpers.UidFromAPI(res.Msg.AvailabilitySpec.Role)
-	state.Target = helpers.UidFromAPI(res.Msg.AvailabilitySpec.Target)
-	state.IdentityDomain = helpers.UidPtrFromAPI(res.Msg.AvailabilitySpec.IdentityDomain)
+	state.Role = eid.EIDFromAPI(res.Msg.AvailabilitySpec.Role)
+	state.Target = eid.EIDFromAPI(res.Msg.AvailabilitySpec.Target)
+	state.IdentityDomain = eid.EIDPtrFromAPI(res.Msg.AvailabilitySpec.IdentityDomain)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }
