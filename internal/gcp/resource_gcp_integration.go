@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/bufbuild/connect-go"
+	"github.com/common-fate/grab"
 	config_client "github.com/common-fate/sdk/config"
 	integrationv1alpha1 "github.com/common-fate/sdk/gen/commonfate/control/integration/v1alpha1"
 	"github.com/common-fate/sdk/gen/commonfate/control/integration/v1alpha1/integrationv1alpha1connect"
@@ -200,8 +201,8 @@ func (r *GCPIntegrationResource) Read(ctx context.Context, req resource.ReadRequ
 	state = GCPIntegrationModel{
 		Id:                                  types.StringValue(state.Id.ValueString()),
 		Name:                                types.StringValue(res.Msg.Integration.Name),
-		WorkloadIdentityConfig:              types.StringValue(integ.ReaderWorkloadIdentityConfig),
-		ServiceAccountCredentialsSecretPath: types.StringValue(integ.ReaderServiceAccountCredentialsSecretPath),
+		WorkloadIdentityConfig:              grab.If(integ.ReaderWorkloadIdentityConfig == "", types.StringNull(), types.StringValue(integ.ReaderWorkloadIdentityConfig)),
+		ServiceAccountCredentialsSecretPath: grab.If(integ.ReaderServiceAccountCredentialsSecretPath == "", types.StringNull(), types.StringValue(integ.ReaderServiceAccountCredentialsSecretPath)),
 		OrganizationID:                      types.StringValue(integ.OrganizationId),
 		GoogleWorkspaceCustomerID:           types.StringValue(integ.GoogleWorkspaceCustomerId),
 	}
