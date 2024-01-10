@@ -19,9 +19,11 @@ import (
 )
 
 type EntraIntegrationModel struct {
-	Id       types.String `tfsdk:"id"`
-	Name     types.String `tfsdk:"name"`
-	TenantID types.String `tfsdk:"tenant_id"`
+	Id                     types.String `tfsdk:"id"`
+	Name                   types.String `tfsdk:"name"`
+	TenantID               types.String `tfsdk:"tenant_id"`
+	ClientID               types.String `tfsdk:"client_id"`
+	ClientSecretSecretPath types.String `tfsdk:"client_secret_secret_path"`
 }
 
 type EntraIntegrationResource struct {
@@ -81,6 +83,14 @@ func (r *EntraIntegrationResource) Schema(ctx context.Context, req resource.Sche
 				MarkdownDescription: "The Microsoft Entra Tenant ID",
 				Optional:            true,
 			},
+			"client_id": schema.StringAttribute{
+				MarkdownDescription: "The Microsoft Entra application Client ID",
+				Optional:            true,
+			},
+			"client_secret_secret_path": schema.StringAttribute{
+				MarkdownDescription: "Path to secret for the Microsoft Entra Client Secret",
+				Optional:            true,
+			},
 		},
 		MarkdownDescription: `Registers a Microsoft Entra integration`,
 	}
@@ -115,7 +125,9 @@ func (r *EntraIntegrationResource) Create(ctx context.Context, req resource.Crea
 		Config: &integrationv1alpha1.Config{
 			Config: &integrationv1alpha1.Config_Entra{
 				Entra: &integrationv1alpha1.Entra{
-					TenantId: data.TenantID.ValueString(),
+					TenantId:               data.TenantID.ValueString(),
+					ClientId:               data.ClientID.ValueString(),
+					ClientSecretSecretPath: data.ClientSecretSecretPath.ValueString(),
 				},
 			},
 		},
@@ -180,9 +192,11 @@ func (r *EntraIntegrationResource) Read(ctx context.Context, req resource.ReadRe
 	}
 
 	state = EntraIntegrationModel{
-		Id:       types.StringValue(state.Id.ValueString()),
-		Name:     types.StringValue(res.Msg.Integration.Name),
-		TenantID: types.StringValue(integ.TenantId),
+		Id:                     types.StringValue(state.Id.ValueString()),
+		Name:                   types.StringValue(res.Msg.Integration.Name),
+		TenantID:               types.StringValue(integ.TenantId),
+		ClientID:               types.StringValue(integ.ClientId),
+		ClientSecretSecretPath: types.StringValue(integ.ClientSecretSecretPath),
 	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
@@ -215,7 +229,9 @@ func (r *EntraIntegrationResource) Update(ctx context.Context, req resource.Upda
 			Config: &integrationv1alpha1.Config{
 				Config: &integrationv1alpha1.Config_Entra{
 					Entra: &integrationv1alpha1.Entra{
-						TenantId: data.TenantID.ValueString(),
+						TenantId:               data.TenantID.ValueString(),
+						ClientId:               data.ClientID.ValueString(),
+						ClientSecretSecretPath: data.ClientSecretSecretPath.ValueString(),
 					},
 				},
 			},
