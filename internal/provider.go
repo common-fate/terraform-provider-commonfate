@@ -144,6 +144,7 @@ func (p *CommonFateProvider) Resources(_ context.Context) []func() resource.Reso
 		NewOpsGenieIntegrationResource,
 		NewEntraIntegrationResource,
 		NewEntraGroupSelectorResource,
+		NewEntraGroupAvailabilitiesResource,
 	}
 }
 
@@ -209,4 +210,7 @@ func NewEntraIntegrationResource() resource.Resource {
 }
 func NewEntraGroupSelectorResource() resource.Resource {
 	return &entra.EntraGroupSelectorResource{}
+}
+func NewEntraGroupAvailabilitiesResource() resource.Resource {
+	return &entra.EntraGroupAvailabilitiesResource{}
 }
