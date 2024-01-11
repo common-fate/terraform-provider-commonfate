@@ -19,7 +19,7 @@ import (
 type EntraGroupSelector struct {
 	ID       types.String `tfsdk:"id"`
 	Name     types.String `tfsdk:"name"`
-	TenantID types.String `tfsdk:"entra_tenant_id"`
+	TenantID types.String `tfsdk:"tenant_id"`
 	When     types.String `tfsdk:"when"`
 }
 
@@ -89,7 +89,7 @@ func (r *EntraGroupSelectorResource) Schema(ctx context.Context, req resource.Sc
 				Optional:            true,
 			},
 
-			"entra_tenant_id": schema.StringAttribute{
+			"tenant_id": schema.StringAttribute{
 				MarkdownDescription: "The Entra Tenant ID",
 				Required:            true,
 			},

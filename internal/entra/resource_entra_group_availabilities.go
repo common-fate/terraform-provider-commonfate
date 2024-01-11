@@ -21,7 +21,7 @@ type EntraGroupAvailabilities struct {
 	ID                   types.String `tfsdk:"id"`
 	WorkflowID           types.String `tfsdk:"workflow_id"`
 	EntraGroupSelectorID types.String `tfsdk:"entra_group_selector_id"`
-	EntraTenantID        types.String `tfsdk:"entra_tenant_id"`
+	EntraTenantID        types.String `tfsdk:"tenant_id"`
 }
 
 type EntraGroupAvailabilitiesResource struct {
@@ -81,7 +81,7 @@ func (r *EntraGroupAvailabilitiesResource) Schema(ctx context.Context, req resou
 				MarkdownDescription: "The target to make available. Should be a Selector entity.",
 				Required:            true,
 			},
-			"entra_tenant_id": schema.StringAttribute{
+			"tenant_id": schema.StringAttribute{
 				MarkdownDescription: "The Entra Tenant ID",
 				Required:            true,
 			},
