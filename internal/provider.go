@@ -8,6 +8,7 @@ import (
 	config_client "github.com/common-fate/sdk/config"
 	"github.com/common-fate/terraform-provider-commonfate/internal/access"
 	"github.com/common-fate/terraform-provider-commonfate/internal/aws"
+	"github.com/common-fate/terraform-provider-commonfate/internal/entra"
 	"github.com/common-fate/terraform-provider-commonfate/internal/gcp"
 	"github.com/common-fate/terraform-provider-commonfate/internal/generic"
 	"github.com/common-fate/terraform-provider-commonfate/internal/opsgenie"
@@ -141,6 +142,9 @@ func (p *CommonFateProvider) Resources(_ context.Context) []func() resource.Reso
 		NewAWSAccountSelectorResource,
 		NewAWSIDCAccountAvailabilitiesResource,
 		NewOpsGenieIntegrationResource,
+		NewEntraIntegrationResource,
+		NewEntraGroupSelectorResource,
+		NewEntraGroupAvailabilitiesResource,
 	}
 }
 
@@ -200,4 +204,13 @@ func NewAWSAccountSelectorResource() resource.Resource {
 }
 func NewOpsGenieIntegrationResource() resource.Resource {
 	return &opsgenie.OpsGenieIntegrationResource{}
+}
+func NewEntraIntegrationResource() resource.Resource {
+	return &entra.EntraIntegrationResource{}
+}
+func NewEntraGroupSelectorResource() resource.Resource {
+	return &entra.EntraGroupSelectorResource{}
+}
+func NewEntraGroupAvailabilitiesResource() resource.Resource {
+	return &entra.EntraGroupAvailabilitiesResource{}
 }
