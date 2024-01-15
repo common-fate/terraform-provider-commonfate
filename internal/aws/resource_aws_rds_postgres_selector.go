@@ -17,10 +17,10 @@ import (
 )
 
 type AWSRDSPostgresSelector struct {
-	ID    types.String `tfsdk:"id"`
-	Name  types.String `tfsdk:"name"`
-	OrgID types.String `tfsdk:"aws_organization_id"`
-	When  types.String `tfsdk:"when"`
+	ID        types.String `tfsdk:"id"`
+	Name      types.String `tfsdk:"name"`
+	AccountID types.String `tfsdk:"aws_account_id"`
+	When      types.String `tfsdk:"when"`
 }
 
 func (s AWSRDSPostgresSelector) ToAPI() *configv1alpha1.Selector {
@@ -29,8 +29,8 @@ func (s AWSRDSPostgresSelector) ToAPI() *configv1alpha1.Selector {
 		Name:         s.Name.ValueString(),
 		ResourceType: "AWS::RDS::Postgres",
 		BelongingTo: &entityv1alpha1.EID{
-			Type: "AWS::Organization",
-			Id:   s.OrgID.ValueString(),
+			Type: "AWS::Account",
+			Id:   s.AccountID.ValueString(),
 		},
 		When: s.When.ValueString(),
 	}
@@ -89,8 +89,8 @@ func (r *AWSRDSPostgresSelectorResource) Schema(ctx context.Context, req resourc
 				Optional:            true,
 			},
 
-			"aws_organization_id": schema.StringAttribute{
-				MarkdownDescription: "The AWS organization ID",
+			"aws_account_id": schema.StringAttribute{
+				MarkdownDescription: "The AWS Account ID",
 				Required:            true,
 			},
 
@@ -184,7 +184,7 @@ func (r *AWSRDSPostgresSelectorResource) Read(ctx context.Context, req resource.
 	}
 
 	state.Name = types.StringValue(res.Msg.Selector.Name)
-	state.OrgID = types.StringValue(res.Msg.Selector.BelongingTo.Id)
+	state.AccountID = types.StringValue(res.Msg.Selector.BelongingTo.Id)
 	state.When = types.StringValue(res.Msg.Selector.When)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
