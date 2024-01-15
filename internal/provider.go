@@ -145,6 +145,9 @@ func (p *CommonFateProvider) Resources(_ context.Context) []func() resource.Reso
 		NewEntraIntegrationResource,
 		NewEntraGroupSelectorResource,
 		NewEntraGroupAvailabilitiesResource,
+		NewAWSRDSPostgresIntegrationResource,
+		NewAWSRDSPostgresSelectorResource,
+		NewAWSRDSPostgresAvailabilitiesResource,
 	}
 }
 
@@ -213,4 +216,13 @@ func NewEntraGroupSelectorResource() resource.Resource {
 }
 func NewEntraGroupAvailabilitiesResource() resource.Resource {
 	return &entra.EntraGroupAvailabilitiesResource{}
+}
+func NewAWSRDSPostgresIntegrationResource() resource.Resource {
+	return &aws.AWSRDSPostgresIntegrationResource{}
+}
+func NewAWSRDSPostgresSelectorResource() resource.Resource {
+	return &aws.AWSRDSPostgresSelectorResource{}
+}
+func NewAWSRDSPostgresAvailabilitiesResource() resource.Resource {
+	return &aws.AWSRDSPostgresAvailabilitiesResource{}
 }
