@@ -16,44 +16,44 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-type AWSRDSPostgresSelector struct {
-	ID        types.String `tfsdk:"id"`
-	Name      types.String `tfsdk:"name"`
-	AccountID types.String `tfsdk:"aws_account_id"`
-	When      types.String `tfsdk:"when"`
+type AWSRDSSelector struct {
+	ID             types.String `tfsdk:"id"`
+	Name           types.String `tfsdk:"name"`
+	OrganizationID types.String `tfsdk:"aws_organization_id"`
+	When           types.String `tfsdk:"when"`
 }
 
-func (s AWSRDSPostgresSelector) ToAPI() *configv1alpha1.Selector {
+func (s AWSRDSSelector) ToAPI() *configv1alpha1.Selector {
 	return &configv1alpha1.Selector{
 		Id:           s.ID.ValueString(),
 		Name:         s.Name.ValueString(),
-		ResourceType: "AWS::RDS::Postgres",
+		ResourceType: "AWS::RDS::Instance",
 		BelongingTo: &entityv1alpha1.EID{
-			Type: "AWS::Account",
-			Id:   s.AccountID.ValueString(),
+			Type: "AWS::Organization",
+			Id:   s.OrganizationID.ValueString(),
 		},
 		When: s.When.ValueString(),
 	}
 }
 
 // AccessRuleResource is the data source implementation.
-type AWSRDSPostgresSelectorResource struct {
+type AWSRDSSelectorResource struct {
 	client *configsvc.Client
 }
 
 var (
-	_ resource.Resource                = &AWSRDSPostgresSelectorResource{}
-	_ resource.ResourceWithConfigure   = &AWSRDSPostgresSelectorResource{}
-	_ resource.ResourceWithImportState = &AWSRDSPostgresSelectorResource{}
+	_ resource.Resource                = &AWSRDSSelectorResource{}
+	_ resource.ResourceWithConfigure   = &AWSRDSSelectorResource{}
+	_ resource.ResourceWithImportState = &AWSRDSSelectorResource{}
 )
 
 // Metadata returns the data source type name.
-func (r *AWSRDSPostgresSelectorResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_aws_rds_postgres_selector"
+func (r *AWSRDSSelectorResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_aws_rds_selector"
 }
 
 // Configure adds the provider configured client to the data source.
-func (r *AWSRDSPostgresSelectorResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *AWSRDSSelectorResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -74,10 +74,10 @@ func (r *AWSRDSPostgresSelectorResource) Configure(_ context.Context, req resour
 
 // GetSchema defines the schema for the data source.
 // schema is based off the governance api
-func (r *AWSRDSPostgresSelectorResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *AWSRDSSelectorResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 
 	resp.Schema = schema.Schema{
-		Description: "A Selector to match AWS RDS Postgres databases with a criteria based on the 'when' field.",
+		Description: "A Selector to match AWS RDS databases with a criteria based on the 'when' field.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				MarkdownDescription: "The ID of the selector",
@@ -89,21 +89,21 @@ func (r *AWSRDSPostgresSelectorResource) Schema(ctx context.Context, req resourc
 				Optional:            true,
 			},
 
-			"aws_account_id": schema.StringAttribute{
+			"aws_organization_id": schema.StringAttribute{
 				MarkdownDescription: "The AWS Account ID",
 				Required:            true,
 			},
 
 			"when": schema.StringAttribute{
-				MarkdownDescription: "A Cedar expression with the criteria to match aws rds postgres databases on, e.g: `resource in AWS::Account::\"12345678912\"`",
+				MarkdownDescription: "A Cedar expression with the criteria to match aws rds databases on, e.g: `resource in AWS::Account::\"12345678912\"`",
 				Required:            true,
 			},
 		},
-		MarkdownDescription: `A Selector to match AWS RDS Postgres databases with a criteria based on the 'when' field.`,
+		MarkdownDescription: `A Selector to match AWS RDS databases with a criteria based on the 'when' field.`,
 	}
 }
 
-func (r *AWSRDSPostgresSelectorResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+func (r *AWSRDSSelectorResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 
 	if r.client == nil {
 		resp.Diagnostics.AddError(
@@ -113,7 +113,7 @@ func (r *AWSRDSPostgresSelectorResource) Create(ctx context.Context, req resourc
 
 		return
 	}
-	var data *AWSRDSPostgresSelector
+	var data *AWSRDSSelector
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -153,7 +153,7 @@ func (r *AWSRDSPostgresSelectorResource) Create(ctx context.Context, req resourc
 }
 
 // Read refreshes the Terraform state with the latest data.
-func (r *AWSRDSPostgresSelectorResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+func (r *AWSRDSSelectorResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	if r.client == nil {
 		resp.Diagnostics.AddError(
 			"Unconfigured HTTP Client",
@@ -162,7 +162,7 @@ func (r *AWSRDSPostgresSelectorResource) Read(ctx context.Context, req resource.
 
 		return
 	}
-	var state AWSRDSPostgresSelector
+	var state AWSRDSSelector
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
@@ -184,20 +184,20 @@ func (r *AWSRDSPostgresSelectorResource) Read(ctx context.Context, req resource.
 	}
 
 	state.Name = types.StringValue(res.Msg.Selector.Name)
-	state.AccountID = types.StringValue(res.Msg.Selector.BelongingTo.Id)
+	state.OrganizationID = types.StringValue(res.Msg.Selector.BelongingTo.Id)
 	state.When = types.StringValue(res.Msg.Selector.When)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }
 
-func (r *AWSRDSPostgresSelectorResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *AWSRDSSelectorResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	if r.client == nil {
 		resp.Diagnostics.AddError(
 			"Unconfigured HTTP Client",
 			"Expected configured HTTP client. Please report this issue to the provider developers.",
 		)
 	}
-	var data AWSRDSPostgresSelector
+	var data AWSRDSSelector
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -233,14 +233,14 @@ func (r *AWSRDSPostgresSelectorResource) Update(ctx context.Context, req resourc
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *AWSRDSPostgresSelectorResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+func (r *AWSRDSSelectorResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	if r.client == nil {
 		resp.Diagnostics.AddError(
 			"Unconfigured HTTP Client",
 			"Expected configured HTTP client. Please report this issue to the provider developers.",
 		)
 	}
-	var data *AWSRDSPostgresSelector
+	var data *AWSRDSSelector
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -269,7 +269,7 @@ func (r *AWSRDSPostgresSelectorResource) Delete(ctx context.Context, req resourc
 	}
 }
 
-func (r *AWSRDSPostgresSelectorResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *AWSRDSSelectorResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	// Retrieve import ID and save to id attribute
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }

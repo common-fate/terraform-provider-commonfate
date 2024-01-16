@@ -17,30 +17,30 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-type AWSRDSPostgresIntegrationModel struct {
+type AWSRDSIntegrationModel struct {
 	Id           types.String `tfsdk:"id"`
 	Name         types.String `tfsdk:"name"`
 	ReadRoleARNs types.Set    `tfsdk:"read_role_arns"`
 	Regions      types.Set    `tfsdk:"regions"`
 }
 
-type AWSRDSPostgresIntegrationResource struct {
+type AWSRDSIntegrationResource struct {
 	client integrationv1alpha1connect.IntegrationServiceClient
 }
 
 var (
-	_ resource.Resource                = &AWSRDSPostgresIntegrationResource{}
-	_ resource.ResourceWithConfigure   = &AWSRDSPostgresIntegrationResource{}
-	_ resource.ResourceWithImportState = &AWSRDSPostgresIntegrationResource{}
+	_ resource.Resource                = &AWSRDSIntegrationResource{}
+	_ resource.ResourceWithConfigure   = &AWSRDSIntegrationResource{}
+	_ resource.ResourceWithImportState = &AWSRDSIntegrationResource{}
 )
 
 // Metadata returns the data source type name.
-func (r *AWSRDSPostgresIntegrationResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_aws_rds_postgres_integration"
+func (r *AWSRDSIntegrationResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_aws_rds_integration"
 }
 
 // Configure adds the provider configured client to the data source.
-func (r *AWSRDSPostgresIntegrationResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *AWSRDSIntegrationResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -61,10 +61,10 @@ func (r *AWSRDSPostgresIntegrationResource) Configure(_ context.Context, req res
 
 // GetSchema defines the schema for the data source.
 // schema is based off the governance api
-func (r *AWSRDSPostgresIntegrationResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *AWSRDSIntegrationResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 
 	resp.Schema = schema.Schema{
-		Description: `Registers an AWS RDS Postgres integration`,
+		Description: `Registers an AWS RDS integration`,
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				MarkdownDescription: "The internal Common Fate ID",
@@ -88,11 +88,11 @@ func (r *AWSRDSPostgresIntegrationResource) Schema(ctx context.Context, req reso
 				ElementType:         types.StringType,
 			},
 		},
-		MarkdownDescription: `Registers an AWS RDS Postgres integration`,
+		MarkdownDescription: `Registers an AWS RDS integration`,
 	}
 }
 
-func (r *AWSRDSPostgresIntegrationResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+func (r *AWSRDSIntegrationResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 
 	if r.client == nil {
 		resp.Diagnostics.AddError(
@@ -102,7 +102,7 @@ func (r *AWSRDSPostgresIntegrationResource) Create(ctx context.Context, req reso
 
 		return
 	}
-	var data *AWSRDSPostgresIntegrationModel
+	var data *AWSRDSIntegrationModel
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -130,8 +130,8 @@ func (r *AWSRDSPostgresIntegrationResource) Create(ctx context.Context, req reso
 	res, err := r.client.CreateIntegration(ctx, connect.NewRequest(&integrationv1alpha1.CreateIntegrationRequest{
 		Name: data.Name.ValueString(),
 		Config: &integrationv1alpha1.Config{
-			Config: &integrationv1alpha1.Config_AwsRdsPostgres{
-				AwsRdsPostgres: &integrationv1alpha1.AWSRDSPostgres{
+			Config: &integrationv1alpha1.Config_AwsRds{
+				AwsRds: &integrationv1alpha1.AWSRDS{
 					Regions:      regions,
 					ReadRoleArns: readRoleARNs,
 				},
@@ -141,7 +141,7 @@ func (r *AWSRDSPostgresIntegrationResource) Create(ctx context.Context, req reso
 
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to Create Resource: AWS RDS Postgres Integration",
+			"Unable to Create Resource: AWS RDS Integration",
 			"An unexpected error occurred while communicating with Common Fate API. "+
 				"Please report this issue to the provider developers.\n\n"+
 				"JSON Error: "+err.Error(),
@@ -157,7 +157,7 @@ func (r *AWSRDSPostgresIntegrationResource) Create(ctx context.Context, req reso
 }
 
 // Read refreshes the Terraform state with the latest data.
-func (r *AWSRDSPostgresIntegrationResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+func (r *AWSRDSIntegrationResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	if r.client == nil {
 		resp.Diagnostics.AddError(
 			"Unconfigured HTTP Client",
@@ -166,7 +166,7 @@ func (r *AWSRDSPostgresIntegrationResource) Read(ctx context.Context, req resour
 
 		return
 	}
-	var state AWSRDSPostgresIntegrationModel
+	var state AWSRDSIntegrationModel
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
@@ -181,7 +181,7 @@ func (r *AWSRDSPostgresIntegrationResource) Read(ctx context.Context, req resour
 		return
 	} else if err != nil {
 		resp.Diagnostics.AddError(
-			"Failed to read AWS RDS Postgres Integration",
+			"Failed to read AWS RDS Integration",
 			err.Error(),
 		)
 		return
@@ -190,20 +190,20 @@ func (r *AWSRDSPostgresIntegrationResource) Read(ctx context.Context, req resour
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }
 
-func (r *AWSRDSPostgresIntegrationResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *AWSRDSIntegrationResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	if r.client == nil {
 		resp.Diagnostics.AddError(
 			"Unconfigured HTTP Client",
 			"Expected configured HTTP client. Please report this issue to the provider developers.",
 		)
 	}
-	var data AWSRDSPostgresIntegrationModel
+	var data AWSRDSIntegrationModel
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		resp.Diagnostics.AddError(
-			"Unable to update AWS RDS Postgres Integration",
+			"Unable to update AWS RDS Integration",
 			"An unexpected error occurred while parsing the resource update response.",
 		)
 
@@ -226,8 +226,8 @@ func (r *AWSRDSPostgresIntegrationResource) Update(ctx context.Context, req reso
 			Id:   data.Id.ValueString(),
 			Name: data.Name.ValueString(),
 			Config: &integrationv1alpha1.Config{
-				Config: &integrationv1alpha1.Config_AwsRdsPostgres{
-					AwsRdsPostgres: &integrationv1alpha1.AWSRDSPostgres{
+				Config: &integrationv1alpha1.Config_AwsRds{
+					AwsRds: &integrationv1alpha1.AWSRDS{
 						Regions:      regions,
 						ReadRoleArns: readRoleARNs,
 					},
@@ -238,7 +238,7 @@ func (r *AWSRDSPostgresIntegrationResource) Update(ctx context.Context, req reso
 
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to Update AWS RDS Postgres Integration",
+			"Unable to Update AWS RDS Integration",
 			"An unexpected error occurred while communicating with Common Fate API. "+
 				"Please report this issue to the provider developers.\n\n"+
 				"JSON Error: "+err.Error(),
@@ -253,20 +253,20 @@ func (r *AWSRDSPostgresIntegrationResource) Update(ctx context.Context, req reso
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *AWSRDSPostgresIntegrationResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+func (r *AWSRDSIntegrationResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	if r.client == nil {
 		resp.Diagnostics.AddError(
 			"Unconfigured HTTP Client",
 			"Expected configured HTTP client. Please report this issue to the provider developers.",
 		)
 	}
-	var data *AWSRDSPostgresIntegrationModel
+	var data *AWSRDSIntegrationModel
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		resp.Diagnostics.AddError(
-			"Unable to delete AWS RDS Postgres Integration",
+			"Unable to delete AWS RDS Integration",
 			"An unexpected error occurred while parsing the resource creation response.",
 		)
 
@@ -279,7 +279,7 @@ func (r *AWSRDSPostgresIntegrationResource) Delete(ctx context.Context, req reso
 
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to delete AWS RDS Postgres Integration",
+			"Unable to delete AWS RDS Integration",
 			"An unexpected error occurred while parsing the resource creation response. "+
 				"Please report this issue to the provider developers.\n\n"+
 				"JSON Error: "+err.Error(),
@@ -289,7 +289,7 @@ func (r *AWSRDSPostgresIntegrationResource) Delete(ctx context.Context, req reso
 	}
 }
 
-func (r *AWSRDSPostgresIntegrationResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *AWSRDSIntegrationResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	// Retrieve import ID and save to id attribute
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }

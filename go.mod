@@ -6,7 +6,7 @@ toolchain go1.21.4
 
 require (
 	github.com/bufbuild/connect-go v1.10.0
-	github.com/common-fate/sdk v0.0.0-20240115021831-c5efdad4ae36
+	github.com/common-fate/sdk v0.0.0-20240116012834-a623fa0db69f
 	github.com/hashicorp/terraform-plugin-docs v0.13.0
 	github.com/hashicorp/terraform-plugin-framework v1.4.2
 	github.com/hashicorp/terraform-plugin-log v0.9.0

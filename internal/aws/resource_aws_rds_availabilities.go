@@ -17,30 +17,30 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-type AWSRDSPostgresAvailabilities struct {
-	ID                       types.String `tfsdk:"id"`
-	WorkflowID               types.String `tfsdk:"workflow_id"`
-	AWSRDSPostgresSelectorID types.String `tfsdk:"aws_rds_postgres_selector_id"`
-	AWSIdentityStoreID       types.String `tfsdk:"aws_identity_store_id"`
+type AWSRDSAvailabilities struct {
+	ID                 types.String `tfsdk:"id"`
+	WorkflowID         types.String `tfsdk:"workflow_id"`
+	AWSRDSSelectorID   types.String `tfsdk:"aws_rds_selector_id"`
+	AWSIdentityStoreID types.String `tfsdk:"aws_identity_store_id"`
 }
 
-type AWSRDSPostgresAvailabilitiesResource struct {
+type AWSRDSAvailabilitiesResource struct {
 	client *configsvc.Client
 }
 
 var (
-	_ resource.Resource                = &AWSRDSPostgresAvailabilitiesResource{}
-	_ resource.ResourceWithConfigure   = &AWSRDSPostgresAvailabilitiesResource{}
-	_ resource.ResourceWithImportState = &AWSRDSPostgresAvailabilitiesResource{}
+	_ resource.Resource                = &AWSRDSAvailabilitiesResource{}
+	_ resource.ResourceWithConfigure   = &AWSRDSAvailabilitiesResource{}
+	_ resource.ResourceWithImportState = &AWSRDSAvailabilitiesResource{}
 )
 
 // Metadata returns the data source type name.
-func (r *AWSRDSPostgresAvailabilitiesResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_aws_rds_postgres_availabilities"
+func (r *AWSRDSAvailabilitiesResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_aws_rds_availabilities"
 }
 
 // Configure adds the provider configured client to the data source.
-func (r *AWSRDSPostgresAvailabilitiesResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *AWSRDSAvailabilitiesResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -61,10 +61,10 @@ func (r *AWSRDSPostgresAvailabilitiesResource) Configure(_ context.Context, req 
 
 // GetSchema defines the schema for the data source.
 // schema is based off the governance api
-func (r *AWSRDSPostgresAvailabilitiesResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *AWSRDSAvailabilitiesResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 
 	resp.Schema = schema.Schema{
-		Description: "A specifier to make AWS RDS Postgres databases available for selection under a particular Access Workflow",
+		Description: "A specifier to make AWS RDS databases available for selection under a particular Access Workflow",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				MarkdownDescription: "The internal Common Fate ID",
@@ -77,7 +77,7 @@ func (r *AWSRDSPostgresAvailabilitiesResource) Schema(ctx context.Context, req r
 				MarkdownDescription: "The Access Workflow ID",
 				Required:            true,
 			},
-			"aws_rds_postgres_selector_id": schema.StringAttribute{
+			"aws_rds_selector_id": schema.StringAttribute{
 				MarkdownDescription: "The target to make available. Should be a Selector entity.",
 				Required:            true,
 			},
@@ -86,11 +86,11 @@ func (r *AWSRDSPostgresAvailabilitiesResource) Schema(ctx context.Context, req r
 				Required:            true,
 			},
 		},
-		MarkdownDescription: `A specifier to make AWS rds postgres databases available for selection under a particular Access Workflow`,
+		MarkdownDescription: `A specifier to make AWS rds databases available for selection under a particular Access Workflow`,
 	}
 }
 
-func (r *AWSRDSPostgresAvailabilitiesResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+func (r *AWSRDSAvailabilitiesResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 
 	if r.client == nil {
 		resp.Diagnostics.AddError(
@@ -100,7 +100,7 @@ func (r *AWSRDSPostgresAvailabilitiesResource) Create(ctx context.Context, req r
 
 		return
 	}
-	var data *AWSRDSPostgresAvailabilities
+	var data *AWSRDSAvailabilities
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -122,7 +122,7 @@ func (r *AWSRDSPostgresAvailabilitiesResource) Create(ctx context.Context, req r
 		WorkflowId: data.WorkflowID.ValueString(),
 		Target: &entityv1alpha1.EID{
 			Type: "Access::Selector",
-			Id:   data.AWSRDSPostgresSelectorID.ValueString(),
+			Id:   data.AWSRDSSelectorID.ValueString(),
 		},
 		IdentityDomain: &entityv1alpha1.EID{
 			Type: "AWS::IDC::IdentityStore",
@@ -134,7 +134,7 @@ func (r *AWSRDSPostgresAvailabilitiesResource) Create(ctx context.Context, req r
 
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to create AWS RDS Postgres Availabilities",
+			"Unable to create AWS RDS Availabilities",
 			"An unexpected error occurred while communicating with Common Fate API. "+
 				"Please report this issue to the provider developers.\n\n"+
 				"JSON Error: "+err.Error(),
@@ -152,7 +152,7 @@ func (r *AWSRDSPostgresAvailabilitiesResource) Create(ctx context.Context, req r
 }
 
 // Read refreshes the Terraform state with the latest data.
-func (r *AWSRDSPostgresAvailabilitiesResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+func (r *AWSRDSAvailabilitiesResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	if r.client == nil {
 		resp.Diagnostics.AddError(
 			"Unconfigured HTTP Client",
@@ -161,7 +161,7 @@ func (r *AWSRDSPostgresAvailabilitiesResource) Read(ctx context.Context, req res
 
 		return
 	}
-	var state AWSRDSPostgresAvailabilities
+	var state AWSRDSAvailabilities
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
@@ -176,7 +176,7 @@ func (r *AWSRDSPostgresAvailabilitiesResource) Read(ctx context.Context, req res
 		return
 	} else if err != nil {
 		resp.Diagnostics.AddError(
-			"Failed to read AWS RDS Postgres Availabilities",
+			"Failed to read AWS RDS Availabilities",
 			err.Error(),
 		)
 		return
@@ -184,7 +184,7 @@ func (r *AWSRDSPostgresAvailabilitiesResource) Read(ctx context.Context, req res
 
 	state.ID = types.StringValue(res.Msg.AvailabilitySpec.Id)
 	state.WorkflowID = types.StringValue(res.Msg.AvailabilitySpec.WorkflowId)
-	state.AWSRDSPostgresSelectorID = types.StringValue(res.Msg.AvailabilitySpec.Target.Id)
+	state.AWSRDSSelectorID = types.StringValue(res.Msg.AvailabilitySpec.Target.Id)
 
 	if res.Msg.AvailabilitySpec.IdentityDomain != nil {
 		state.AWSIdentityStoreID = types.StringValue(res.Msg.AvailabilitySpec.IdentityDomain.Id)
@@ -193,14 +193,14 @@ func (r *AWSRDSPostgresAvailabilitiesResource) Read(ctx context.Context, req res
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }
 
-func (r *AWSRDSPostgresAvailabilitiesResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *AWSRDSAvailabilitiesResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	if r.client == nil {
 		resp.Diagnostics.AddError(
 			"Unconfigured HTTP Client",
 			"Expected configured HTTP client. Please report this issue to the provider developers.",
 		)
 	}
-	var data AWSRDSPostgresAvailabilities
+	var data AWSRDSAvailabilities
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -222,7 +222,7 @@ func (r *AWSRDSPostgresAvailabilitiesResource) Update(ctx context.Context, req r
 		WorkflowId: data.WorkflowID.ValueString(),
 		Target: &entityv1alpha1.EID{
 			Type: "Access::Selector",
-			Id:   data.AWSRDSPostgresSelectorID.ValueString(),
+			Id:   data.AWSRDSSelectorID.ValueString(),
 		},
 		IdentityDomain: &entityv1alpha1.EID{
 			Type: "AWS::IDC::IdentityStore",
@@ -235,7 +235,7 @@ func (r *AWSRDSPostgresAvailabilitiesResource) Update(ctx context.Context, req r
 	}))
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to update AWS RDS Postgres Availabilities",
+			"Unable to update AWS RDS Availabilities",
 			"An unexpected error occurred while communicating with Common Fate API. "+
 				"Please report this issue to the provider developers.\n\n"+
 				"JSON Error: "+err.Error(),
@@ -251,20 +251,20 @@ func (r *AWSRDSPostgresAvailabilitiesResource) Update(ctx context.Context, req r
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *AWSRDSPostgresAvailabilitiesResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+func (r *AWSRDSAvailabilitiesResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	if r.client == nil {
 		resp.Diagnostics.AddError(
 			"Unconfigured HTTP Client",
 			"Expected configured HTTP client. Please report this issue to the provider developers.",
 		)
 	}
-	var data *AWSRDSPostgresAvailabilities
+	var data *AWSRDSAvailabilities
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		resp.Diagnostics.AddError(
-			"Unable to delete AWS RDS Postgres Availabilities",
+			"Unable to delete AWS RDS Availabilities",
 			"An unexpected error occurred while parsing the resource creation response.",
 		)
 
@@ -277,7 +277,7 @@ func (r *AWSRDSPostgresAvailabilitiesResource) Delete(ctx context.Context, req r
 
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to delete AWS RDS Postgres Availabilities",
+			"Unable to delete AWS RDS Availabilities",
 			"An unexpected error occurred while parsing the resource creation response. "+
 				"Please report this issue to the provider developers.\n\n"+
 				"JSON Error: "+err.Error(),
@@ -287,7 +287,7 @@ func (r *AWSRDSPostgresAvailabilitiesResource) Delete(ctx context.Context, req r
 	}
 }
 
-func (r *AWSRDSPostgresAvailabilitiesResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *AWSRDSAvailabilitiesResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	// Retrieve import ID and save to id attribute
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
