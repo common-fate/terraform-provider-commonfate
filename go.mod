@@ -6,6 +6,7 @@ toolchain go1.21.4
 
 require (
 	github.com/bufbuild/connect-go v1.10.0
+	github.com/common-fate/grab v1.1.0
 	github.com/common-fate/sdk v0.0.0-20240123023155-cda7be3cd472
 	github.com/hashicorp/terraform-plugin-docs v0.13.0
 	github.com/hashicorp/terraform-plugin-framework v1.4.2
@@ -23,6 +24,7 @@ require (
 )
 
 require (
+	connectrpc.com/connect v1.14.0 // indirect
 	github.com/99designs/go-keychain v0.0.0-20191008050251-8e49817e8af4 // indirect
 	github.com/99designs/keyring v1.2.2 // indirect
 	github.com/BurntSushi/toml v1.3.2 // indirect
@@ -32,7 +34,6 @@ require (
 	github.com/armon/go-radix v1.0.0 // indirect
 	github.com/bgentry/speakeasy v0.1.0 // indirect
 	github.com/common-fate/clio v1.2.3 // indirect
-	github.com/common-fate/grab v1.1.0 // indirect
 	github.com/danieljoos/wincred v1.1.2 // indirect
 	github.com/dvsekhvalnov/jose2go v1.6.0 // indirect
 	github.com/fatih/color v1.13.0 // indirect
