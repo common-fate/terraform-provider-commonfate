@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/bufbuild/connect-go"
+	"connectrpc.com/connect"
 	config_client "github.com/common-fate/sdk/config"
 	configv1alpha1 "github.com/common-fate/sdk/gen/commonfate/control/config/v1alpha1"
 	configv1alpha1connect "github.com/common-fate/sdk/gen/commonfate/control/config/v1alpha1/configv1alpha1connect"

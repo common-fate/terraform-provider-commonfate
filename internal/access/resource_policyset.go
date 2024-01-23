@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/bufbuild/connect-go"
+	"connectrpc.com/connect"
 	config_client "github.com/common-fate/sdk/config"
 	"github.com/common-fate/sdk/service/authz/policyset"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
