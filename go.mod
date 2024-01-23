@@ -6,11 +6,11 @@ toolchain go1.21.4
 
 require (
 	github.com/bufbuild/connect-go v1.10.0
-	github.com/common-fate/sdk v0.0.0-20240116012834-a623fa0db69f
+	github.com/common-fate/sdk v0.0.0-20240123023155-cda7be3cd472
 	github.com/hashicorp/terraform-plugin-docs v0.13.0
 	github.com/hashicorp/terraform-plugin-framework v1.4.2
 	github.com/hashicorp/terraform-plugin-log v0.9.0
-	google.golang.org/protobuf v1.31.0
+	google.golang.org/protobuf v1.32.0
 )
 
 require (
@@ -34,7 +34,7 @@ require (
 	github.com/common-fate/clio v1.2.3 // indirect
 	github.com/common-fate/grab v1.1.0 // indirect
 	github.com/danieljoos/wincred v1.1.2 // indirect
-	github.com/dvsekhvalnov/jose2go v1.5.0 // indirect
+	github.com/dvsekhvalnov/jose2go v1.6.0 // indirect
 	github.com/fatih/color v1.13.0 // indirect
 	github.com/godbus/dbus v0.0.0-20190726142602-4481cbc300e2 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
@@ -78,12 +78,12 @@ require (
 	github.com/zitadel/oidc/v2 v2.12.0 // indirect
 	go.uber.org/multierr v1.10.0 // indirect
 	go.uber.org/zap v1.26.0 // indirect
-	golang.org/x/crypto v0.15.0 // indirect
+	golang.org/x/crypto v0.17.0 // indirect
 	golang.org/x/mod v0.13.0 // indirect
 	golang.org/x/net v0.18.0 // indirect
 	golang.org/x/oauth2 v0.14.0 // indirect
-	golang.org/x/sys v0.14.0 // indirect
-	golang.org/x/term v0.14.0 // indirect
+	golang.org/x/sys v0.15.0 // indirect
+	golang.org/x/term v0.15.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/grpc v1.57.1 // indirect
