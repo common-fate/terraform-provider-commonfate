@@ -36,7 +36,7 @@ var (
 
 // Metadata returns the data source type name.
 func (r *AWSIDCGroupAvailabilitiesResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_aws_idc_account_availabilities"
+	resp.TypeName = req.ProviderTypeName + "_aws_idc_group_availabilities"
 }
 
 // Configure adds the provider configured client to the data source.
