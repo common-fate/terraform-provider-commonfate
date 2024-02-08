@@ -17,31 +17,30 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-type AWSIDCAccountAvailabilities struct {
+type AWSIDCGroupAvailabilities struct {
 	ID                 types.String `tfsdk:"id"`
 	WorkflowID         types.String `tfsdk:"workflow_id"`
-	PermissionSetARN   types.String `tfsdk:"aws_permission_set_arn"`
-	AccountSelectorID  types.String `tfsdk:"aws_account_selector_id"`
+	GroupSelectorID    types.String `tfsdk:"aws_idc_group_selector_id"`
 	AWSIdentityStoreID types.String `tfsdk:"aws_identity_store_id"`
 }
 
-type AWSIDCAccountAvailabilitiesResource struct {
+type AWSIDCGroupAvailabilitiesResource struct {
 	client *configsvc.Client
 }
 
 var (
-	_ resource.Resource                = &AWSIDCAccountAvailabilitiesResource{}
-	_ resource.ResourceWithConfigure   = &AWSIDCAccountAvailabilitiesResource{}
-	_ resource.ResourceWithImportState = &AWSIDCAccountAvailabilitiesResource{}
+	_ resource.Resource                = &AWSIDCGroupAvailabilitiesResource{}
+	_ resource.ResourceWithConfigure   = &AWSIDCGroupAvailabilitiesResource{}
+	_ resource.ResourceWithImportState = &AWSIDCGroupAvailabilitiesResource{}
 )
 
 // Metadata returns the data source type name.
-func (r *AWSIDCAccountAvailabilitiesResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_aws_idc_account_availabilities"
+func (r *AWSIDCGroupAvailabilitiesResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_aws_idc_group_availabilities"
 }
 
 // Configure adds the provider configured client to the data source.
-func (r *AWSIDCAccountAvailabilitiesResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *AWSIDCGroupAvailabilitiesResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -62,10 +61,10 @@ func (r *AWSIDCAccountAvailabilitiesResource) Configure(_ context.Context, req r
 
 // GetSchema defines the schema for the data source.
 // schema is based off the governance api
-func (r *AWSIDCAccountAvailabilitiesResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *AWSIDCGroupAvailabilitiesResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 
 	resp.Schema = schema.Schema{
-		Description: "A specifier to make AWS accounts available for selection under a particular Access Workflow",
+		Description: "A specifier to make AWS IAM Identity Center groups available for selection under a particular Access Workflow",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				MarkdownDescription: "The internal Common Fate ID",
@@ -79,11 +78,7 @@ func (r *AWSIDCAccountAvailabilitiesResource) Schema(ctx context.Context, req re
 				Required:            true,
 			},
 
-			"aws_permission_set_arn": schema.StringAttribute{
-				MarkdownDescription: "The AWS Permission Set to make available",
-				Required:            true,
-			},
-			"aws_account_selector_id": schema.StringAttribute{
+			"aws_idc_group_selector_id": schema.StringAttribute{
 				MarkdownDescription: "The target to make available. Should be a Selector entity.",
 				Required:            true,
 			},
@@ -92,11 +87,11 @@ func (r *AWSIDCAccountAvailabilitiesResource) Schema(ctx context.Context, req re
 				Required:            true,
 			},
 		},
-		MarkdownDescription: `A specifier to make AWS accounts available for selection under a particular Access Workflow`,
+		MarkdownDescription: `A specifier to make AWS IAM Identity Center groups available for selection under a particular Access Workflow`,
 	}
 }
 
-func (r *AWSIDCAccountAvailabilitiesResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+func (r *AWSIDCGroupAvailabilitiesResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 
 	if r.client == nil {
 		resp.Diagnostics.AddError(
@@ -106,7 +101,7 @@ func (r *AWSIDCAccountAvailabilitiesResource) Create(ctx context.Context, req re
 
 		return
 	}
-	var data *AWSIDCAccountAvailabilities
+	var data *AWSIDCGroupAvailabilities
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -122,13 +117,13 @@ func (r *AWSIDCAccountAvailabilitiesResource) Create(ctx context.Context, req re
 
 	input := &configv1alpha1.CreateAvailabilitySpecRequest{
 		Role: &entityv1alpha1.EID{
-			Type: "AWS::IDC::PermissionSet",
-			Id:   data.PermissionSetARN.ValueString(),
+			Type: "AWS::IDC::GroupRole",
+			Id:   "Member",
 		},
 		WorkflowId: data.WorkflowID.ValueString(),
 		Target: &entityv1alpha1.EID{
 			Type: "Access::Selector",
-			Id:   data.AccountSelectorID.ValueString(),
+			Id:   data.GroupSelectorID.ValueString(),
 		},
 		IdentityDomain: &entityv1alpha1.EID{
 			Type: "AWS::IDC::IdentityStore",
@@ -158,7 +153,7 @@ func (r *AWSIDCAccountAvailabilitiesResource) Create(ctx context.Context, req re
 }
 
 // Read refreshes the Terraform state with the latest data.
-func (r *AWSIDCAccountAvailabilitiesResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+func (r *AWSIDCGroupAvailabilitiesResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	if r.client == nil {
 		resp.Diagnostics.AddError(
 			"Unconfigured HTTP Client",
@@ -167,7 +162,7 @@ func (r *AWSIDCAccountAvailabilitiesResource) Read(ctx context.Context, req reso
 
 		return
 	}
-	var state AWSIDCAccountAvailabilities
+	var state AWSIDCGroupAvailabilities
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
@@ -190,8 +185,7 @@ func (r *AWSIDCAccountAvailabilitiesResource) Read(ctx context.Context, req reso
 
 	state.ID = types.StringValue(res.Msg.AvailabilitySpec.Id)
 	state.WorkflowID = types.StringValue(res.Msg.AvailabilitySpec.WorkflowId)
-	state.PermissionSetARN = types.StringValue(res.Msg.AvailabilitySpec.Role.Id)
-	state.AccountSelectorID = types.StringValue(res.Msg.AvailabilitySpec.Target.Id)
+	state.GroupSelectorID = types.StringValue(res.Msg.AvailabilitySpec.Target.Id)
 
 	if res.Msg.AvailabilitySpec.IdentityDomain != nil {
 		state.AWSIdentityStoreID = types.StringValue(res.Msg.AvailabilitySpec.IdentityDomain.Id)
@@ -200,14 +194,14 @@ func (r *AWSIDCAccountAvailabilitiesResource) Read(ctx context.Context, req reso
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }
 
-func (r *AWSIDCAccountAvailabilitiesResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *AWSIDCGroupAvailabilitiesResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	if r.client == nil {
 		resp.Diagnostics.AddError(
 			"Unconfigured HTTP Client",
 			"Expected configured HTTP client. Please report this issue to the provider developers.",
 		)
 	}
-	var data AWSIDCAccountAvailabilities
+	var data AWSIDCGroupAvailabilities
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -223,13 +217,13 @@ func (r *AWSIDCAccountAvailabilitiesResource) Update(ctx context.Context, req re
 	input := &configv1alpha1.AvailabilitySpec{
 		Id: data.ID.ValueString(),
 		Role: &entityv1alpha1.EID{
-			Type: "AWS::IDC::PermissionSet",
-			Id:   data.PermissionSetARN.ValueString(),
+			Type: "AWS::IDC::GroupRole",
+			Id:   "Member",
 		},
 		WorkflowId: data.WorkflowID.ValueString(),
 		Target: &entityv1alpha1.EID{
 			Type: "Access::Selector",
-			Id:   data.AccountSelectorID.ValueString(),
+			Id:   data.GroupSelectorID.ValueString(),
 		},
 		IdentityDomain: &entityv1alpha1.EID{
 			Type: "AWS::IDC::IdentityStore",
@@ -258,14 +252,14 @@ func (r *AWSIDCAccountAvailabilitiesResource) Update(ctx context.Context, req re
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *AWSIDCAccountAvailabilitiesResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+func (r *AWSIDCGroupAvailabilitiesResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	if r.client == nil {
 		resp.Diagnostics.AddError(
 			"Unconfigured HTTP Client",
 			"Expected configured HTTP client. Please report this issue to the provider developers.",
 		)
 	}
-	var data *AWSIDCAccountAvailabilities
+	var data *AWSIDCGroupAvailabilities
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -294,7 +288,7 @@ func (r *AWSIDCAccountAvailabilitiesResource) Delete(ctx context.Context, req re
 	}
 }
 
-func (r *AWSIDCAccountAvailabilitiesResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *AWSIDCGroupAvailabilitiesResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	// Retrieve import ID and save to id attribute
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
