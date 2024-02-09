@@ -4,7 +4,6 @@ description: |-
   The Common Fate provider is used to configure and manage access to your cloud.
 ---
 
-test
 
 The Common Fate provider is used to configure and customize your Common Fate deployment.
 Manage things like identitity, creating access policies and just-in-time (JIT) access workflows for permission to resources ranging across all cloud providers.
