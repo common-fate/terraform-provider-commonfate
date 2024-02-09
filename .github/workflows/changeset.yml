@@ -6,11 +6,6 @@ on:
       - "main"
       - "release/*"
 
-permissions:
-  id-token: write
-  contents: write
-  pull-requests: write
-
 jobs:
   changeset:
     name: Changeset
@@ -21,6 +16,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           lfs: true
+          token: ${{ secrets.GH_TAGGER_TOKEN }}
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
@@ -42,7 +38,7 @@ jobs:
         with:
           title: Version Packages for ${{ github.head_ref || github.ref_name }}
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_TAGGER_TOKEN }}
       - name: Publish
         if: steps.changesets.outputs.hasChangesets == 'false'
         # Push a new tag when changesets have been merged.
