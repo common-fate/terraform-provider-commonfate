@@ -1,0 +1,32 @@
+name: Update Docs
+
+on:
+  push:
+    branches-ignore:
+      - main
+
+jobs:
+  update-docs:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+
+      - name: Run make command
+
+        run: |
+          make generate
+
+      - name: Commit changes
+        uses: EndBug/add-and-commit@v9
+        with:
+          committer_name: GitHub Actions
+          committer_email: actions@github.com
+          message: 'Generate documentation'
+          add: '.'
