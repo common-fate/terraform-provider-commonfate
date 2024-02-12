@@ -147,7 +147,6 @@ func (p *CommonFateProvider) Resources(_ context.Context) []func() resource.Reso
 		NewEntraIntegrationResource,
 		NewEntraGroupSelectorResource,
 		NewEntraGroupAvailabilitiesResource,
-		NewAWSRDSIntegrationResource,
 		NewAWSRDSSelectorResource,
 		NewAWSRDSAvailabilitiesResource,
 		NewAWSIDCGroupSelectorResource,
@@ -229,9 +228,7 @@ func NewEntraGroupSelectorResource() resource.Resource {
 func NewEntraGroupAvailabilitiesResource() resource.Resource {
 	return &entra.EntraGroupAvailabilitiesResource{}
 }
-func NewAWSRDSIntegrationResource() resource.Resource {
-	return &aws.AWSRDSIntegrationResource{}
-}
+
 func NewAWSRDSSelectorResource() resource.Resource {
 	return &aws.AWSRDSSelectorResource{}
 }
