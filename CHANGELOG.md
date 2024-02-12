@@ -1,5 +1,11 @@
 # @common-fate/terraform-provider-commonfate
 
+## 2.8.1
+
+### Patch Changes
+
+- c123aec: Update documentation
+
 ## 2.8.0
 
 ### Minor Changes
