@@ -41,8 +41,6 @@ github.com/common-fate/grab v1.1.0 h1:HLZPtltdHScYu6qtt/UC78rvwylCTWuyoZoiQXV4QH
 github.com/common-fate/grab v1.1.0/go.mod h1:L0qa03RwqOMZz9PrrWw9eI145i5FQRf+iLtNSJypQvY=
 github.com/common-fate/sdk v0.0.0-20240123054829-ba35aca9fdf4 h1:mqiKbc07gwZsy37coaUpzIhk6OLmqy0FaNHQR7wOdL8=
 github.com/common-fate/sdk v0.0.0-20240123054829-ba35aca9fdf4/go.mod h1:WJfjdFPhVEcLxo5keKrm3zsXz+eZnxoQ/kh8Ef4EAmc=
-github.com/common-fate/sdk v1.3.1-0.20240212062257-7520f485cb82 h1:YxyD0yhRHlWnoOe6i/218SW8Y6fTpmK/xiuTaRHFLBE=
-github.com/common-fate/sdk v1.3.1-0.20240212062257-7520f485cb82/go.mod h1:WJfjdFPhVEcLxo5keKrm3zsXz+eZnxoQ/kh8Ef4EAmc=
 github.com/cyphar/filepath-securejoin v0.2.4 h1:Ugdm7cg7i6ZK6x3xDF1oEu1nfkyfH53EtKeQYTC3kyg=
 github.com/cyphar/filepath-securejoin v0.2.4/go.mod h1:aPGpWjXOXUn2NCNjFvBE6aRxGGx79pTxQpKOJNYHHl4=
 github.com/danieljoos/wincred v1.1.2 h1:QLdCxFs1/Yl4zduvBdcHB8goaYk9RARS2SgLLRuAyr0=

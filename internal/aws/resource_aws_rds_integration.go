@@ -17,32 +17,30 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-type AWSIDCIntegrationModel struct {
-	Id              types.String `tfsdk:"id"`
-	Name            types.String `tfsdk:"name"`
-	SSOInstanceARN  types.String `tfsdk:"sso_instance_arn"`
-	IdentityStoreID types.String `tfsdk:"identity_store_id"`
-	SSORegion       types.String `tfsdk:"sso_region"`
-	ReaderRoleARN   types.String `tfsdk:"reader_role_arn"`
+type AWSRDSIntegrationModel struct {
+	Id           types.String `tfsdk:"id"`
+	Name         types.String `tfsdk:"name"`
+	ReadRoleARNs types.Set    `tfsdk:"read_role_arns"`
+	Regions      types.Set    `tfsdk:"regions"`
 }
 
-type AWSIDCIntegrationResource struct {
+type AWSRDSIntegrationResource struct {
 	client integrationv1alpha1connect.IntegrationServiceClient
 }
 
 var (
-	_ resource.Resource                = &AWSIDCIntegrationResource{}
-	_ resource.ResourceWithConfigure   = &AWSIDCIntegrationResource{}
-	_ resource.ResourceWithImportState = &AWSIDCIntegrationResource{}
+	_ resource.Resource                = &AWSRDSIntegrationResource{}
+	_ resource.ResourceWithConfigure   = &AWSRDSIntegrationResource{}
+	_ resource.ResourceWithImportState = &AWSRDSIntegrationResource{}
 )
 
 // Metadata returns the data source type name.
-func (r *AWSIDCIntegrationResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_aws_idc_integration"
+func (r *AWSRDSIntegrationResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_aws_rds_integration"
 }
 
 // Configure adds the provider configured client to the data source.
-func (r *AWSIDCIntegrationResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *AWSRDSIntegrationResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -63,10 +61,10 @@ func (r *AWSIDCIntegrationResource) Configure(_ context.Context, req resource.Co
 
 // GetSchema defines the schema for the data source.
 // schema is based off the governance api
-func (r *AWSIDCIntegrationResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *AWSRDSIntegrationResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 
 	resp.Schema = schema.Schema{
-		Description: `Registers an AWS IAM Identity Center integration`,
+		Description: `Registers an AWS RDS integration`,
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				MarkdownDescription: "The internal Common Fate ID",
@@ -79,28 +77,22 @@ func (r *AWSIDCIntegrationResource) Schema(ctx context.Context, req resource.Sch
 				MarkdownDescription: "The name of the integration: use a short label which is descriptive of the organization you're connecting to",
 				Required:            true,
 			},
-			"sso_instance_arn": schema.StringAttribute{
-				MarkdownDescription: "The ARN of the IAM Identity Center SSO instance",
+			"regions": schema.SetAttribute{
+				MarkdownDescription: "A set of AWS Regions to scan for databases",
 				Required:            true,
+				ElementType:         types.StringType,
 			},
-			"sso_region": schema.StringAttribute{
-				MarkdownDescription: "The AWS region that the SSO instance is hosted in",
+			"read_role_arns": schema.SetAttribute{
+				MarkdownDescription: "The ARNs of the roles to assume in order to discover databases",
 				Required:            true,
-			},
-			"identity_store_id": schema.StringAttribute{
-				MarkdownDescription: "The IAM Identity Center identity store ID",
-				Required:            true,
-			},
-			"reader_role_arn": schema.StringAttribute{
-				MarkdownDescription: "The ARN of the role to assume in order to read AWS IAM Identity Store data",
-				Required:            true,
+				ElementType:         types.StringType,
 			},
 		},
-		MarkdownDescription: `Registers an AWS IAM Identity Center  integration`,
+		MarkdownDescription: `Registers an AWS RDS integration`,
 	}
 }
 
-func (r *AWSIDCIntegrationResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+func (r *AWSRDSIntegrationResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 
 	if r.client == nil {
 		resp.Diagnostics.AddError(
@@ -110,7 +102,7 @@ func (r *AWSIDCIntegrationResource) Create(ctx context.Context, req resource.Cre
 
 		return
 	}
-	var data *AWSIDCIntegrationModel
+	var data *AWSRDSIntegrationModel
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -123,16 +115,25 @@ func (r *AWSIDCIntegrationResource) Create(ctx context.Context, req resource.Cre
 
 		return
 	}
-
+	var readRoleARNs []string
+	diags := data.ReadRoleARNs.ElementsAs(ctx, &readRoleARNs, false)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+	var regions []string
+	diags = data.Regions.ElementsAs(ctx, &regions, false)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
 	res, err := r.client.CreateIntegration(ctx, connect.NewRequest(&integrationv1alpha1.CreateIntegrationRequest{
 		Name: data.Name.ValueString(),
 		Config: &integrationv1alpha1.Config{
-			Config: &integrationv1alpha1.Config_AwsIdc{
-				AwsIdc: &integrationv1alpha1.AWSIDC{
-					SsoInstanceArn:  data.SSOInstanceARN.ValueString(),
-					IdentityStoreId: data.IdentityStoreID.ValueString(),
-					SsoRegion:       data.SSORegion.ValueString(),
-					ReaderRoleArn:   data.ReaderRoleARN.ValueString(),
+			Config: &integrationv1alpha1.Config_AwsRds{
+				AwsRds: &integrationv1alpha1.AWSRDS{
+					Regions:      regions,
+					ReadRoleArns: readRoleARNs,
 				},
 			},
 		},
@@ -140,7 +141,7 @@ func (r *AWSIDCIntegrationResource) Create(ctx context.Context, req resource.Cre
 
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to Create Resource: AWS IAM Identity Store Integration",
+			"Unable to Create Resource: AWS RDS Integration",
 			"An unexpected error occurred while communicating with Common Fate API. "+
 				"Please report this issue to the provider developers.\n\n"+
 				"JSON Error: "+err.Error(),
@@ -156,7 +157,7 @@ func (r *AWSIDCIntegrationResource) Create(ctx context.Context, req resource.Cre
 }
 
 // Read refreshes the Terraform state with the latest data.
-func (r *AWSIDCIntegrationResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+func (r *AWSRDSIntegrationResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	if r.client == nil {
 		resp.Diagnostics.AddError(
 			"Unconfigured HTTP Client",
@@ -165,7 +166,7 @@ func (r *AWSIDCIntegrationResource) Read(ctx context.Context, req resource.ReadR
 
 		return
 	}
-	var state AWSIDCIntegrationModel
+	var state AWSRDSIntegrationModel
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
@@ -180,7 +181,7 @@ func (r *AWSIDCIntegrationResource) Read(ctx context.Context, req resource.ReadR
 		return
 	} else if err != nil {
 		resp.Diagnostics.AddError(
-			"Failed to read AWS IAM Identity Store Integration",
+			"Failed to read AWS RDS Integration",
 			err.Error(),
 		)
 		return
@@ -189,37 +190,46 @@ func (r *AWSIDCIntegrationResource) Read(ctx context.Context, req resource.ReadR
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }
 
-func (r *AWSIDCIntegrationResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *AWSRDSIntegrationResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	if r.client == nil {
 		resp.Diagnostics.AddError(
 			"Unconfigured HTTP Client",
 			"Expected configured HTTP client. Please report this issue to the provider developers.",
 		)
 	}
-	var data AWSIDCIntegrationModel
+	var data AWSRDSIntegrationModel
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		resp.Diagnostics.AddError(
-			"Unable to update AWS IAM Identity Store Integration",
+			"Unable to update AWS RDS Integration",
 			"An unexpected error occurred while parsing the resource update response.",
 		)
 
 		return
 	}
-
+	var readRoleARNs []string
+	diags := data.ReadRoleARNs.ElementsAs(ctx, &readRoleARNs, false)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+	var regions []string
+	diags = data.Regions.ElementsAs(ctx, &regions, false)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
 	res, err := r.client.UpdateIntegration(ctx, connect.NewRequest(&integrationv1alpha1.UpdateIntegrationRequest{
 		Integration: &integrationv1alpha1.Integration{
 			Id:   data.Id.ValueString(),
 			Name: data.Name.ValueString(),
 			Config: &integrationv1alpha1.Config{
-				Config: &integrationv1alpha1.Config_AwsIdc{
-					AwsIdc: &integrationv1alpha1.AWSIDC{
-						SsoInstanceArn:  data.SSOInstanceARN.ValueString(),
-						IdentityStoreId: data.IdentityStoreID.ValueString(),
-						SsoRegion:       data.SSORegion.ValueString(),
-						ReaderRoleArn:   data.ReaderRoleARN.ValueString(),
+				Config: &integrationv1alpha1.Config_AwsRds{
+					AwsRds: &integrationv1alpha1.AWSRDS{
+						Regions:      regions,
+						ReadRoleArns: readRoleARNs,
 					},
 				},
 			},
@@ -228,7 +238,7 @@ func (r *AWSIDCIntegrationResource) Update(ctx context.Context, req resource.Upd
 
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to Update AWS IAM Identity Store Integration",
+			"Unable to Update AWS RDS Integration",
 			"An unexpected error occurred while communicating with Common Fate API. "+
 				"Please report this issue to the provider developers.\n\n"+
 				"JSON Error: "+err.Error(),
@@ -243,20 +253,20 @@ func (r *AWSIDCIntegrationResource) Update(ctx context.Context, req resource.Upd
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *AWSIDCIntegrationResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+func (r *AWSRDSIntegrationResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	if r.client == nil {
 		resp.Diagnostics.AddError(
 			"Unconfigured HTTP Client",
 			"Expected configured HTTP client. Please report this issue to the provider developers.",
 		)
 	}
-	var data *AWSIDCIntegrationModel
+	var data *AWSRDSIntegrationModel
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		resp.Diagnostics.AddError(
-			"Unable to delete AWS IAM Identity Store Integration",
+			"Unable to delete AWS RDS Integration",
 			"An unexpected error occurred while parsing the resource creation response.",
 		)
 
@@ -269,7 +279,7 @@ func (r *AWSIDCIntegrationResource) Delete(ctx context.Context, req resource.Del
 
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to delete AWS IAM Identity Store Integration",
+			"Unable to delete AWS RDS Integration",
 			"An unexpected error occurred while parsing the resource creation response. "+
 				"Please report this issue to the provider developers.\n\n"+
 				"JSON Error: "+err.Error(),
@@ -279,7 +289,7 @@ func (r *AWSIDCIntegrationResource) Delete(ctx context.Context, req resource.Del
 	}
 }
 
-func (r *AWSIDCIntegrationResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *AWSRDSIntegrationResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	// Retrieve import ID and save to id attribute
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
