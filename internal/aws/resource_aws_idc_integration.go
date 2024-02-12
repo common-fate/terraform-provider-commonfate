@@ -24,6 +24,8 @@ type AWSIDCIntegrationModel struct {
 	IdentityStoreID types.String `tfsdk:"identity_store_id"`
 	SSORegion       types.String `tfsdk:"sso_region"`
 	ReaderRoleARN   types.String `tfsdk:"reader_role_arn"`
+	AuditRoleName   types.String `tfsdk:"audit_role_name"`
+	ResourceRegions types.Set    `tfsdk:"resource_regions"`
 }
 
 type AWSIDCIntegrationResource struct {
@@ -95,8 +97,16 @@ func (r *AWSIDCIntegrationResource) Schema(ctx context.Context, req resource.Sch
 				MarkdownDescription: "The ARN of the role to assume in order to read AWS IAM Identity Store data",
 				Required:            true,
 			},
+			"audit_role_name": schema.StringAttribute{
+				MarkdownDescription: "The name of the role to assume in each AWS Account in order to read resources",
+				Required:            true,
+			},
+			"resource_regions": schema.StringAttribute{
+				MarkdownDescription: "The regions to read reasources from in each account",
+				Required:            true,
+			},
 		},
-		MarkdownDescription: `Registers an AWS IAM Identity Center  integration`,
+		MarkdownDescription: `Registers an AWS IAM Identity Center integration`,
 	}
 }
 
@@ -124,6 +134,13 @@ func (r *AWSIDCIntegrationResource) Create(ctx context.Context, req resource.Cre
 		return
 	}
 
+	var resourceRegions []string
+	diag := data.ResourceRegions.ElementsAs(ctx, &resourceRegions, false)
+	if diag.HasError() {
+		resp.Diagnostics.Append(diag...)
+		return
+	}
+
 	res, err := r.client.CreateIntegration(ctx, connect.NewRequest(&integrationv1alpha1.CreateIntegrationRequest{
 		Name: data.Name.ValueString(),
 		Config: &integrationv1alpha1.Config{
@@ -133,6 +150,8 @@ func (r *AWSIDCIntegrationResource) Create(ctx context.Context, req resource.Cre
 					IdentityStoreId: data.IdentityStoreID.ValueString(),
 					SsoRegion:       data.SSORegion.ValueString(),
 					ReaderRoleArn:   data.ReaderRoleARN.ValueString(),
+					AuditRoleName:   data.AuditRoleName.ValueString(),
+					ResourceRegions: resourceRegions,
 				},
 			},
 		},
@@ -208,6 +227,12 @@ func (r *AWSIDCIntegrationResource) Update(ctx context.Context, req resource.Upd
 
 		return
 	}
+	var resourceRegions []string
+	diag := data.ResourceRegions.ElementsAs(ctx, &resourceRegions, false)
+	if diag.HasError() {
+		resp.Diagnostics.Append(diag...)
+		return
+	}
 
 	res, err := r.client.UpdateIntegration(ctx, connect.NewRequest(&integrationv1alpha1.UpdateIntegrationRequest{
 		Integration: &integrationv1alpha1.Integration{
@@ -220,6 +245,8 @@ func (r *AWSIDCIntegrationResource) Update(ctx context.Context, req resource.Upd
 						IdentityStoreId: data.IdentityStoreID.ValueString(),
 						SsoRegion:       data.SSORegion.ValueString(),
 						ReaderRoleArn:   data.ReaderRoleARN.ValueString(),
+						AuditRoleName:   data.AuditRoleName.ValueString(),
+						ResourceRegions: resourceRegions,
 					},
 				},
 			},
