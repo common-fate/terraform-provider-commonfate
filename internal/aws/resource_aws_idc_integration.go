@@ -99,11 +99,11 @@ func (r *AWSIDCIntegrationResource) Schema(ctx context.Context, req resource.Sch
 			},
 			"audit_role_name": schema.StringAttribute{
 				MarkdownDescription: "The name of the role to assume in each AWS Account in order to read resources",
-				Required:            true,
+				Required:            false,
 			},
 			"resource_regions": schema.StringAttribute{
 				MarkdownDescription: "The regions to read reasources from in each account",
-				Required:            true,
+				Required:            false,
 			},
 		},
 		MarkdownDescription: `Registers an AWS IAM Identity Center integration`,
