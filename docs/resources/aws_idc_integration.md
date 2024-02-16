@@ -3,12 +3,12 @@
 page_title: "commonfate_aws_idc_integration Resource - commonfate"
 subcategory: ""
 description: |-
-  Registers an AWS IAM Identity Center  integration
+  Registers an AWS IAM Identity Center integration
 ---
 
 # commonfate_aws_idc_integration (Resource)
 
-Registers an AWS IAM Identity Center  integration
+Registers an AWS IAM Identity Center integration
 
 ## Example Usage
 
@@ -32,6 +32,11 @@ resource "commonfate_aws_idc_integration" "demo" {
 - `reader_role_arn` (String) The ARN of the role to assume in order to read AWS IAM Identity Store data
 - `sso_instance_arn` (String) The ARN of the IAM Identity Center SSO instance
 - `sso_region` (String) The AWS region that the SSO instance is hosted in
+
+### Optional
+
+- `audit_role_name` (String) The name of the role to assume in each AWS Account in order to read resources
+- `resource_regions` (Set of String) The regions to read reasources from in each account
 
 ### Read-Only
 
