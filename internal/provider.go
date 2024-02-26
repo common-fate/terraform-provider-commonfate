@@ -11,6 +11,7 @@ import (
 	"github.com/common-fate/terraform-provider-commonfate/internal/entra"
 	"github.com/common-fate/terraform-provider-commonfate/internal/gcp"
 	"github.com/common-fate/terraform-provider-commonfate/internal/generic"
+	"github.com/common-fate/terraform-provider-commonfate/internal/okta"
 	"github.com/common-fate/terraform-provider-commonfate/internal/opsgenie"
 	"github.com/common-fate/terraform-provider-commonfate/internal/pagerduty"
 	"github.com/common-fate/terraform-provider-commonfate/internal/slack"
@@ -151,6 +152,9 @@ func (p *CommonFateProvider) Resources(_ context.Context) []func() resource.Reso
 		NewAWSRDSAvailabilitiesResource,
 		NewAWSIDCGroupSelectorResource,
 		NewAWSIDCGroupAvailabilitiesResource,
+		NewOktaIntegrationResource,
+		NewOktaGroupSelectorResource,
+		NewOktaGroupAvailabilitiesResource,
 	}
 }
 
@@ -240,4 +244,13 @@ func NewAWSIDCGroupAvailabilitiesResource() resource.Resource {
 }
 func NewAWSIDCGroupSelectorResource() resource.Resource {
 	return &aws.AWSIDCGroupSelectorResource{}
+}
+func NewOktaIntegrationResource() resource.Resource {
+	return &okta.OktaIntegrationResource{}
+}
+func NewOktaGroupSelectorResource() resource.Resource {
+	return &okta.OktaGroupSelectorResource{}
+}
+func NewOktaGroupAvailabilitiesResource() resource.Resource {
+	return &okta.OktaGroupAvailabilitiesResource{}
 }
