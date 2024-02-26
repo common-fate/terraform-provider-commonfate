@@ -1,5 +1,11 @@
 # @common-fate/terraform-provider-commonfate
 
+## 2.10.0
+
+### Minor Changes
+
+- 3fbaac4: Add resources for Okta JIT integration
+
 ## 2.9.0
 
 ### Minor Changes
