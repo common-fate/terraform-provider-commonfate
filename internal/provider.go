@@ -8,6 +8,7 @@ import (
 	config_client "github.com/common-fate/sdk/config"
 	"github.com/common-fate/terraform-provider-commonfate/internal/access"
 	"github.com/common-fate/terraform-provider-commonfate/internal/aws"
+	"github.com/common-fate/terraform-provider-commonfate/internal/datastax"
 	"github.com/common-fate/terraform-provider-commonfate/internal/entra"
 	"github.com/common-fate/terraform-provider-commonfate/internal/gcp"
 	"github.com/common-fate/terraform-provider-commonfate/internal/generic"
@@ -155,6 +156,7 @@ func (p *CommonFateProvider) Resources(_ context.Context) []func() resource.Reso
 		NewOktaIntegrationResource,
 		NewOktaGroupSelectorResource,
 		NewOktaGroupAvailabilitiesResource,
+		NewDataStaxIntegrationResource,
 	}
 }
 
@@ -253,4 +255,8 @@ func NewOktaGroupSelectorResource() resource.Resource {
 }
 func NewOktaGroupAvailabilitiesResource() resource.Resource {
 	return &okta.OktaGroupAvailabilitiesResource{}
+}
+
+func NewDataStaxIntegrationResource() resource.Resource {
+	return &datastax.DataStaxIntegrationResource{}
 }
