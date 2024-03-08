@@ -219,6 +219,7 @@ func (r *AvailabilitySpecResource) Update(ctx context.Context, req resource.Upda
 	}
 
 	input := &configv1alpha1.AvailabilitySpec{
+		Id:         data.ID.ValueString(),
 		Role:       data.Role.ToAPI(),
 		WorkflowId: data.WorkflowID.ValueString(),
 		Target:     data.Target.ToAPI(),
