@@ -1,5 +1,11 @@
 # @common-fate/terraform-provider-commonfate
 
+## 2.10.1
+
+### Patch Changes
+
+- 8403479: Fix availability_spec resource update api call causing 500 errors
+
 ## 2.10.0
 
 ### Minor Changes
