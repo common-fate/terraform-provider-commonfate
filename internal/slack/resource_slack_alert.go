@@ -81,7 +81,7 @@ func (r *SlackAlertResource) Schema(ctx context.Context, req resource.SchemaRequ
 			},
 			"integration_id": schema.StringAttribute{
 				MarkdownDescription: "The ID for the integration set up to slack.",
-				Required:            true,
+				Optional:            true,
 			},
 			"slack_channel_id": schema.StringAttribute{
 				MarkdownDescription: "If Slack is connected, it will send notifications to this slack channel. Must be the ID of the channel and not the name. See below on how to find this ID.",
