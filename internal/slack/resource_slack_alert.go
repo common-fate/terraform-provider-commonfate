@@ -120,12 +120,17 @@ func (r *SlackAlertResource) Create(ctx context.Context, req resource.CreateRequ
 		return
 	}
 
-	res, err := r.client.CreateSlackAlert(ctx, connect.NewRequest(&configv1alpha1.CreateSlackAlertRequest{
+	createSlackAlert := &configv1alpha1.CreateSlackAlertRequest{
 		WorkflowId:       data.WorkflowID.ValueString(),
 		SlackChannelId:   data.SlackChannelID.ValueString(),
 		SlackWorkspaceId: data.SlackWorkspaceID.ValueString(),
-		IntegrationId:    data.SlackIntegrationID.ValueString(),
-	}))
+	}
+
+	if data.SlackIntegrationID.ValueString() != "" {
+		createSlackAlert.IntegrationId = data.SlackIntegrationID.ValueStringPointer()
+	}
+
+	res, err := r.client.CreateSlackAlert(ctx, connect.NewRequest(createSlackAlert))
 
 	if err != nil {
 		resp.Diagnostics.AddError(
@@ -182,7 +187,7 @@ func (r *SlackAlertResource) Read(ctx context.Context, req resource.ReadRequest,
 		WorkflowID:         types.StringValue(res.Msg.Alert.WorkflowId),
 		SlackChannelID:     types.StringValue(res.Msg.Alert.SlackChannelId),
 		SlackWorkspaceID:   types.StringValue(res.Msg.Alert.SlackWorkspaceId),
-		SlackIntegrationID: types.StringValue(res.Msg.Alert.IntegrationId),
+		SlackIntegrationID: types.StringPointerValue(res.Msg.Alert.IntegrationId),
 	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
@@ -208,15 +213,19 @@ func (r *SlackAlertResource) Update(ctx context.Context, req resource.UpdateRequ
 		return
 	}
 
-	res, err := r.client.UpdateSlackAlert(ctx, connect.NewRequest(&configv1alpha1.UpdateSlackAlertRequest{
-		Alert: &configv1alpha1.SlackAlert{
-			Id:               data.ID.ValueString(),
+	updateSlackAlert := &configv1alpha1.UpdateSlackAlertRequest{
+		Alert: &configv1alpha1.SlackAlert{Id: data.ID.ValueString(),
 			WorkflowId:       data.WorkflowID.ValueString(),
 			SlackChannelId:   data.SlackChannelID.ValueString(),
 			SlackWorkspaceId: data.SlackWorkspaceID.ValueString(),
-			IntegrationId:    data.SlackIntegrationID.ValueString(),
 		},
-	}))
+	}
+
+	if data.SlackIntegrationID.ValueString() != "" {
+		updateSlackAlert.Alert.IntegrationId = data.SlackIntegrationID.ValueStringPointer()
+	}
+
+	res, err := r.client.UpdateSlackAlert(ctx, connect.NewRequest(updateSlackAlert))
 
 	if err != nil {
 		resp.Diagnostics.AddError(
