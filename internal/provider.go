@@ -265,3 +265,7 @@ func NewDataStaxIntegrationResource() resource.Resource {
 func NewDataStaxOrganizationAvailabilitiesResource() resource.Resource {
 	return &datastax.DataStaxOrganizationAvailabilitiesResource{}
 }
+
+func NewDataStaxOrganizationSelectorResource() resource.Resource {
+	return &datastax.DataStaxOrganizationSelectorResource{}
+}
