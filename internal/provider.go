@@ -158,6 +158,7 @@ func (p *CommonFateProvider) Resources(_ context.Context) []func() resource.Reso
 		NewOktaGroupAvailabilitiesResource,
 		NewDataStaxIntegrationResource,
 		NewDataStaxOrganizationAvailabilitiesResource,
+		NewDataStaxOrganizationSelectorResource,
 	}
 }
 
