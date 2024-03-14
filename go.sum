@@ -52,6 +52,8 @@ github.com/common-fate/sdk v1.10.0 h1:pXW5iQkdSCFn28v4rSreuUMQOwP6hShcPiSHLN5awr
 github.com/common-fate/sdk v1.10.0/go.mod h1:WJfjdFPhVEcLxo5keKrm3zsXz+eZnxoQ/kh8Ef4EAmc=
 github.com/common-fate/sdk v1.10.1-0.20240311042609-5adf4b7d16fb h1:hVTppr5XF6MnhiOGDxWmkk2ryZhYxakvrV5lZyaDub8=
 github.com/common-fate/sdk v1.10.1-0.20240311042609-5adf4b7d16fb/go.mod h1:WJfjdFPhVEcLxo5keKrm3zsXz+eZnxoQ/kh8Ef4EAmc=
+github.com/common-fate/sdk v1.12.1 h1:eUsYNvYa4eAiziesR43tP+GEeNUi+0BBmvAxq1B9LCc=
+github.com/common-fate/sdk v1.12.1/go.mod h1:5CJxmDmjk7hRPbvEQcoH6qiOrAFIgLsqAdokOZZ4mKw=
 github.com/cyphar/filepath-securejoin v0.2.4 h1:Ugdm7cg7i6ZK6x3xDF1oEu1nfkyfH53EtKeQYTC3kyg=
 github.com/cyphar/filepath-securejoin v0.2.4/go.mod h1:aPGpWjXOXUn2NCNjFvBE6aRxGGx79pTxQpKOJNYHHl4=
 github.com/danieljoos/wincred v1.1.2 h1:QLdCxFs1/Yl4zduvBdcHB8goaYk9RARS2SgLLRuAyr0=
@@ -335,6 +337,7 @@ google.golang.org/protobuf v1.26.0-rc.1/go.mod h1:jlhhOSvTdKEhbULTjvd4ARK9grFBp0
 google.golang.org/protobuf v1.26.0/go.mod h1:9q0QmTI4eRPtz6boOQmLYwt+qCgq0jsYwAQnmE0givc=
 google.golang.org/protobuf v1.32.0 h1:pPC6BG5ex8PDFnkbrGU3EixyhKcQ2aDuBS36lqK/C7I=
 google.golang.org/protobuf v1.32.0/go.mod h1:c6P6GXX6sHbq/GpV6MGZEdwhWPcYBgnhAHhKbcUYpos=
+google.golang.org/protobuf v1.33.0/go.mod h1:c6P6GXX6sHbq/GpV6MGZEdwhWPcYBgnhAHhKbcUYpos=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
 gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
 gopkg.in/check.v1 v1.0.0-20200902074654-038fdea0a05b h1:QRR6H1YWRnHb4Y/HeNFCTJLFVxaq6wH4YuVdsUOr75U=
