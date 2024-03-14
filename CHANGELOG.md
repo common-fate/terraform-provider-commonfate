@@ -1,5 +1,17 @@
 # @common-fate/terraform-provider-commonfate
 
+## 2.12.0
+
+### Minor Changes
+
+- 8930396: Added DataStax integration resources.
+
+## 2.11.0
+
+### Minor Changes
+
+- 15361af: Added DataStax integration
+
 ## 2.10.1
 
 ### Patch Changes
