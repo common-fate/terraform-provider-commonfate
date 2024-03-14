@@ -7,11 +7,11 @@ toolchain go1.21.4
 require (
 	connectrpc.com/connect v1.14.0
 	github.com/common-fate/grab v1.1.0
-	github.com/common-fate/sdk v1.10.1-0.20240312234145-3395e5cadc59
+	github.com/common-fate/sdk v1.12.1
 	github.com/hashicorp/terraform-plugin-docs v0.13.0
 	github.com/hashicorp/terraform-plugin-framework v1.4.2
 	github.com/hashicorp/terraform-plugin-log v0.9.0
-	google.golang.org/protobuf v1.32.0
+	google.golang.org/protobuf v1.33.0
 )
 
 require (
