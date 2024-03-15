@@ -33,6 +33,7 @@ resource "commonfate-slack_alert" "demo" {
 
 ### Optional
 
+- `integration_id` (String) The ID for the integration set up to slack.
 - `slack_workspace_id` (String) The Slack Workspace ID. In Slack URLs, such as `https://app.slack.com/client/TXXXXXXX/CXXXXXXX` it is the string beginning with T.
 
 ### Read-Only

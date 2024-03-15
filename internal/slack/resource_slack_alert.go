@@ -18,10 +18,11 @@ import (
 )
 
 type SlackAlertModel struct {
-	ID               types.String `tfsdk:"id"`
-	WorkflowID       types.String `tfsdk:"workflow_id"`
-	SlackChannelID   types.String `tfsdk:"slack_channel_id"`
-	SlackWorkspaceID types.String `tfsdk:"slack_workspace_id"`
+	ID                 types.String `tfsdk:"id"`
+	WorkflowID         types.String `tfsdk:"workflow_id"`
+	SlackIntegrationID types.String `tfsdk:"integration_id"`
+	SlackChannelID     types.String `tfsdk:"slack_channel_id"`
+	SlackWorkspaceID   types.String `tfsdk:"slack_workspace_id"`
 }
 
 // AccessRuleResource is the data source implementation.
@@ -78,6 +79,10 @@ func (r *SlackAlertResource) Schema(ctx context.Context, req resource.SchemaRequ
 				MarkdownDescription: "The Access Workflow ID.",
 				Required:            true,
 			},
+			"integration_id": schema.StringAttribute{
+				MarkdownDescription: "The ID for the integration set up to slack.",
+				Optional:            true,
+			},
 			"slack_channel_id": schema.StringAttribute{
 				MarkdownDescription: "If Slack is connected, it will send notifications to this slack channel. Must be the ID of the channel and not the name. See below on how to find this ID.",
 				Required:            true,
@@ -115,11 +120,17 @@ func (r *SlackAlertResource) Create(ctx context.Context, req resource.CreateRequ
 		return
 	}
 
-	res, err := r.client.CreateSlackAlert(ctx, connect.NewRequest(&configv1alpha1.CreateSlackAlertRequest{
+	createSlackAlert := &configv1alpha1.CreateSlackAlertRequest{
 		WorkflowId:       data.WorkflowID.ValueString(),
 		SlackChannelId:   data.SlackChannelID.ValueString(),
 		SlackWorkspaceId: data.SlackWorkspaceID.ValueString(),
-	}))
+	}
+
+	if data.SlackIntegrationID.ValueString() != "" {
+		createSlackAlert.IntegrationId = data.SlackIntegrationID.ValueStringPointer()
+	}
+
+	res, err := r.client.CreateSlackAlert(ctx, connect.NewRequest(createSlackAlert))
 
 	if err != nil {
 		resp.Diagnostics.AddError(
@@ -172,10 +183,11 @@ func (r *SlackAlertResource) Read(ctx context.Context, req resource.ReadRequest,
 
 	//refresh state
 	state = SlackAlertModel{
-		ID:               types.StringValue(res.Msg.Alert.Id),
-		WorkflowID:       types.StringValue(res.Msg.Alert.WorkflowId),
-		SlackChannelID:   types.StringValue(res.Msg.Alert.SlackChannelId),
-		SlackWorkspaceID: types.StringValue(res.Msg.Alert.SlackWorkspaceId),
+		ID:                 types.StringValue(res.Msg.Alert.Id),
+		WorkflowID:         types.StringValue(res.Msg.Alert.WorkflowId),
+		SlackChannelID:     types.StringValue(res.Msg.Alert.SlackChannelId),
+		SlackWorkspaceID:   types.StringValue(res.Msg.Alert.SlackWorkspaceId),
+		SlackIntegrationID: types.StringPointerValue(res.Msg.Alert.IntegrationId),
 	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
@@ -201,14 +213,19 @@ func (r *SlackAlertResource) Update(ctx context.Context, req resource.UpdateRequ
 		return
 	}
 
-	res, err := r.client.UpdateSlackAlert(ctx, connect.NewRequest(&configv1alpha1.UpdateSlackAlertRequest{
-		Alert: &configv1alpha1.SlackAlert{
-			Id:               data.ID.ValueString(),
+	updateSlackAlert := &configv1alpha1.UpdateSlackAlertRequest{
+		Alert: &configv1alpha1.SlackAlert{Id: data.ID.ValueString(),
 			WorkflowId:       data.WorkflowID.ValueString(),
 			SlackChannelId:   data.SlackChannelID.ValueString(),
 			SlackWorkspaceId: data.SlackWorkspaceID.ValueString(),
 		},
-	}))
+	}
+
+	if data.SlackIntegrationID.ValueString() != "" {
+		updateSlackAlert.Alert.IntegrationId = data.SlackIntegrationID.ValueStringPointer()
+	}
+
+	res, err := r.client.UpdateSlackAlert(ctx, connect.NewRequest(updateSlackAlert))
 
 	if err != nil {
 		resp.Diagnostics.AddError(
