@@ -1,5 +1,11 @@
 # @common-fate/terraform-provider-commonfate
 
+## 2.13.0
+
+### Minor Changes
+
+- 956ea4a: add ability to link slack notifier to a slack integration via its ID
+
 ## 2.12.0
 
 ### Minor Changes
