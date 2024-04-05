@@ -18,11 +18,12 @@ import (
 )
 
 type SlackAlertModel struct {
-	ID                 types.String `tfsdk:"id"`
-	WorkflowID         types.String `tfsdk:"workflow_id"`
-	SlackIntegrationID types.String `tfsdk:"integration_id"`
-	SlackChannelID     types.String `tfsdk:"slack_channel_id"`
-	SlackWorkspaceID   types.String `tfsdk:"slack_workspace_id"`
+	ID                             types.String `tfsdk:"id"`
+	WorkflowID                     types.String `tfsdk:"workflow_id"`
+	SlackIntegrationID             types.String `tfsdk:"integration_id"`
+	SlackChannelID                 types.String `tfsdk:"slack_channel_id"`
+	SlackWorkspaceID               types.String `tfsdk:"slack_workspace_id"`
+	UseWebConsoleForRequestActions types.Bool   `tfsdk:"use_web_console_for_request_actions"`
 }
 
 // AccessRuleResource is the data source implementation.
@@ -91,6 +92,10 @@ func (r *SlackAlertResource) Schema(ctx context.Context, req resource.SchemaRequ
 				MarkdownDescription: "The Slack Workspace ID. In Slack URLs, such as `https://app.slack.com/client/TXXXXXXX/CXXXXXXX` it is the string beginning with T.",
 				Optional:            true,
 			},
+			"use_web_console_for_request_actions": schema.BoolAttribute{
+				MarkdownDescription: "Optionally, configure the access request review buttons to be links to the web console, rather than performing the action in Slack.",
+				Optional:            true,
+			},
 		},
 		MarkdownDescription: `Links a Slack message being send to a particular channel or workspace based on actions made against a workflow.`,
 	}
@@ -121,9 +126,10 @@ func (r *SlackAlertResource) Create(ctx context.Context, req resource.CreateRequ
 	}
 
 	createSlackAlert := &configv1alpha1.CreateSlackAlertRequest{
-		WorkflowId:       data.WorkflowID.ValueString(),
-		SlackChannelId:   data.SlackChannelID.ValueString(),
-		SlackWorkspaceId: data.SlackWorkspaceID.ValueString(),
+		WorkflowId:                    data.WorkflowID.ValueString(),
+		SlackChannelId:                data.SlackChannelID.ValueString(),
+		SlackWorkspaceId:              data.SlackWorkspaceID.ValueString(),
+		UseWebConsoleForReviewActions: data.UseWebConsoleForRequestActions.ValueBoolPointer(),
 	}
 
 	if data.SlackIntegrationID.ValueString() != "" {
@@ -183,11 +189,12 @@ func (r *SlackAlertResource) Read(ctx context.Context, req resource.ReadRequest,
 
 	//refresh state
 	state = SlackAlertModel{
-		ID:                 types.StringValue(res.Msg.Alert.Id),
-		WorkflowID:         types.StringValue(res.Msg.Alert.WorkflowId),
-		SlackChannelID:     types.StringValue(res.Msg.Alert.SlackChannelId),
-		SlackWorkspaceID:   types.StringValue(res.Msg.Alert.SlackWorkspaceId),
-		SlackIntegrationID: types.StringPointerValue(res.Msg.Alert.IntegrationId),
+		ID:                             types.StringValue(res.Msg.Alert.Id),
+		WorkflowID:                     types.StringValue(res.Msg.Alert.WorkflowId),
+		SlackChannelID:                 types.StringValue(res.Msg.Alert.SlackChannelId),
+		SlackWorkspaceID:               types.StringValue(res.Msg.Alert.SlackWorkspaceId),
+		SlackIntegrationID:             types.StringPointerValue(res.Msg.Alert.IntegrationId),
+		UseWebConsoleForRequestActions: types.BoolPointerValue(res.Msg.Alert.UseWebConsoleForReviewActions),
 	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
@@ -215,9 +222,10 @@ func (r *SlackAlertResource) Update(ctx context.Context, req resource.UpdateRequ
 
 	updateSlackAlert := &configv1alpha1.UpdateSlackAlertRequest{
 		Alert: &configv1alpha1.SlackAlert{Id: data.ID.ValueString(),
-			WorkflowId:       data.WorkflowID.ValueString(),
-			SlackChannelId:   data.SlackChannelID.ValueString(),
-			SlackWorkspaceId: data.SlackWorkspaceID.ValueString(),
+			WorkflowId:                    data.WorkflowID.ValueString(),
+			SlackChannelId:                data.SlackChannelID.ValueString(),
+			SlackWorkspaceId:              data.SlackWorkspaceID.ValueString(),
+			UseWebConsoleForReviewActions: data.UseWebConsoleForRequestActions.ValueBoolPointer(),
 		},
 	}
 
