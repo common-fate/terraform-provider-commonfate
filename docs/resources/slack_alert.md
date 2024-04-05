@@ -15,10 +15,11 @@ Links a Slack message being send to a particular channel or workspace based on a
 
 ```terraform
 resource "commonfate-slack_alert" "demo" {
-  id                 = "demo"
-  workflow_id        = "wrk_123"
-  slack_channel_id   = "demo"
-  slack_workspace_id = "123"
+  id                                  = "demo"
+  workflow_id                         = "wrk_123"
+  slack_channel_id                    = "demo"
+  slack_workspace_id                  = "123"
+  use_web_console_for_request_actions = false
 }
 ```
 
@@ -35,6 +36,7 @@ resource "commonfate-slack_alert" "demo" {
 
 - `integration_id` (String) The ID for the integration set up to slack.
 - `slack_workspace_id` (String) The Slack Workspace ID. In Slack URLs, such as `https://app.slack.com/client/TXXXXXXX/CXXXXXXX` it is the string beginning with T.
+- `use_web_console_for_request_actions` (Boolean) Optionally, configure the access request review buttons to be links to the web console, rather than performing the action in Slack.
 
 ### Read-Only
 
