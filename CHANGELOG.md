@@ -1,5 +1,11 @@
 # @common-fate/terraform-provider-commonfate
 
+## 2.13.1
+
+### Patch Changes
+
+- f9e3d72: Add additional config for Slack Alert to optionally perform approvals via the web app.
+
 ## 2.13.0
 
 ### Minor Changes
