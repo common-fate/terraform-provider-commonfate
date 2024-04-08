@@ -23,7 +23,7 @@ type SlackAlertModel struct {
 	SlackIntegrationID             types.String `tfsdk:"integration_id"`
 	SlackChannelID                 types.String `tfsdk:"slack_channel_id"`
 	SlackWorkspaceID               types.String `tfsdk:"slack_workspace_id"`
-	UseWebConsoleForRequestActions types.Bool   `tfsdk:"use_web_console_for_request_actions"`
+	UseWebConsoleForApprovalAction types.Bool   `tfsdk:"use_web_console_for_approval_action"`
 }
 
 // AccessRuleResource is the data source implementation.
@@ -92,7 +92,7 @@ func (r *SlackAlertResource) Schema(ctx context.Context, req resource.SchemaRequ
 				MarkdownDescription: "The Slack Workspace ID. In Slack URLs, such as `https://app.slack.com/client/TXXXXXXX/CXXXXXXX` it is the string beginning with T.",
 				Optional:            true,
 			},
-			"use_web_console_for_request_actions": schema.BoolAttribute{
+			"use_web_console_for_approval_action": schema.BoolAttribute{
 				MarkdownDescription: "Optionally, configure the access request review buttons to be links to the web console, rather than performing the action in Slack.",
 				Optional:            true,
 			},
@@ -129,7 +129,7 @@ func (r *SlackAlertResource) Create(ctx context.Context, req resource.CreateRequ
 		WorkflowId:                    data.WorkflowID.ValueString(),
 		SlackChannelId:                data.SlackChannelID.ValueString(),
 		SlackWorkspaceId:              data.SlackWorkspaceID.ValueString(),
-		UseWebConsoleForReviewActions: data.UseWebConsoleForRequestActions.ValueBoolPointer(),
+		UseWebConsoleForApproveAction: data.UseWebConsoleForApprovalAction.ValueBool(),
 	}
 
 	if data.SlackIntegrationID.ValueString() != "" {
@@ -194,7 +194,7 @@ func (r *SlackAlertResource) Read(ctx context.Context, req resource.ReadRequest,
 		SlackChannelID:                 types.StringValue(res.Msg.Alert.SlackChannelId),
 		SlackWorkspaceID:               types.StringValue(res.Msg.Alert.SlackWorkspaceId),
 		SlackIntegrationID:             types.StringPointerValue(res.Msg.Alert.IntegrationId),
-		UseWebConsoleForRequestActions: types.BoolPointerValue(res.Msg.Alert.UseWebConsoleForReviewActions),
+		UseWebConsoleForApprovalAction: types.BoolPointerValue(&res.Msg.Alert.UseWebConsoleForApproveAction),
 	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
@@ -225,7 +225,7 @@ func (r *SlackAlertResource) Update(ctx context.Context, req resource.UpdateRequ
 			WorkflowId:                    data.WorkflowID.ValueString(),
 			SlackChannelId:                data.SlackChannelID.ValueString(),
 			SlackWorkspaceId:              data.SlackWorkspaceID.ValueString(),
-			UseWebConsoleForReviewActions: data.UseWebConsoleForRequestActions.ValueBoolPointer(),
+			UseWebConsoleForApproveAction: data.UseWebConsoleForApprovalAction.ValueBool(),
 		},
 	}
 
