@@ -16,6 +16,7 @@ import (
 	"github.com/common-fate/terraform-provider-commonfate/internal/opsgenie"
 	"github.com/common-fate/terraform-provider-commonfate/internal/pagerduty"
 	"github.com/common-fate/terraform-provider-commonfate/internal/slack"
+	"github.com/common-fate/terraform-provider-commonfate/internal/webhook"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
@@ -159,6 +160,7 @@ func (p *CommonFateProvider) Resources(_ context.Context) []func() resource.Reso
 		NewDataStaxIntegrationResource,
 		NewDataStaxOrganizationAvailabilitiesResource,
 		NewDataStaxOrganizationSelectorResource,
+		NewWebhookIntegrationResource,
 	}
 }
 
@@ -269,4 +271,8 @@ func NewDataStaxOrganizationAvailabilitiesResource() resource.Resource {
 
 func NewDataStaxOrganizationSelectorResource() resource.Resource {
 	return &datastax.DataStaxOrganizationSelectorResource{}
+}
+
+func NewWebhookIntegrationResource() resource.Resource {
+	return &webhook.WebhookIntegrationResource{}
 }
