@@ -26,7 +26,7 @@ type AccessWorkflowModel struct {
 	AccessDuration   types.Int64  `tfsdk:"access_duration_seconds"`
 	TryExtendAfter   types.Int64  `tfsdk:"try_extend_after_seconds"`
 	Priority         types.Int64  `tfsdk:"priority"`
-	ActivationExpiry types.Int64  `tfsdk:"activation_expiry_time_hours"`
+	ActivationExpiry types.Int64  `tfsdk:"activation_expiry_time"`
 }
 
 // AccessRuleResource is the data source implementation.
@@ -96,9 +96,9 @@ func (r *AccessWorkflowResource) Schema(ctx context.Context, req resource.Schema
 				MarkdownDescription: "The priority that governs whether the policy will be used. If a different policy with a higher priority and the same role exists that one will be used over another.",
 				Optional:            true,
 			},
-			"activation_expiry_time_hours": schema.Int64Attribute{
-				MarkdownDescription: "The amount of time after access is activated before the request will be expired.",
-				Required:            true,
+			"activation_expiry_time": schema.Int64Attribute{
+				MarkdownDescription: "The amount of time after access is activated before the request will be expired. Defaults to 12 hours.",
+				Required:            false,
 			},
 		},
 		MarkdownDescription: `Access Workflows are used to describe how long access should be applied. Created Workflows can be referenced in other resources created.`,
