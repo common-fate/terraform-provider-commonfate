@@ -14,6 +14,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -68,7 +69,6 @@ func (r *AccessWorkflowResource) Configure(_ context.Context, req resource.Confi
 // GetSchema defines the schema for the data source.
 // schema is based off the governance api
 func (r *AccessWorkflowResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
-
 	resp.Schema = schema.Schema{
 		Description: `Access Workflows are used to describe how long access should be applied. Created Workflows can be referenced in other resources created.
 `,
@@ -99,6 +99,7 @@ func (r *AccessWorkflowResource) Schema(ctx context.Context, req resource.Schema
 			"activation_expiry_time": schema.Int64Attribute{
 				MarkdownDescription: "The amount of time after access is activated before the request will be expired. Defaults to 12 hours.",
 				Required:            false,
+				Default:             int64default.StaticInt64(60 * 60 * 12), //12 hours
 			},
 		},
 		MarkdownDescription: `Access Workflows are used to describe how long access should be applied. Created Workflows can be referenced in other resources created.`,
