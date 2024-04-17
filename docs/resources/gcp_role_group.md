@@ -17,7 +17,12 @@ Defines GCP role group resource
 
 ### Required
 
+- `gcp_organization_id` (String) The GCP organization ID
 - `role_ids` (List of String) The list of GCP role IDs to include in the role group
+
+### Optional
+
+- `name` (String) The unique name of the selector. Call this something memorable and relevant to the resources being selected. For example: `prod-data-eng`
 
 ### Read-Only
 
