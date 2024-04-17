@@ -7,7 +7,7 @@ toolchain go1.21.4
 require (
 	connectrpc.com/connect v1.14.0
 	github.com/common-fate/grab v1.1.0
-	github.com/common-fate/sdk v1.24.1-0.20240415052805-372a1a9fee1f
+	github.com/common-fate/sdk v1.24.1-0.20240417061119-f5e9d68353fd
 	github.com/hashicorp/terraform-plugin-docs v0.13.0
 	github.com/hashicorp/terraform-plugin-framework v1.4.2
 	github.com/hashicorp/terraform-plugin-log v0.9.0

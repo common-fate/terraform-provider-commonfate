@@ -14,7 +14,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -97,9 +96,8 @@ func (r *AccessWorkflowResource) Schema(ctx context.Context, req resource.Schema
 				Optional:            true,
 			},
 			"activation_expiry_time": schema.Int64Attribute{
-				MarkdownDescription: "The amount of time after access is activated before the request will be expired. Defaults to 12 hours.",
-				Required:            false,
-				Default:             int64default.StaticInt64(60 * 60 * 12), //12 hours
+				MarkdownDescription: "The amount of time after access is activated before the request will be expired",
+				Optional:            true,
 			},
 		},
 		MarkdownDescription: `Access Workflows are used to describe how long access should be applied. Created Workflows can be referenced in other resources created.`,
@@ -135,11 +133,11 @@ func (r *AccessWorkflowResource) Create(ctx context.Context, req resource.Create
 	activationExpiry := time.Second * time.Duration(data.ActivationExpiry.ValueInt64())
 
 	res, err := r.client.CreateAccessWorkflow(ctx, connect.NewRequest(&configv1alpha1.CreateAccessWorkflowRequest{
-		Name:                 data.Name.ValueString(),
-		AccessDuration:       durationpb.New(accessDuration),
-		TryExtendAfter:       durationpb.New(tryExtendAfter),
-		Priority:             int32(data.Priority.ValueInt64()),
-		ActivationExpiryTime: durationpb.New(activationExpiry),
+		Name:             data.Name.ValueString(),
+		AccessDuration:   durationpb.New(accessDuration),
+		TryExtendAfter:   durationpb.New(tryExtendAfter),
+		Priority:         int32(data.Priority.ValueInt64()),
+		ActivationExpiry: durationpb.New(activationExpiry),
 	}))
 
 	if err != nil {
@@ -197,12 +195,12 @@ func (r *AccessWorkflowResource) Read(ctx context.Context, req resource.ReadRequ
 
 	//refresh state
 	state = AccessWorkflowModel{
-		ID:               types.StringValue(res.Msg.Workflow.Id),
-		Name:             types.StringValue(res.Msg.Workflow.Name),
-		AccessDuration:   types.Int64Value(res.Msg.Workflow.AccessDuration.Seconds),
-		Priority:         types.Int64Value(int64(res.Msg.Workflow.Priority)),
-		TryExtendAfter:   types.Int64Value(res.Msg.Workflow.TryExtendAfter.Seconds),
-		ActivationExpiry: types.Int64Value(res.Msg.Workflow.ActivationExpiryTime.Seconds),
+		ID:             types.StringValue(res.Msg.Workflow.Id),
+		Name:           types.StringValue(res.Msg.Workflow.Name),
+		AccessDuration: types.Int64Value(res.Msg.Workflow.AccessDuration.Seconds),
+		Priority:       types.Int64Value(int64(res.Msg.Workflow.Priority)),
+		TryExtendAfter: types.Int64Value(res.Msg.Workflow.TryExtendAfter.Seconds),
+		// ActivationExpiry: types.Int64Value(res.Msg.Workflow.ActivationExpiryTime.Seconds),
 	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
@@ -234,12 +232,12 @@ func (r *AccessWorkflowResource) Update(ctx context.Context, req resource.Update
 
 	res, err := r.client.UpdateAccessWorkflow(ctx, connect.NewRequest(&configv1alpha1.UpdateAccessWorkflowRequest{
 		Workflow: &configv1alpha1.AccessWorkflow{
-			Id:                   data.ID.ValueString(),
-			Name:                 data.Name.ValueString(),
-			AccessDuration:       durationpb.New(accessDuration),
-			TryExtendAfter:       durationpb.New(tryExtendAfter),
-			Priority:             int32(data.Priority.ValueInt64()),
-			ActivationExpiryTime: durationpb.New(activationExpiry),
+			Id:               data.ID.ValueString(),
+			Name:             data.Name.ValueString(),
+			AccessDuration:   durationpb.New(accessDuration),
+			TryExtendAfter:   durationpb.New(tryExtendAfter),
+			Priority:         int32(data.Priority.ValueInt64()),
+			ActivationExpiry: durationpb.New(activationExpiry),
 		},
 	}))
 
@@ -260,6 +258,7 @@ func (r *AccessWorkflowResource) Update(ctx context.Context, req resource.Update
 	data.ID = types.StringValue(res.Msg.Workflow.Id)
 	data.AccessDuration = types.Int64Value(res.Msg.Workflow.AccessDuration.Seconds)
 	data.TryExtendAfter = types.Int64Value(res.Msg.Workflow.TryExtendAfter.Seconds)
+	// data.ActivationExpiry = types.Int64Value(res.Msg.Workflow.ActivationExpiryTime.Seconds)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
