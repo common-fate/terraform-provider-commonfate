@@ -89,10 +89,10 @@ func (p *CommonFateProvider) Configure(ctx context.Context, req provider.Configu
 		return
 	}
 
-	api_url := config.APIURL.ValueString()
+	apiURL := config.APIURL.ValueString()
 
 	if os.Getenv("CF_API_URL") != "" {
-		api_url = os.Getenv("CF_API_URL")
+		apiURL = os.Getenv("CF_API_URL")
 	}
 
 	clientid := config.OIDCClientId.ValueString();
@@ -107,26 +107,26 @@ func (p *CommonFateProvider) Configure(ctx context.Context, req provider.Configu
 		clientsecret = os.Getenv("CF_OIDC_CLIENT_SECRET")
 	}
 
-	oidc_issuer := strings.TrimSuffix(config.OIDCIssuer.ValueString(), "/")
+	oidcIssuer := strings.TrimSuffix(config.OIDCIssuer.ValueString(), "/")
 
 	if os.Getenv("CF_OIDC_ISSUER") != "" {
-		oidc_issuer = os.Getenv("CF_OIDC_ISSUER")
+		oidcIssuer = os.Getenv("CF_OIDC_ISSUER")
 	}
 
-	authz_url := config.AuthzURL.ValueString()
+	authzURL := config.AuthzURL.ValueString()
 
 	if os.Getenv("CF_AUTHZ_URL") != "" {
-		authz_url = os.Getenv("CF_AUTHZ_URL")
+		authzURL = os.Getenv("CF_AUTHZ_URL")
 	}
 
 	//using context.Background() here causes a cancelled context issue
 	//see https://github.com/databricks/databricks-sdk-go/issues/671
 	cfg, err := config_client.NewServerContext(context.Background(), config_client.Opts{
-		APIURL:       	api_url,
+		APIURL:       	apiURL,
 		ClientID:     	clientid,
 		ClientSecret: 	clientsecret,
-		OIDCIssuer: 	oidc_issuer,
-		AuthzURL:   	authz_url,
+		OIDCIssuer: 	oidcIssuer,
+		AuthzURL:   	authzURL,
 	})
 	if err != nil {
 		resp.Diagnostics.AddError(
