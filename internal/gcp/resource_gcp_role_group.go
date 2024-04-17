@@ -20,6 +20,8 @@ import (
 type GCPRoleGroupModel struct {
 	ID      types.String   `tfsdk:"id"`
 	RoleIDs []types.String `tfsdk:"role_ids"`
+	Name    types.String   `tfsdk:"name"`
+	OrgID   types.String   `tfsdk:"gcp_organization_id"`
 }
 
 type GCPRoleGroupResource struct {
@@ -73,6 +75,15 @@ func (r *GCPRoleGroupResource) Schema(ctx context.Context, req resource.SchemaRe
 				MarkdownDescription: "The list of GCP role IDs to include in the role group",
 				Required:            true,
 				ElementType:         types.StringType,
+			},
+			"name": schema.StringAttribute{
+				MarkdownDescription: "The unique name of the selector. Call this something memorable and relevant to the resources being selected. For example: `prod-data-eng`",
+				Optional:            true,
+			},
+
+			"gcp_organization_id": schema.StringAttribute{
+				MarkdownDescription: "The GCP organization ID",
+				Required:            true,
 			},
 		},
 		MarkdownDescription: `Defines GCP role group resource`,
