@@ -153,6 +153,10 @@ func (p *CommonFateProvider) Resources(_ context.Context) []func() resource.Reso
 		NewDataStaxIntegrationResource,
 		NewDataStaxOrganizationAvailabilitiesResource,
 		NewDataStaxOrganizationSelectorResource,
+		NewGCPBigQueryTableAvailabilitiesResource,
+		NewGCPBigQueryTableSelectorResource,
+		NewGCPBigQueryDatasetAvailabilitiesResource,
+		NewGCPBigQueryDatasetSelectorResource,
 	}
 }
 
@@ -271,4 +275,20 @@ func NewDataStaxOrganizationAvailabilitiesResource() resource.Resource {
 
 func NewDataStaxOrganizationSelectorResource() resource.Resource {
 	return &datastax.DataStaxOrganizationSelectorResource{}
+}
+
+func NewGCPBigQueryTableAvailabilitiesResource() resource.Resource {
+	return &gcp.GCPBigQueryTableAvailabilitiesResource{}
+}
+
+func NewGCPBigQueryTableSelectorResource() resource.Resource {
+	return &gcp.GCPBigQueryTableSelectorResource{}
+}
+
+func NewGCPBigQueryDatasetAvailabilitiesResource() resource.Resource {
+	return &gcp.GCPBigQueryDatasetAvailabilitiesResource{}
+}
+
+func NewGCPBigQueryDatasetSelectorResource() resource.Resource {
+	return &gcp.GCPBigQueryDatasetSelectorResource{}
 }
