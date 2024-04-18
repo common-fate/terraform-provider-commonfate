@@ -33,7 +33,7 @@ resource "commonfate-access_workflow" "workflow-demo" {
 
 ### Optional
 
-- `activation_expiry_time` (Number) The amount of time after access is activated before the request will be expired
+- `activation_expiry` (Number) The amount of time after access is activated before the request will be expired
 - `name` (String) A unique name for the workflow so you know how to identify it.
 - `priority` (Number) The priority that governs whether the policy will be used. If a different policy with a higher priority and the same role exists that one will be used over another.
 
