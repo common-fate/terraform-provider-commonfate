@@ -279,7 +279,6 @@ func NewDataStaxOrganizationSelectorResource() resource.Resource {
 	return &datastax.DataStaxOrganizationSelectorResource{}
 }
 
-<<<<<<< HEAD
 func NewGCPBigQueryTableAvailabilitiesResource() resource.Resource {
 	return &gcp.GCPBigQueryTableAvailabilitiesResource{}
 }
@@ -294,8 +293,8 @@ func NewGCPBigQueryDatasetAvailabilitiesResource() resource.Resource {
 
 func NewGCPBigQueryDatasetSelectorResource() resource.Resource {
 	return &gcp.GCPBigQueryDatasetSelectorResource{}
-=======
+}
+
 func NewWebhookIntegrationResource() resource.Resource {
 	return &webhook.WebhookIntegrationResource{}
->>>>>>> main
 }
