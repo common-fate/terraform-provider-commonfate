@@ -35,6 +35,7 @@ func (s DataStaxOrganizationSelector) ToAPI() *configv1alpha1.Selector {
 	}
 }
 
+// AccessRuleResource is the data source implementation.
 type DataStaxOrganizationSelectorResource struct {
 	client *configsvc.Client
 }
@@ -70,6 +71,8 @@ func (r *DataStaxOrganizationSelectorResource) Configure(_ context.Context, req 
 	r.client = client
 }
 
+// GetSchema defines the schema for the data source.
+// schema is based off the governance api
 func (r *DataStaxOrganizationSelectorResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 
 	resp.Schema = schema.Schema{
@@ -124,7 +127,7 @@ func (r *DataStaxOrganizationSelectorResource) Create(ctx context.Context, req r
 
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to Create Resource",
+			"Unable to Create Resource: Access Selector",
 			"An unexpected error occurred while communicating with Common Fate API. "+
 				"Please report this issue to the provider developers.\n\n"+
 				"JSON Error: "+err.Error(),
@@ -205,7 +208,7 @@ func (r *DataStaxOrganizationSelectorResource) Update(ctx context.Context, req r
 	}))
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to Update Resource",
+			"Unable to Create Resource: Access Selector",
 			"An unexpected error occurred while communicating with Common Fate API. "+
 				"Please report this issue to the provider developers.\n\n"+
 				"JSON Error: "+err.Error(),
