@@ -1,4 +1,4 @@
-package datastax
+package gcp
 
 import (
 	"context"
@@ -16,42 +16,42 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-type DataStaxOrganizationSelector struct {
+type GCPOrganizationSelector struct {
 	ID    types.String `tfsdk:"id"`
 	Name  types.String `tfsdk:"name"`
-	OrgID types.String `tfsdk:"datastax_organization_id"`
+	OrgID types.String `tfsdk:"gcp_organization_id"`
 }
 
-func (s DataStaxOrganizationSelector) ToAPI() *configv1alpha1.Selector {
+func (s GCPOrganizationSelector) ToAPI() *configv1alpha1.Selector {
 	return &configv1alpha1.Selector{
 		Id:           s.ID.ValueString(),
 		Name:         s.Name.ValueString(),
-		ResourceType: "DataStax::Organization",
+		ResourceType: "GCP::Organization",
 		BelongingTo: &entityv1alpha1.EID{
-			Type: "DataStax::Organization",
+			Type: "GCP::Organization",
 			Id:   s.OrgID.ValueString(),
 		},
 		When: "true",
 	}
 }
 
-type DataStaxOrganizationSelectorResource struct {
+type GCPOrganizationSelectorResource struct {
 	client *configsvc.Client
 }
 
 var (
-	_ resource.Resource                = &DataStaxOrganizationSelectorResource{}
-	_ resource.ResourceWithConfigure   = &DataStaxOrganizationSelectorResource{}
-	_ resource.ResourceWithImportState = &DataStaxOrganizationSelectorResource{}
+	_ resource.Resource                = &GCPOrganizationSelectorResource{}
+	_ resource.ResourceWithConfigure   = &GCPOrganizationSelectorResource{}
+	_ resource.ResourceWithImportState = &GCPOrganizationSelectorResource{}
 )
 
 // Metadata returns the data source type name.
-func (r *DataStaxOrganizationSelectorResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_datastax_organization_selector"
+func (r *GCPOrganizationSelectorResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_gcp_organization_selector"
 }
 
 // Configure adds the provider configured client to the data source.
-func (r *DataStaxOrganizationSelectorResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *GCPOrganizationSelectorResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -70,10 +70,10 @@ func (r *DataStaxOrganizationSelectorResource) Configure(_ context.Context, req 
 	r.client = client
 }
 
-func (r *DataStaxOrganizationSelectorResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *GCPOrganizationSelectorResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 
 	resp.Schema = schema.Schema{
-		Description: "A Selector to match a DataStax organization.",
+		Description: "A Selector to match a GCP organization.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				MarkdownDescription: "The ID of the selector",
@@ -81,20 +81,20 @@ func (r *DataStaxOrganizationSelectorResource) Schema(ctx context.Context, req r
 			},
 
 			"name": schema.StringAttribute{
-				MarkdownDescription: "The unique name of the selector. Call this something memorable and relevant to the resources being selected. For example: `prod-data-eng`",
+				MarkdownDescription: "The unique name of the selector. Call this something memorable and relevant to the resources being selected. For example: `prod-org`",
 				Optional:            true,
 			},
 
-			"datastax_organization_id": schema.StringAttribute{
-				MarkdownDescription: "The DataStax organization ID",
+			"gcp_organization_id": schema.StringAttribute{
+				MarkdownDescription: "The GCP organization ID. This should look something like 'organizations/123456789'",
 				Required:            true,
 			},
 		},
-		MarkdownDescription: `A Selector to match a DataStax organization.`,
+		MarkdownDescription: `A Selector to match a GCP organization.`,
 	}
 }
 
-func (r *DataStaxOrganizationSelectorResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+func (r *GCPOrganizationSelectorResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 
 	if r.client == nil {
 		resp.Diagnostics.AddError(
@@ -104,7 +104,7 @@ func (r *DataStaxOrganizationSelectorResource) Create(ctx context.Context, req r
 
 		return
 	}
-	var data *DataStaxOrganizationSelector
+	var data *GCPOrganizationSelector
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -144,7 +144,7 @@ func (r *DataStaxOrganizationSelectorResource) Create(ctx context.Context, req r
 }
 
 // Read refreshes the Terraform state with the latest data.
-func (r *DataStaxOrganizationSelectorResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+func (r *GCPOrganizationSelectorResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	if r.client == nil {
 		resp.Diagnostics.AddError(
 			"Unconfigured HTTP Client",
@@ -153,7 +153,7 @@ func (r *DataStaxOrganizationSelectorResource) Read(ctx context.Context, req res
 
 		return
 	}
-	var state DataStaxOrganizationSelector
+	var state GCPOrganizationSelector
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
@@ -180,20 +180,20 @@ func (r *DataStaxOrganizationSelectorResource) Read(ctx context.Context, req res
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }
 
-func (r *DataStaxOrganizationSelectorResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *GCPOrganizationSelectorResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	if r.client == nil {
 		resp.Diagnostics.AddError(
 			"Unconfigured HTTP Client",
 			"Expected configured HTTP client. Please report this issue to the provider developers.",
 		)
 	}
-	var data DataStaxOrganizationSelector
+	var data GCPOrganizationSelector
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		resp.Diagnostics.AddError(
-			"Unable to Create Resource",
+			"Unable to Update Resource",
 			"An unexpected error occurred while parsing the resource creation response.",
 		)
 
@@ -223,14 +223,14 @@ func (r *DataStaxOrganizationSelectorResource) Update(ctx context.Context, req r
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *DataStaxOrganizationSelectorResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+func (r *GCPOrganizationSelectorResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	if r.client == nil {
 		resp.Diagnostics.AddError(
 			"Unconfigured HTTP Client",
 			"Expected configured HTTP client. Please report this issue to the provider developers.",
 		)
 	}
-	var data *DataStaxOrganizationSelector
+	var data *GCPOrganizationSelector
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -259,7 +259,7 @@ func (r *DataStaxOrganizationSelectorResource) Delete(ctx context.Context, req r
 	}
 }
 
-func (r *DataStaxOrganizationSelectorResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *GCPOrganizationSelectorResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	// Retrieve import ID and save to id attribute
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
