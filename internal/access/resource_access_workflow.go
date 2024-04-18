@@ -130,15 +130,21 @@ func (r *AccessWorkflowResource) Create(ctx context.Context, req resource.Create
 
 	accessDuration := time.Second * time.Duration(data.AccessDuration.ValueInt64())
 	tryExtendAfter := time.Second * time.Duration(data.TryExtendAfter.ValueInt64())
-	activationExpiry := time.Second * time.Duration(data.ActivationExpiry.ValueInt64())
 
-	res, err := r.client.CreateAccessWorkflow(ctx, connect.NewRequest(&configv1alpha1.CreateAccessWorkflowRequest{
-		Name:             data.Name.ValueString(),
-		AccessDuration:   durationpb.New(accessDuration),
-		TryExtendAfter:   durationpb.New(tryExtendAfter),
-		Priority:         int32(data.Priority.ValueInt64()),
-		ActivationExpiry: durationpb.New(activationExpiry),
-	}))
+	createReq := &configv1alpha1.CreateAccessWorkflowRequest{
+		Name:           data.Name.ValueString(),
+		AccessDuration: durationpb.New(accessDuration),
+		TryExtendAfter: durationpb.New(tryExtendAfter),
+		Priority:       int32(data.Priority.ValueInt64()),
+	}
+
+	if !data.ActivationExpiry.IsNull() {
+		activationExpiry := time.Second * time.Duration(data.ActivationExpiry.ValueInt64())
+
+		createReq.ActivationExpiry = durationpb.New(activationExpiry)
+	}
+
+	res, err := r.client.CreateAccessWorkflow(ctx, connect.NewRequest(createReq))
 
 	if err != nil {
 		resp.Diagnostics.AddError(
@@ -195,12 +201,12 @@ func (r *AccessWorkflowResource) Read(ctx context.Context, req resource.ReadRequ
 
 	//refresh state
 	state = AccessWorkflowModel{
-		ID:             types.StringValue(res.Msg.Workflow.Id),
-		Name:           types.StringValue(res.Msg.Workflow.Name),
-		AccessDuration: types.Int64Value(res.Msg.Workflow.AccessDuration.Seconds),
-		Priority:       types.Int64Value(int64(res.Msg.Workflow.Priority)),
-		TryExtendAfter: types.Int64Value(res.Msg.Workflow.TryExtendAfter.Seconds),
-		// ActivationExpiry: types.Int64Value(res.Msg.Workflow.ActivationExpiryTime.Seconds),
+		ID:               types.StringValue(res.Msg.Workflow.Id),
+		Name:             types.StringValue(res.Msg.Workflow.Name),
+		AccessDuration:   types.Int64Value(res.Msg.Workflow.AccessDuration.Seconds),
+		Priority:         types.Int64Value(int64(res.Msg.Workflow.Priority)),
+		TryExtendAfter:   types.Int64Value(res.Msg.Workflow.TryExtendAfter.Seconds),
+		ActivationExpiry: types.Int64Value(res.Msg.Workflow.ActivationExpiry.Seconds),
 	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
@@ -228,18 +234,24 @@ func (r *AccessWorkflowResource) Update(ctx context.Context, req resource.Update
 
 	accessDuration := time.Second * time.Duration(data.AccessDuration.ValueInt64())
 	tryExtendAfter := time.Second * time.Duration(data.TryExtendAfter.ValueInt64())
-	activationExpiry := time.Second * time.Duration(data.ActivationExpiry.ValueInt64())
 
-	res, err := r.client.UpdateAccessWorkflow(ctx, connect.NewRequest(&configv1alpha1.UpdateAccessWorkflowRequest{
+	updateReq := &configv1alpha1.UpdateAccessWorkflowRequest{
 		Workflow: &configv1alpha1.AccessWorkflow{
-			Id:               data.ID.ValueString(),
-			Name:             data.Name.ValueString(),
-			AccessDuration:   durationpb.New(accessDuration),
-			TryExtendAfter:   durationpb.New(tryExtendAfter),
-			Priority:         int32(data.Priority.ValueInt64()),
-			ActivationExpiry: durationpb.New(activationExpiry),
+			Id:             data.ID.ValueString(),
+			Name:           data.Name.ValueString(),
+			AccessDuration: durationpb.New(accessDuration),
+			TryExtendAfter: durationpb.New(tryExtendAfter),
+			Priority:       int32(data.Priority.ValueInt64()),
 		},
-	}))
+	}
+
+	if !data.ActivationExpiry.IsNull() {
+		activationExpiry := time.Second * time.Duration(data.ActivationExpiry.ValueInt64())
+
+		updateReq.Workflow.ActivationExpiry = durationpb.New(activationExpiry)
+	}
+
+	res, err := r.client.UpdateAccessWorkflow(ctx, connect.NewRequest(updateReq))
 
 	if err != nil {
 		resp.Diagnostics.AddError(
@@ -258,7 +270,13 @@ func (r *AccessWorkflowResource) Update(ctx context.Context, req resource.Update
 	data.ID = types.StringValue(res.Msg.Workflow.Id)
 	data.AccessDuration = types.Int64Value(res.Msg.Workflow.AccessDuration.Seconds)
 	data.TryExtendAfter = types.Int64Value(res.Msg.Workflow.TryExtendAfter.Seconds)
-	// data.ActivationExpiry = types.Int64Value(res.Msg.Workflow.ActivationExpiryTime.Seconds)
+
+	if res.Msg.Workflow.ActivationExpiry == nil {
+		data.ActivationExpiry = types.Int64Null()
+	} else {
+		data.ActivationExpiry = types.Int64Value(res.Msg.Workflow.ActivationExpiry.Seconds)
+
+	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
