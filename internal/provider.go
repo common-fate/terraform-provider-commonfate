@@ -15,6 +15,7 @@ import (
 	"github.com/common-fate/terraform-provider-commonfate/internal/opsgenie"
 	"github.com/common-fate/terraform-provider-commonfate/internal/pagerduty"
 	"github.com/common-fate/terraform-provider-commonfate/internal/slack"
+	"github.com/common-fate/terraform-provider-commonfate/internal/webhook"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
@@ -157,6 +158,7 @@ func (p *CommonFateProvider) Resources(_ context.Context) []func() resource.Reso
 		NewGCPBigQueryTableSelectorResource,
 		NewGCPBigQueryDatasetAvailabilitiesResource,
 		NewGCPBigQueryDatasetSelectorResource,
+		NewWebhookIntegrationResource,
 	}
 }
 
@@ -277,6 +279,7 @@ func NewDataStaxOrganizationSelectorResource() resource.Resource {
 	return &datastax.DataStaxOrganizationSelectorResource{}
 }
 
+<<<<<<< HEAD
 func NewGCPBigQueryTableAvailabilitiesResource() resource.Resource {
 	return &gcp.GCPBigQueryTableAvailabilitiesResource{}
 }
@@ -291,4 +294,8 @@ func NewGCPBigQueryDatasetAvailabilitiesResource() resource.Resource {
 
 func NewGCPBigQueryDatasetSelectorResource() resource.Resource {
 	return &gcp.GCPBigQueryDatasetSelectorResource{}
+=======
+func NewWebhookIntegrationResource() resource.Resource {
+	return &webhook.WebhookIntegrationResource{}
+>>>>>>> main
 }
