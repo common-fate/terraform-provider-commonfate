@@ -129,6 +129,8 @@ func (p *CommonFateProvider) Resources(_ context.Context) []func() resource.Reso
 		NewGCPProjectAvailabilitiesResource,
 		NewGCPFolderSelectorResource,
 		NewGCPFolderAvailabilitiesResource,
+		NewGCPOrganizationSelectorResource,
+		NewGCPOrganizationAvailabilitiesResource,
 		NewAvailabilitySpecResource,
 		NewGCPIntegrationResource,
 		NewSlackAlertResource,
@@ -152,6 +154,10 @@ func (p *CommonFateProvider) Resources(_ context.Context) []func() resource.Reso
 		NewDataStaxIntegrationResource,
 		NewDataStaxOrganizationAvailabilitiesResource,
 		NewDataStaxOrganizationSelectorResource,
+		NewGCPBigQueryTableAvailabilitiesResource,
+		NewGCPBigQueryTableSelectorResource,
+		NewGCPBigQueryDatasetAvailabilitiesResource,
+		NewGCPBigQueryDatasetSelectorResource,
 		NewWebhookIntegrationResource,
 	}
 }
@@ -179,6 +185,14 @@ func NewGCPFolderSelectorResource() resource.Resource {
 
 func NewGCPFolderAvailabilitiesResource() resource.Resource {
 	return &gcp.GCPFolderAvailabilitiesResource{}
+}
+
+func NewGCPOrganizationSelectorResource() resource.Resource {
+	return &gcp.GCPOrganizationSelectorResource{}
+}
+
+func NewGCPOrganizationAvailabilitiesResource() resource.Resource {
+	return &gcp.GCPOrganizationAvailabilitiesResource{}
 }
 
 func NewWebhookProvisionerResource() resource.Resource {
@@ -263,6 +277,22 @@ func NewDataStaxOrganizationAvailabilitiesResource() resource.Resource {
 
 func NewDataStaxOrganizationSelectorResource() resource.Resource {
 	return &datastax.DataStaxOrganizationSelectorResource{}
+}
+
+func NewGCPBigQueryTableAvailabilitiesResource() resource.Resource {
+	return &gcp.GCPBigQueryTableAvailabilitiesResource{}
+}
+
+func NewGCPBigQueryTableSelectorResource() resource.Resource {
+	return &gcp.GCPBigQueryTableSelectorResource{}
+}
+
+func NewGCPBigQueryDatasetAvailabilitiesResource() resource.Resource {
+	return &gcp.GCPBigQueryDatasetAvailabilitiesResource{}
+}
+
+func NewGCPBigQueryDatasetSelectorResource() resource.Resource {
+	return &gcp.GCPBigQueryDatasetSelectorResource{}
 }
 
 func NewWebhookIntegrationResource() resource.Resource {
