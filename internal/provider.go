@@ -92,11 +92,12 @@ func (p *CommonFateProvider) Configure(ctx context.Context, req provider.Configu
 	//using context.Background() here causes a cancelled context issue
 	//see https://github.com/databricks/databricks-sdk-go/issues/671
 	cfg, err := config_client.New(context.Background(), config_client.Opts{
-		APIURL:        config.APIURL.ValueString(),
-		ClientID:      config.OIDCClientId.ValueString(),
-		ClientSecret:  config.OIDCClientSecret.ValueString(),
-		OIDCIssuer:    strings.TrimSuffix(config.OIDCIssuer.ValueString(), "/"),
-		AuthzURL:      config.AuthzURL.ValueString(),
+		APIURL:       config.APIURL.ValueString(),
+		ClientID:     config.OIDCClientId.ValueString(),
+		ClientSecret: config.OIDCClientSecret.ValueString(),
+		OIDCIssuer:   strings.TrimSuffix(config.OIDCIssuer.ValueString(), "/"),
+		AuthzURL:     config.AuthzURL.ValueString(),
+
 		ConfigSources: []string{"env"},
 	})
 	if err != nil {
