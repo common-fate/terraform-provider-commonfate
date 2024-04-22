@@ -1,5 +1,11 @@
 # @common-fate/terraform-provider-commonfate
 
+## 2.14.1
+
+### Patch Changes
+
+- b3d6971: Fix for config file does not exist error
+
 ## 2.14.0
 
 ### Minor Changes
