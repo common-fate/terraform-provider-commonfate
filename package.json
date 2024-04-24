@@ -1,6 +1,6 @@
 {
   "name": "@common-fate/terraform-provider-commonfate",
-  "version": "2.13.1",
+  "version": "2.14.1",
   "description": "",
   "main": "index.js",
   "keywords": [],
