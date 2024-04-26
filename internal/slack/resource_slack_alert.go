@@ -100,10 +100,9 @@ func (r *SlackAlertResource) Schema(ctx context.Context, req resource.SchemaRequ
 				Computed:            true,
 				Default:             booldefault.StaticBool(false),
 			},
-			"AlertWithDM": schema.BoolAttribute{
+			"alert_with_dm": schema.BoolAttribute{
 				MarkdownDescription: "If Slack is connected, it will send notifications to the requesting user. Cannot be used in conjunction with 'slack_channel_id'",
 				Optional:            true,
-				Default:             booldefault.StaticBool(false),
 			},
 		},
 		MarkdownDescription: `Links a Slack message being send to a particular channel or workspace based on actions made against a workflow.`,
@@ -137,7 +136,7 @@ func (r *SlackAlertResource) Create(ctx context.Context, req resource.CreateRequ
 	if !data.SlackChannelID.IsNull() && data.AlertWithDM.ValueBool() {
 		resp.Diagnostics.AddError(
 			"Unable to Create Resource",
-			"Cannot use `SlackChannelID` and `AlertWithDM` together.",
+			"Cannot use `slack_channel_id` and `alert_with_dm` together.",
 		)
 
 		return
@@ -217,6 +216,7 @@ func (r *SlackAlertResource) Read(ctx context.Context, req resource.ReadRequest,
 		SlackWorkspaceID:               types.StringValue(res.Msg.Alert.SlackWorkspaceId),
 		SlackIntegrationID:             types.StringPointerValue(res.Msg.Alert.IntegrationId),
 		UseWebConsoleForApprovalAction: types.BoolPointerValue(&res.Msg.Alert.UseWebConsoleForApproveAction),
+		AlertWithDM:                    types.BoolPointerValue(&res.Msg.Alert.AlertWithDm),
 	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
@@ -242,11 +242,21 @@ func (r *SlackAlertResource) Update(ctx context.Context, req resource.UpdateRequ
 		return
 	}
 
+	if !data.SlackChannelID.IsNull() && data.AlertWithDM.ValueBool() {
+		resp.Diagnostics.AddError(
+			"Unable to Create Resource",
+			"Cannot use `slack_channel_id` and `alert_with_dm` together.",
+		)
+
+		return
+	}
+
 	updateSlackAlert := &configv1alpha1.UpdateSlackAlertRequest{
 		Alert: &configv1alpha1.SlackAlert{Id: data.ID.ValueString(),
 			WorkflowId:                    data.WorkflowID.ValueString(),
 			SlackWorkspaceId:              data.SlackWorkspaceID.ValueString(),
 			UseWebConsoleForApproveAction: data.UseWebConsoleForApprovalAction.ValueBool(),
+			AlertWithDm:                   data.AlertWithDM.ValueBool(),
 		},
 	}
 
