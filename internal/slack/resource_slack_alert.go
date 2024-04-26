@@ -25,6 +25,7 @@ type SlackAlertModel struct {
 	SlackChannelID                 types.String `tfsdk:"slack_channel_id"`
 	SlackWorkspaceID               types.String `tfsdk:"slack_workspace_id"`
 	UseWebConsoleForApprovalAction types.Bool   `tfsdk:"use_web_console_for_approval_action"`
+	AlertWithDM                    types.Bool   `tfsdk:"alert_with_dm"`
 }
 
 // AccessRuleResource is the data source implementation.
@@ -87,7 +88,7 @@ func (r *SlackAlertResource) Schema(ctx context.Context, req resource.SchemaRequ
 			},
 			"slack_channel_id": schema.StringAttribute{
 				MarkdownDescription: "If Slack is connected, it will send notifications to this slack channel. Must be the ID of the channel and not the name. See below on how to find this ID.",
-				Required:            true,
+				Optional:            true,
 			},
 			"slack_workspace_id": schema.StringAttribute{
 				MarkdownDescription: "The Slack Workspace ID. In Slack URLs, such as `https://app.slack.com/client/TXXXXXXX/CXXXXXXX` it is the string beginning with T.",
@@ -97,6 +98,11 @@ func (r *SlackAlertResource) Schema(ctx context.Context, req resource.SchemaRequ
 				MarkdownDescription: "Optionally, configure the access request review buttons to be links to the web console, rather than performing the action in Slack.",
 				Optional:            true,
 				Computed:            true,
+				Default:             booldefault.StaticBool(false),
+			},
+			"AlertWithDM": schema.BoolAttribute{
+				MarkdownDescription: "If Slack is connected, it will send notifications to the requesting user. Cannot be used in conjunction with 'slack_channel_id'",
+				Optional:            true,
 				Default:             booldefault.StaticBool(false),
 			},
 		},
@@ -128,11 +134,24 @@ func (r *SlackAlertResource) Create(ctx context.Context, req resource.CreateRequ
 		return
 	}
 
+	if !data.SlackChannelID.IsNull() && data.AlertWithDM.ValueBool() {
+		resp.Diagnostics.AddError(
+			"Unable to Create Resource",
+			"Cannot use `SlackChannelID` and `AlertWithDM` together.",
+		)
+
+		return
+	}
+
 	createSlackAlert := &configv1alpha1.CreateSlackAlertRequest{
 		WorkflowId:                    data.WorkflowID.ValueString(),
-		SlackChannelId:                data.SlackChannelID.ValueString(),
 		SlackWorkspaceId:              data.SlackWorkspaceID.ValueString(),
 		UseWebConsoleForApproveAction: data.UseWebConsoleForApprovalAction.ValueBool(),
+		AlertWithDm:                   data.AlertWithDM.ValueBool(),
+	}
+
+	if !data.SlackChannelID.IsNull() {
+		createSlackAlert.SlackChannelId = data.SlackChannelID.ValueString()
 	}
 
 	if data.SlackIntegrationID.ValueString() != "" {
@@ -226,10 +245,13 @@ func (r *SlackAlertResource) Update(ctx context.Context, req resource.UpdateRequ
 	updateSlackAlert := &configv1alpha1.UpdateSlackAlertRequest{
 		Alert: &configv1alpha1.SlackAlert{Id: data.ID.ValueString(),
 			WorkflowId:                    data.WorkflowID.ValueString(),
-			SlackChannelId:                data.SlackChannelID.ValueString(),
 			SlackWorkspaceId:              data.SlackWorkspaceID.ValueString(),
 			UseWebConsoleForApproveAction: data.UseWebConsoleForApprovalAction.ValueBool(),
 		},
+	}
+
+	if !data.SlackChannelID.IsNull() {
+		updateSlackAlert.Alert.SlackChannelId = data.SlackChannelID.ValueString()
 	}
 
 	if data.SlackIntegrationID.ValueString() != "" {
