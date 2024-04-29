@@ -103,6 +103,8 @@ func (r *SlackAlertResource) Schema(ctx context.Context, req resource.SchemaRequ
 			"send_direct_message": schema.BoolAttribute{
 				MarkdownDescription: "If Slack is connected, it will send notifications to the requesting user. Cannot be used in conjunction with 'slack_channel_id'",
 				Optional:            true,
+				Computed:            true,
+				Default:             booldefault.StaticBool(false),
 			},
 		},
 		MarkdownDescription: `Links a Slack message being send to a particular channel or workspace based on actions made against a workflow.`,
@@ -137,6 +139,15 @@ func (r *SlackAlertResource) Create(ctx context.Context, req resource.CreateRequ
 		resp.Diagnostics.AddError(
 			"Unable to Create Resource",
 			"Cannot use `slack_channel_id` and `send_direct_message` together.",
+		)
+
+		return
+	}
+
+	if data.SlackChannelID.IsNull() && !data.SendDirectMessages.ValueBool() {
+		resp.Diagnostics.AddError(
+			"Unable to Create Resource",
+			"Must have `slack_channel_id` or `send_direct_message` set.",
 		)
 
 		return
@@ -246,6 +257,15 @@ func (r *SlackAlertResource) Update(ctx context.Context, req resource.UpdateRequ
 		resp.Diagnostics.AddError(
 			"Unable to Create Resource",
 			"Cannot use `slack_channel_id` and `send_direct_message` together.",
+		)
+
+		return
+	}
+
+	if data.SlackChannelID.IsNull() && !data.SendDirectMessages.ValueBool() {
+		resp.Diagnostics.AddError(
+			"Unable to Create Resource",
+			"Must have `slack_channel_id` or `send_direct_message` set.",
 		)
 
 		return
