@@ -33,8 +33,8 @@ resource "commonfate-slack_alert" "demo" {
 
 ### Optional
 
-- `alert_with_dm` (Boolean) If Slack is connected, it will send notifications to the requesting user. Cannot be used in conjunction with 'slack_channel_id'
 - `integration_id` (String) The ID for the integration set up to slack.
+- `send_direct_message` (Boolean) If Slack is connected, it will send notifications to the requesting user. Cannot be used in conjunction with 'slack_channel_id'
 - `slack_channel_id` (String) If Slack is connected, it will send notifications to this slack channel. Must be the ID of the channel and not the name. See below on how to find this ID.
 - `slack_workspace_id` (String) The Slack Workspace ID. In Slack URLs, such as `https://app.slack.com/client/TXXXXXXX/CXXXXXXX` it is the string beginning with T.
 - `use_web_console_for_approval_action` (Boolean) Optionally, configure the access request review buttons to be links to the web console, rather than performing the action in Slack.
