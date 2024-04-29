@@ -25,7 +25,7 @@ type SlackAlertModel struct {
 	SlackChannelID                 types.String `tfsdk:"slack_channel_id"`
 	SlackWorkspaceID               types.String `tfsdk:"slack_workspace_id"`
 	UseWebConsoleForApprovalAction types.Bool   `tfsdk:"use_web_console_for_approval_action"`
-	SendDirectMessages             types.Bool   `tfsdk:"alert_with_dm"`
+	SendDirectMessages             types.Bool   `tfsdk:"send_direct_messages"`
 }
 
 // AccessRuleResource is the data source implementation.
@@ -245,7 +245,7 @@ func (r *SlackAlertResource) Update(ctx context.Context, req resource.UpdateRequ
 	if !data.SlackChannelID.IsNull() && data.SendDirectMessages.ValueBool() {
 		resp.Diagnostics.AddError(
 			"Unable to Create Resource",
-			"Cannot use `slack_channel_id` and `alert_with_dm` together.",
+			"Cannot use `slack_channel_id` and `send_direct_messages` together.",
 		)
 
 		return
