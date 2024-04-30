@@ -114,7 +114,10 @@ func (r *GCPRoleGroupResource) Create(ctx context.Context, req resource.CreateRe
 		return
 	}
 
-	createGCPRoleGroup := &configv1alpha1.CreateGCPRoleGroupRequest{}
+	createGCPRoleGroup := &configv1alpha1.CreateGCPRoleGroupRequest{
+		Name:           data.Name.ValueString(),
+		OrganizationId: data.OrgID.ValueString(),
+	}
 
 	for _, r := range data.RoleIDs {
 		createGCPRoleGroup.RoleIds = append(createGCPRoleGroup.RoleIds, r.ValueString())
@@ -173,7 +176,9 @@ func (r *GCPRoleGroupResource) Read(ctx context.Context, req resource.ReadReques
 
 	// refresh state
 	state = GCPRoleGroupModel{
-		ID: types.StringValue(res.Msg.RoleGroup.Id),
+		ID:    types.StringValue(res.Msg.RoleGroup.Id),
+		Name:  types.StringValue(res.Msg.RoleGroup.Name),
+		OrgID: types.StringValue(res.Msg.RoleGroup.OrganizationId),
 	}
 
 	for _, r := range res.Msg.RoleGroup.RoleIds {
@@ -204,7 +209,10 @@ func (r *GCPRoleGroupResource) Update(ctx context.Context, req resource.UpdateRe
 	}
 
 	updateGCPRoleGroup := &configv1alpha1.UpdateGCPRoleGroupRequest{
-		RoleGroup: &configv1alpha1.GCPRoleGroup{Id: data.ID.ValueString()},
+		RoleGroup: &configv1alpha1.GCPRoleGroup{
+			Id:             data.ID.ValueString(),
+			Name:           data.Name.ValueString(),
+			OrganizationId: data.OrgID.ValueString()},
 	}
 
 	for _, roleID := range data.RoleIDs {

@@ -139,6 +139,8 @@ func (p *CommonFateProvider) Resources(_ context.Context) []func() resource.Reso
 		NewAvailabilitySpecResource,
 		NewGCPIntegrationResource,
 		NewGCPRoleGroupResource,
+		NewGCPRoleGroupFolderAvailabilitiesResource,
+		NewGCPRoleGroupProjectAvailabilitiesResource,
 		NewSlackAlertResource,
 		NewWebhookProvisionerResource,
 		NewAWSIDCIntegrationResource,
@@ -190,6 +192,14 @@ func NewGCPFolderAvailabilitiesResource() resource.Resource {
 
 func NewGCPRoleGroupResource() resource.Resource {
 	return &gcp.GCPRoleGroupResource{}
+}
+
+func NewGCPRoleGroupFolderAvailabilitiesResource() resource.Resource {
+	return &gcp.GCPRoleGroupFolderAvailabilitiesResource{}
+}
+
+func NewGCPRoleGroupProjectAvailabilitiesResource() resource.Resource {
+	return &gcp.GCPRoleGroupProjectAvailabilitiesResource{}
 }
 
 func NewWebhookProvisionerResource() resource.Resource {

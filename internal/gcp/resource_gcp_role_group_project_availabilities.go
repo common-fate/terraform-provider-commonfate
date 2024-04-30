@@ -20,7 +20,7 @@ import (
 type GCPRoleGroupProjectAvailabilities struct {
 	ID                  types.String `tfsdk:"id"`
 	WorkflowID          types.String `tfsdk:"workflow_id"`
-	RoleGroup           types.String `tfsdk:"gcp_role_group"`
+	RoleGroup           types.String `tfsdk:"gcp_role_group_id"`
 	ProjectSelectorID   types.String `tfsdk:"gcp_project_selector_id"`
 	WorkspaceCustomerID types.String `tfsdk:"google_workspace_customer_id"`
 }
@@ -80,8 +80,8 @@ func (r *GCPRoleGroupProjectAvailabilitiesResource) Schema(ctx context.Context, 
 				Required:            true,
 			},
 
-			"gcp_role_group": schema.StringAttribute{
-				MarkdownDescription: "The GCP role group to make available",
+			"gcp_role_group_id": schema.StringAttribute{
+				MarkdownDescription: "The ID of the GCP role group to make available",
 				Required:            true,
 			},
 

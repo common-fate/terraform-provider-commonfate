@@ -20,7 +20,7 @@ import (
 type GCPRoleGroupFolderAvailabilities struct {
 	ID                  types.String `tfsdk:"id"`
 	WorkflowID          types.String `tfsdk:"workflow_id"`
-	RoleGroup           types.String `tfsdk:"gcp_role_group"`
+	RoleGroup           types.String `tfsdk:"gcp_role_group_id"`
 	FolderSelectorID    types.String `tfsdk:"gcp_folder_selector_id"`
 	WorkspaceCustomerID types.String `tfsdk:"google_workspace_customer_id"`
 }
@@ -37,7 +37,7 @@ var (
 
 // Metadata returns the data source type name.
 func (r *GCPRoleGroupFolderAvailabilitiesResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_gcp_role_group_group_folder_availabilities"
+	resp.TypeName = req.ProviderTypeName + "_gcp_role_group_folder_availabilities"
 }
 
 // Configure adds the provider configured client to the data source.
@@ -80,8 +80,8 @@ func (r *GCPRoleGroupFolderAvailabilitiesResource) Schema(ctx context.Context, r
 				Required:            true,
 			},
 
-			"gcp_role_group": schema.StringAttribute{
-				MarkdownDescription: "The GCP role group to make available",
+			"gcp_role_group_id": schema.StringAttribute{
+				MarkdownDescription: "The ID of the GCP role group to make available",
 				Required:            true,
 			},
 
