@@ -201,6 +201,8 @@ func NewGCPRoleGroupFolderAvailabilitiesResource() resource.Resource {
 
 func NewGCPRoleGroupProjectAvailabilitiesResource() resource.Resource {
 	return &gcp.GCPRoleGroupProjectAvailabilitiesResource{}
+}
+
 func NewGCPOrganizationSelectorResource() resource.Resource {
 	return &gcp.GCPOrganizationSelectorResource{}
 }
