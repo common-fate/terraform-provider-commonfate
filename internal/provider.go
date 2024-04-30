@@ -2,7 +2,6 @@ package internal
 
 import (
 	"context"
-	"os"
 	"strings"
 
 	config_client "github.com/common-fate/sdk/config"
@@ -16,6 +15,7 @@ import (
 	"github.com/common-fate/terraform-provider-commonfate/internal/opsgenie"
 	"github.com/common-fate/terraform-provider-commonfate/internal/pagerduty"
 	"github.com/common-fate/terraform-provider-commonfate/internal/slack"
+	"github.com/common-fate/terraform-provider-commonfate/internal/webhook"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
@@ -59,21 +59,21 @@ func (p *CommonFateProvider) Schema(ctx context.Context, req provider.SchemaRequ
 		Attributes: map[string]schema.Attribute{
 			"api_url": schema.StringAttribute{
 				Description: "The API url of your Common Fate deployment.",
-				Required:    true,
+				Optional:    true,
 			},
 			"authz_url": schema.StringAttribute{
 				Description: "The base URL of the Common Fate authz service. If not provided, will default to the same URL as the api_url",
 				Optional:    true,
 			},
 			"oidc_client_id": schema.StringAttribute{
-				Required: true,
+				Optional: true,
 			},
 			"oidc_client_secret": schema.StringAttribute{
 				Optional:  true,
 				Sensitive: true,
 			},
 			"oidc_issuer": schema.StringAttribute{
-				Required: true,
+				Optional: true,
 			},
 		},
 	}
@@ -89,21 +89,15 @@ func (p *CommonFateProvider) Configure(ctx context.Context, req provider.Configu
 		return
 	}
 
-	clientsecret := config.OIDCClientSecret.ValueString()
-
-	if os.Getenv("CF_OIDC_CLIENT_SECRET") != "" {
-		clientsecret = os.Getenv("CF_OIDC_CLIENT_SECRET")
-	}
-
 	//using context.Background() here causes a cancelled context issue
 	//see https://github.com/databricks/databricks-sdk-go/issues/671
-	cfg, err := config_client.NewServerContext(context.Background(), config_client.Opts{
-		APIURL:       config.APIURL.ValueString(),
-		ClientID:     config.OIDCClientId.ValueString(),
-		ClientSecret: clientsecret,
-		// @TODO consider changing this to use a direct issuer env var
-		OIDCIssuer: strings.TrimSuffix(config.OIDCIssuer.ValueString(), "/"),
-		AuthzURL:   config.AuthzURL.ValueString(),
+	cfg, err := config_client.New(context.Background(), config_client.Opts{
+		APIURL:        config.APIURL.ValueString(),
+		ClientID:      config.OIDCClientId.ValueString(),
+		ClientSecret:  config.OIDCClientSecret.ValueString(),
+		OIDCIssuer:    strings.TrimSuffix(config.OIDCIssuer.ValueString(), "/"),
+		AuthzURL:      config.AuthzURL.ValueString(),
+		ConfigSources: []string{"env"},
 	})
 	if err != nil {
 		resp.Diagnostics.AddError(
@@ -136,6 +130,8 @@ func (p *CommonFateProvider) Resources(_ context.Context) []func() resource.Reso
 		NewGCPProjectAvailabilitiesResource,
 		NewGCPFolderSelectorResource,
 		NewGCPFolderAvailabilitiesResource,
+		NewGCPOrganizationSelectorResource,
+		NewGCPOrganizationAvailabilitiesResource,
 		NewAvailabilitySpecResource,
 		NewGCPIntegrationResource,
 		NewGCPRoleGroupResource,
@@ -162,6 +158,11 @@ func (p *CommonFateProvider) Resources(_ context.Context) []func() resource.Reso
 		NewDataStaxIntegrationResource,
 		NewDataStaxOrganizationAvailabilitiesResource,
 		NewDataStaxOrganizationSelectorResource,
+		NewGCPBigQueryTableAvailabilitiesResource,
+		NewGCPBigQueryTableSelectorResource,
+		NewGCPBigQueryDatasetAvailabilitiesResource,
+		NewGCPBigQueryDatasetSelectorResource,
+		NewWebhookIntegrationResource,
 	}
 }
 
@@ -200,6 +201,12 @@ func NewGCPRoleGroupFolderAvailabilitiesResource() resource.Resource {
 
 func NewGCPRoleGroupProjectAvailabilitiesResource() resource.Resource {
 	return &gcp.GCPRoleGroupProjectAvailabilitiesResource{}
+func NewGCPOrganizationSelectorResource() resource.Resource {
+	return &gcp.GCPOrganizationSelectorResource{}
+}
+
+func NewGCPOrganizationAvailabilitiesResource() resource.Resource {
+	return &gcp.GCPOrganizationAvailabilitiesResource{}
 }
 
 func NewWebhookProvisionerResource() resource.Resource {
@@ -284,4 +291,24 @@ func NewDataStaxOrganizationAvailabilitiesResource() resource.Resource {
 
 func NewDataStaxOrganizationSelectorResource() resource.Resource {
 	return &datastax.DataStaxOrganizationSelectorResource{}
+}
+
+func NewGCPBigQueryTableAvailabilitiesResource() resource.Resource {
+	return &gcp.GCPBigQueryTableAvailabilitiesResource{}
+}
+
+func NewGCPBigQueryTableSelectorResource() resource.Resource {
+	return &gcp.GCPBigQueryTableSelectorResource{}
+}
+
+func NewGCPBigQueryDatasetAvailabilitiesResource() resource.Resource {
+	return &gcp.GCPBigQueryDatasetAvailabilitiesResource{}
+}
+
+func NewGCPBigQueryDatasetSelectorResource() resource.Resource {
+	return &gcp.GCPBigQueryDatasetSelectorResource{}
+}
+
+func NewWebhookIntegrationResource() resource.Resource {
+	return &webhook.WebhookIntegrationResource{}
 }

@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -95,6 +96,8 @@ func (r *SlackAlertResource) Schema(ctx context.Context, req resource.SchemaRequ
 			"use_web_console_for_approval_action": schema.BoolAttribute{
 				MarkdownDescription: "Optionally, configure the access request review buttons to be links to the web console, rather than performing the action in Slack.",
 				Optional:            true,
+				Computed:            true,
+				Default:             booldefault.StaticBool(false),
 			},
 		},
 		MarkdownDescription: `Links a Slack message being send to a particular channel or workspace based on actions made against a workflow.`,

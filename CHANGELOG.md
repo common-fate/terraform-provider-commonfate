@@ -1,5 +1,25 @@
 # @common-fate/terraform-provider-commonfate
 
+## 2.14.1
+
+### Patch Changes
+
+- b3d6971: Fix for config file does not exist error
+
+## 2.14.0
+
+### Minor Changes
+
+- c4a3323: Add support for configuring the Terraform provider entirely via environment variables.
+- 4a3a3f0: Adds `gcp_bigquery_table_selector` and `gcp_bigquery_table_availabilities`, used for just-in-time access to BigQuery Tables.
+- 4a3a3f0: Adds `gcp_bigquery_dataset_selector` and `gcp_bigquery_dataset_availabilities`, used for just-in-time access to BigQuery Datasets.
+- 4a3a3f0: Adds `gcp_organization_selector` and `gcp_organization_availabilities`, used for just-in-time access to organization-level GCP roles.
+- 794a2d8: Add Webhook Integration resource
+
+### Patch Changes
+
+- 950bf6d: Fix an issue where Terraform would prompt to set the 'use_web_console_for_approval_action' to null each plan/apply.
+
 ## 2.13.1
 
 ### Patch Changes
