@@ -1,5 +1,11 @@
 # @common-fate/terraform-provider-commonfate
 
+## 2.15.0
+
+### Minor Changes
+
+- cbd0f85: adds variable to workflows to configure expiry time for closing approved requests
+
 ## 2.14.1
 
 ### Patch Changes
