@@ -127,7 +127,7 @@ func (r *GCPRoleGroupResource) Create(ctx context.Context, req resource.CreateRe
 
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to Create Resource: Access GCPRoleGroup",
+			"Unable to Create Resource: GCPRoleGroup",
 			"An unexpected error occurred while communicating with Common Fate API. "+
 				"Please report this issue to the provider developers.\n\n"+
 				"JSON Error: "+err.Error(),
