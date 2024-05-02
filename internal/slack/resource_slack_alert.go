@@ -25,7 +25,7 @@ type SlackAlertModel struct {
 	SlackChannelID                 types.String `tfsdk:"slack_channel_id"`
 	SlackWorkspaceID               types.String `tfsdk:"slack_workspace_id"`
 	UseWebConsoleForApprovalAction types.Bool   `tfsdk:"use_web_console_for_approval_action"`
-	SendDirectMessages             types.Bool   `tfsdk:"send_direct_message"`
+	SendDirectMessagesToApprovers  types.Bool   `tfsdk:"send_direct_message_to_approvers"`
 }
 
 // AccessRuleResource is the data source implementation.
@@ -100,7 +100,7 @@ func (r *SlackAlertResource) Schema(ctx context.Context, req resource.SchemaRequ
 				Computed:            true,
 				Default:             booldefault.StaticBool(false),
 			},
-			"send_direct_message": schema.BoolAttribute{
+			"send_direct_message_to_approvers": schema.BoolAttribute{
 				MarkdownDescription: "If Slack is connected, it will send notifications to the requesting user. Cannot be used in conjunction with 'slack_channel_id'",
 				Optional:            true,
 				Computed:            true,
@@ -135,19 +135,19 @@ func (r *SlackAlertResource) Create(ctx context.Context, req resource.CreateRequ
 		return
 	}
 
-	if !data.SlackChannelID.IsNull() && data.SendDirectMessages.ValueBool() {
+	if !data.SlackChannelID.IsNull() && data.SendDirectMessagesToApprovers.ValueBool() {
 		resp.Diagnostics.AddError(
 			"Unable to Create Resource",
-			"Cannot use `slack_channel_id` and `send_direct_message` together.",
+			"Cannot use `slack_channel_id` and `send_direct_message_to_approvers` together.",
 		)
 
 		return
 	}
 
-	if data.SlackChannelID.IsNull() && !data.SendDirectMessages.ValueBool() {
+	if data.SlackChannelID.IsNull() && !data.SendDirectMessagesToApprovers.ValueBool() {
 		resp.Diagnostics.AddError(
 			"Unable to Create Resource",
-			"Must have `slack_channel_id` or `send_direct_message` set.",
+			"Must have `slack_channel_id` or `send_direct_message_to_approvers` set.",
 		)
 
 		return
@@ -157,7 +157,7 @@ func (r *SlackAlertResource) Create(ctx context.Context, req resource.CreateRequ
 		WorkflowId:                    data.WorkflowID.ValueString(),
 		SlackWorkspaceId:              data.SlackWorkspaceID.ValueString(),
 		UseWebConsoleForApproveAction: data.UseWebConsoleForApprovalAction.ValueBool(),
-		SendDirectMessagesToApprovers: data.SendDirectMessages.ValueBool(),
+		SendDirectMessagesToApprovers: data.SendDirectMessagesToApprovers.ValueBool(),
 	}
 
 	if !data.SlackChannelID.IsNull() {
@@ -227,7 +227,7 @@ func (r *SlackAlertResource) Read(ctx context.Context, req resource.ReadRequest,
 		SlackWorkspaceID:               types.StringValue(res.Msg.Alert.SlackWorkspaceId),
 		SlackIntegrationID:             types.StringPointerValue(res.Msg.Alert.IntegrationId),
 		UseWebConsoleForApprovalAction: types.BoolPointerValue(&res.Msg.Alert.UseWebConsoleForApproveAction),
-		SendDirectMessages:             types.BoolPointerValue(&res.Msg.Alert.SendDirectMessagesToApprovers),
+		SendDirectMessagesToApprovers:  types.BoolPointerValue(&res.Msg.Alert.SendDirectMessagesToApprovers),
 	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
@@ -253,19 +253,19 @@ func (r *SlackAlertResource) Update(ctx context.Context, req resource.UpdateRequ
 		return
 	}
 
-	if !data.SlackChannelID.IsNull() && data.SendDirectMessages.ValueBool() {
+	if !data.SlackChannelID.IsNull() && data.SendDirectMessagesToApprovers.ValueBool() {
 		resp.Diagnostics.AddError(
 			"Unable to Create Resource",
-			"Cannot use `slack_channel_id` and `send_direct_message` together.",
+			"Cannot use `slack_channel_id` and `send_direct_message_to_approvers` together.",
 		)
 
 		return
 	}
 
-	if data.SlackChannelID.IsNull() && !data.SendDirectMessages.ValueBool() {
+	if data.SlackChannelID.IsNull() && !data.SendDirectMessagesToApprovers.ValueBool() {
 		resp.Diagnostics.AddError(
 			"Unable to Create Resource",
-			"Must have `slack_channel_id` or `send_direct_message` set.",
+			"Must have `slack_channel_id` or `send_direct_message_to_approvers` set.",
 		)
 
 		return
@@ -276,7 +276,7 @@ func (r *SlackAlertResource) Update(ctx context.Context, req resource.UpdateRequ
 			WorkflowId:                    data.WorkflowID.ValueString(),
 			SlackWorkspaceId:              data.SlackWorkspaceID.ValueString(),
 			UseWebConsoleForApproveAction: data.UseWebConsoleForApprovalAction.ValueBool(),
-			SendDirectMessagesToApprovers: data.SendDirectMessages.ValueBool(),
+			SendDirectMessagesToApprovers: data.SendDirectMessagesToApprovers.ValueBool(),
 		},
 	}
 
