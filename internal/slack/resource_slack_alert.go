@@ -157,7 +157,7 @@ func (r *SlackAlertResource) Create(ctx context.Context, req resource.CreateRequ
 		WorkflowId:                    data.WorkflowID.ValueString(),
 		SlackWorkspaceId:              data.SlackWorkspaceID.ValueString(),
 		UseWebConsoleForApproveAction: data.UseWebConsoleForApprovalAction.ValueBool(),
-		SendDirectMessages:            data.SendDirectMessages.ValueBool(),
+		SendDirectMessagesToApprovers: data.SendDirectMessages.ValueBool(),
 	}
 
 	if !data.SlackChannelID.IsNull() {
@@ -227,7 +227,7 @@ func (r *SlackAlertResource) Read(ctx context.Context, req resource.ReadRequest,
 		SlackWorkspaceID:               types.StringValue(res.Msg.Alert.SlackWorkspaceId),
 		SlackIntegrationID:             types.StringPointerValue(res.Msg.Alert.IntegrationId),
 		UseWebConsoleForApprovalAction: types.BoolPointerValue(&res.Msg.Alert.UseWebConsoleForApproveAction),
-		SendDirectMessages:             types.BoolPointerValue(&res.Msg.Alert.SendDirectMessages),
+		SendDirectMessages:             types.BoolPointerValue(&res.Msg.Alert.SendDirectMessagesToApprovers),
 	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
@@ -276,7 +276,7 @@ func (r *SlackAlertResource) Update(ctx context.Context, req resource.UpdateRequ
 			WorkflowId:                    data.WorkflowID.ValueString(),
 			SlackWorkspaceId:              data.SlackWorkspaceID.ValueString(),
 			UseWebConsoleForApproveAction: data.UseWebConsoleForApprovalAction.ValueBool(),
-			SendDirectMessages:            data.SendDirectMessages.ValueBool(),
+			SendDirectMessagesToApprovers: data.SendDirectMessages.ValueBool(),
 		},
 	}
 
