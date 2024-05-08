@@ -1,5 +1,11 @@
 # @common-fate/terraform-provider-commonfate
 
+## 2.16.1
+
+### Patch Changes
+
+- 7a104b7: Fix an issue causing the provider to panic.
+
 ## 2.16.0
 
 ### Minor Changes
