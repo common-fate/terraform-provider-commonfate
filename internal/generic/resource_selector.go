@@ -117,7 +117,7 @@ func (r *SelectorResource) Schema(ctx context.Context, req resource.SchemaReques
 				Required:            true,
 			},
 		},
-		MarkdownDescription: `Access Selectors select resources matching a criteria specified in the 'when' parameter. Resources matching this criteria can be made available for Access Worfklows.`,
+		MarkdownDescription: `Access Selectors select resources matching a criteria specified in the 'when' parameter. Resources matching this criteria can be made available for Access Workflows.`,
 	}
 }
 
