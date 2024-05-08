@@ -6,6 +6,7 @@ import (
 
 	config_client "github.com/common-fate/sdk/config"
 	"github.com/common-fate/terraform-provider-commonfate/internal/access"
+	"github.com/common-fate/terraform-provider-commonfate/internal/auth0"
 	"github.com/common-fate/terraform-provider-commonfate/internal/aws"
 	"github.com/common-fate/terraform-provider-commonfate/internal/datastax"
 	"github.com/common-fate/terraform-provider-commonfate/internal/entra"
@@ -163,6 +164,9 @@ func (p *CommonFateProvider) Resources(_ context.Context) []func() resource.Reso
 		NewGCPBigQueryDatasetAvailabilitiesResource,
 		NewGCPBigQueryDatasetSelectorResource,
 		NewWebhookIntegrationResource,
+		NewAuth0IntegrationResource,
+		NewAuth0OrganizationSelectorResource,
+		NewAuth0OrganizationAvailabilitiesResource,
 	}
 }
 
@@ -313,4 +317,16 @@ func NewGCPBigQueryDatasetSelectorResource() resource.Resource {
 
 func NewWebhookIntegrationResource() resource.Resource {
 	return &webhook.WebhookIntegrationResource{}
+}
+
+func NewAuth0OrganizationAvailabilitiesResource() resource.Resource {
+	return &auth0.Auth0OrganizationAvailabilitiesResource{}
+}
+
+func NewAuth0OrganizationSelectorResource() resource.Resource {
+	return &auth0.Auth0OrganizationSelectorResource{}
+}
+
+func NewAuth0IntegrationResource() resource.Resource {
+	return &auth0.Auth0IntegrationResource{}
 }
