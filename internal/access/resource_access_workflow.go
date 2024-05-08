@@ -210,7 +210,7 @@ func (r *AccessWorkflowResource) Read(ctx context.Context, req resource.ReadRequ
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
 
-	//read the state from the client
+	// read the state from the client
 	res, err := r.client.GetAccessWorkflow(ctx, connect.NewRequest(&configv1alpha1.GetAccessWorkflowRequest{
 		Id: state.ID.ValueString(),
 	}))
@@ -225,14 +225,17 @@ func (r *AccessWorkflowResource) Read(ctx context.Context, req resource.ReadRequ
 		return
 	}
 
-	//refresh state
+	// refresh state
 	state = AccessWorkflowModel{
-		ID:              types.StringValue(res.Msg.Workflow.Id),
-		Name:            types.StringValue(res.Msg.Workflow.Name),
-		AccessDuration:  types.Int64Value(res.Msg.Workflow.AccessDuration.Seconds),
-		Priority:        types.Int64Value(int64(res.Msg.Workflow.Priority)),
-		TryExtendAfter:  types.Int64Value(res.Msg.Workflow.TryExtendAfter.Seconds),
-		DefaultDuration: types.Int64Value(res.Msg.Workflow.DefaultDuration.Seconds),
+		ID:             types.StringValue(res.Msg.Workflow.Id),
+		Name:           types.StringValue(res.Msg.Workflow.Name),
+		AccessDuration: types.Int64Value(res.Msg.Workflow.AccessDuration.Seconds),
+		Priority:       types.Int64Value(int64(res.Msg.Workflow.Priority)),
+		TryExtendAfter: types.Int64Value(res.Msg.Workflow.TryExtendAfter.Seconds),
+	}
+
+	if res.Msg.Workflow.DefaultDuration != nil {
+		state.DefaultDuration = types.Int64Value(res.Msg.Workflow.DefaultDuration.Seconds)
 	}
 
 	if res.Msg.Workflow.ActivationExpiry != nil {
