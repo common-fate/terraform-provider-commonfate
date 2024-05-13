@@ -38,8 +38,16 @@ resource "commonfate-access_workflow" "workflow-demo" {
 - `default_duration_seconds` (Number) The default duration of the access workflow
 - `name` (String) A unique name for the workflow so you know how to identify it.
 - `priority` (Number) The priority that governs whether the policy will be used. If a different policy with a higher priority and the same role exists that one will be used over another.
+- `validation` (Object) Validation requirements to be set with this workflow (see [below for nested schema](#nestedatt--validation))
 
 ### Read-Only
 
 - `id` (String) The internal approval workflow ID
+
+<a id="nestedatt--validation"></a>
+### Nested Schema for `validation`
+
+Optional:
+
+- `has_reason` (Boolean)
 
