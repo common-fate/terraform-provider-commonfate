@@ -27,6 +27,7 @@ type AccessWorkflowModel struct {
 	TryExtendAfter   types.Int64  `tfsdk:"try_extend_after_seconds"`
 	Priority         types.Int64  `tfsdk:"priority"`
 	ActivationExpiry types.Int64  `tfsdk:"activation_expiry"`
+	DefaultDuration  types.Int64  `tfsdk:"default_duration_seconds"`
 }
 
 // AccessRuleResource is the data source implementation.
@@ -84,7 +85,7 @@ func (r *AccessWorkflowResource) Schema(ctx context.Context, req resource.Schema
 				Optional:            true,
 			},
 			"access_duration_seconds": schema.Int64Attribute{
-				MarkdownDescription: "The duration of the access workflow.",
+				MarkdownDescription: "The maximum allowable duration for the access workflow",
 				Required:            true,
 			},
 			"try_extend_after_seconds": schema.Int64Attribute{
@@ -97,6 +98,10 @@ func (r *AccessWorkflowResource) Schema(ctx context.Context, req resource.Schema
 			},
 			"activation_expiry": schema.Int64Attribute{
 				MarkdownDescription: "The amount of time after access is activated before the request will be expired",
+				Optional:            true,
+			},
+			"default_duration_seconds": schema.Int64Attribute{
+				MarkdownDescription: "The default duration of the access workflow",
 				Optional:            true,
 			},
 		},
@@ -144,6 +149,22 @@ func (r *AccessWorkflowResource) Create(ctx context.Context, req resource.Create
 		createReq.ActivationExpiry = durationpb.New(activationExpiry)
 	}
 
+	// set default duration to access duration by default
+	if !data.DefaultDuration.IsNull() {
+		defaultDuration := time.Second * time.Duration(data.DefaultDuration.ValueInt64())
+
+		if defaultDuration > accessDuration {
+			resp.Diagnostics.AddError(
+				"Invalid Default Duration",
+				"The default duration must be less than the maximum access duration. "+
+					"Please adjust the Default Duration to be less than Access Duration.\n\n"+
+					"Default Duration: "+defaultDuration.String()+", Access Duration: "+accessDuration.String(),
+			)
+			return
+		}
+		createReq.DefaultDuration = durationpb.New(defaultDuration)
+	}
+
 	res, err := r.client.CreateAccessWorkflow(ctx, connect.NewRequest(createReq))
 
 	if err != nil {
@@ -184,7 +205,7 @@ func (r *AccessWorkflowResource) Read(ctx context.Context, req resource.ReadRequ
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
 
-	//read the state from the client
+	// read the state from the client
 	res, err := r.client.GetAccessWorkflow(ctx, connect.NewRequest(&configv1alpha1.GetAccessWorkflowRequest{
 		Id: state.ID.ValueString(),
 	}))
@@ -199,13 +220,17 @@ func (r *AccessWorkflowResource) Read(ctx context.Context, req resource.ReadRequ
 		return
 	}
 
-	//refresh state
+	// refresh state
 	state = AccessWorkflowModel{
 		ID:             types.StringValue(res.Msg.Workflow.Id),
 		Name:           types.StringValue(res.Msg.Workflow.Name),
 		AccessDuration: types.Int64Value(res.Msg.Workflow.AccessDuration.Seconds),
 		Priority:       types.Int64Value(int64(res.Msg.Workflow.Priority)),
 		TryExtendAfter: types.Int64Value(res.Msg.Workflow.TryExtendAfter.Seconds),
+	}
+
+	if res.Msg.Workflow.DefaultDuration != nil {
+		state.DefaultDuration = types.Int64Value(res.Msg.Workflow.DefaultDuration.Seconds)
 	}
 
 	if res.Msg.Workflow.ActivationExpiry != nil {
@@ -255,6 +280,22 @@ func (r *AccessWorkflowResource) Update(ctx context.Context, req resource.Update
 		updateReq.Workflow.ActivationExpiry = durationpb.New(activationExpiry)
 	}
 
+	// set default duration to access duration by default
+	if !data.DefaultDuration.IsNull() {
+
+		defaultDuration := time.Second * time.Duration(data.DefaultDuration.ValueInt64())
+		if defaultDuration > accessDuration {
+			resp.Diagnostics.AddError(
+				"Invalid Default Duration",
+				"The default duration must be less than the maximum access duration. "+
+					"Please adjust the Default Duration to be less than Access Duration.\n\n"+
+					"Default Duration: "+defaultDuration.String()+", Access Duration: "+accessDuration.String(),
+			)
+			return
+		}
+		updateReq.Workflow.DefaultDuration = durationpb.New(defaultDuration)
+	}
+
 	res, err := r.client.UpdateAccessWorkflow(ctx, connect.NewRequest(updateReq))
 
 	if err != nil {
@@ -279,6 +320,13 @@ func (r *AccessWorkflowResource) Update(ctx context.Context, req resource.Update
 		data.ActivationExpiry = types.Int64Null()
 	} else {
 		data.ActivationExpiry = types.Int64Value(res.Msg.Workflow.ActivationExpiry.Seconds)
+
+	}
+
+	if res.Msg.Workflow.DefaultDuration == nil {
+		data.DefaultDuration = types.Int64Null()
+	} else {
+		data.DefaultDuration = types.Int64Value(res.Msg.Workflow.DefaultDuration.Seconds)
 
 	}
 

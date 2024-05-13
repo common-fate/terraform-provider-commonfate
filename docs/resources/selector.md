@@ -3,12 +3,12 @@
 page_title: "commonfate_selector Resource - commonfate"
 subcategory: ""
 description: |-
-  Access Selectors select resources matching a criteria specified in the 'when' parameter. Resources matching this criteria can be made available for Access Worfklows.
+  Access Selectors select resources matching a criteria specified in the 'when' parameter. Resources matching this criteria can be made available for Access Workflows.
 ---
 
 # commonfate_selector (Resource)
 
-Access Selectors select resources matching a criteria specified in the 'when' parameter. Resources matching this criteria can be made available for Access Worfklows.
+Access Selectors select resources matching a criteria specified in the 'when' parameter. Resources matching this criteria can be made available for Access Workflows.
 
 
 

@@ -1,5 +1,22 @@
 # @common-fate/terraform-provider-commonfate
 
+## 2.16.1
+
+### Patch Changes
+
+- 7a104b7: Fix an issue causing the provider to panic.
+
+## 2.16.0
+
+### Minor Changes
+
+- 3bf9ab9: Added custom resource for GCP Role Group
+
+### Patch Changes
+
+- de45f99: Add default duration to access workflow.
+- 74b047e: Adds option to slack alert to send direct messages to approvers
+
 ## 2.15.0
 
 ### Minor Changes
