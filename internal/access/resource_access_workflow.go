@@ -168,12 +168,7 @@ func (r *AccessWorkflowResource) Create(ctx context.Context, req resource.Create
 	}
 	// set default duration to access duration by default
 	if !data.DefaultDuration.IsNull() {
-<<<<<<< add-justification-requirement-config
-=======
 		defaultDuration := time.Second * time.Duration(data.DefaultDuration.ValueInt64())
->>>>>>> main
-
-		defaultDuration = time.Second * time.Duration(data.DefaultDuration.ValueInt64())
 		if defaultDuration > accessDuration {
 			resp.Diagnostics.AddError(
 				"Invalid Default Duration",
@@ -182,16 +177,9 @@ func (r *AccessWorkflowResource) Create(ctx context.Context, req resource.Create
 					"Default Duration: "+defaultDuration.String()+", Access Duration: "+accessDuration.String(),
 			)
 			return
-		} else {
-			defaultDuration = accessDuration
 		}
-<<<<<<< add-justification-requirement-config
-	}
-	createReq.DefaultDuration = durationpb.New(defaultDuration)
-=======
 		createReq.DefaultDuration = durationpb.New(defaultDuration)
 	}
->>>>>>> main
 
 	res, err := r.client.CreateAccessWorkflow(ctx, connect.NewRequest(createReq))
 
@@ -331,16 +319,9 @@ func (r *AccessWorkflowResource) Update(ctx context.Context, req resource.Update
 					"Default Duration: "+defaultDuration.String()+", Access Duration: "+accessDuration.String(),
 			)
 			return
-		} else {
-			defaultDuration = accessDuration
 		}
-<<<<<<< add-justification-requirement-config
-	}
-	updateReq.Workflow.DefaultDuration = durationpb.New(defaultDuration)
-=======
 		updateReq.Workflow.DefaultDuration = durationpb.New(defaultDuration)
 	}
->>>>>>> main
 
 	res, err := r.client.UpdateAccessWorkflow(ctx, connect.NewRequest(updateReq))
 
