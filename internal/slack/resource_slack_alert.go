@@ -272,7 +272,8 @@ func (r *SlackAlertResource) Update(ctx context.Context, req resource.UpdateRequ
 	}
 
 	updateSlackAlert := &configv1alpha1.UpdateSlackAlertRequest{
-		Alert: &configv1alpha1.SlackAlert{Id: data.ID.ValueString(),
+		Alert: &configv1alpha1.SlackAlert{
+			Id:                            data.ID.ValueString(),
 			WorkflowId:                    data.WorkflowID.ValueString(),
 			SlackWorkspaceId:              data.SlackWorkspaceID.ValueString(),
 			UseWebConsoleForApproveAction: data.UseWebConsoleForApprovalAction.ValueBool(),

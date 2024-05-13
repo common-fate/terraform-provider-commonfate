@@ -11,6 +11,7 @@ import (
 	configv1alpha1 "github.com/common-fate/sdk/gen/commonfate/control/config/v1alpha1"
 	configv1alpha1connect "github.com/common-fate/sdk/gen/commonfate/control/config/v1alpha1/configv1alpha1connect"
 	accessworkflow_handler "github.com/common-fate/sdk/service/control/config/accessworkflow"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -20,6 +21,10 @@ import (
 	"google.golang.org/protobuf/types/known/durationpb"
 )
 
+type Validations struct {
+	HasReason types.Bool `tfsdk:"has_reason"`
+}
+
 type AccessWorkflowModel struct {
 	ID               types.String `tfsdk:"id"`
 	Name             types.String `tfsdk:"name"`
@@ -28,6 +33,7 @@ type AccessWorkflowModel struct {
 	Priority         types.Int64  `tfsdk:"priority"`
 	ActivationExpiry types.Int64  `tfsdk:"activation_expiry"`
 	DefaultDuration  types.Int64  `tfsdk:"default_duration_seconds"`
+	Validation       *Validations `tfsdk:"validation"`
 }
 
 // AccessRuleResource is the data source implementation.
@@ -104,6 +110,13 @@ func (r *AccessWorkflowResource) Schema(ctx context.Context, req resource.Schema
 				MarkdownDescription: "The default duration of the access workflow",
 				Optional:            true,
 			},
+			"validation": schema.ObjectAttribute{
+				MarkdownDescription: "Validation requirements to be set with this workflow",
+				Optional:            true,
+				AttributeTypes: map[string]attr.Type{
+					"has_reason": types.BoolType,
+				},
+			},
 		},
 		MarkdownDescription: `Access Workflows are used to describe how long access should be applied. Created Workflows can be referenced in other resources created.`,
 	}
@@ -149,10 +162,13 @@ func (r *AccessWorkflowResource) Create(ctx context.Context, req resource.Create
 		createReq.ActivationExpiry = durationpb.New(activationExpiry)
 	}
 
+	if data.Validation != nil {
+
+		createReq.Validation = &configv1alpha1.ValidationConfig{HasReason: data.Validation.HasReason.ValueBool()}
+	}
 	// set default duration to access duration by default
 	if !data.DefaultDuration.IsNull() {
 		defaultDuration := time.Second * time.Duration(data.DefaultDuration.ValueInt64())
-
 		if defaultDuration > accessDuration {
 			resp.Diagnostics.AddError(
 				"Invalid Default Duration",
@@ -238,6 +254,12 @@ func (r *AccessWorkflowResource) Read(ctx context.Context, req resource.ReadRequ
 
 	}
 
+	if res.Msg.Workflow.Validation != nil {
+		state.Validation = &Validations{
+			HasReason: types.BoolValue(res.Msg.Workflow.Validation.HasReason),
+		}
+	}
+
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }
 
@@ -278,6 +300,11 @@ func (r *AccessWorkflowResource) Update(ctx context.Context, req resource.Update
 		activationExpiry := time.Second * time.Duration(data.ActivationExpiry.ValueInt64())
 
 		updateReq.Workflow.ActivationExpiry = durationpb.New(activationExpiry)
+	}
+
+	if data.Validation != nil {
+
+		updateReq.Workflow.Validation = &configv1alpha1.ValidationConfig{HasReason: data.Validation.HasReason.ValueBool()}
 	}
 
 	// set default duration to access duration by default
