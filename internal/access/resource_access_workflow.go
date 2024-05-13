@@ -11,6 +11,7 @@ import (
 	configv1alpha1 "github.com/common-fate/sdk/gen/commonfate/control/config/v1alpha1"
 	configv1alpha1connect "github.com/common-fate/sdk/gen/commonfate/control/config/v1alpha1/configv1alpha1connect"
 	accessworkflow_handler "github.com/common-fate/sdk/service/control/config/accessworkflow"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -20,6 +21,10 @@ import (
 	"google.golang.org/protobuf/types/known/durationpb"
 )
 
+type Validations struct {
+	HasReason types.Bool `tfsdk:"has_reason"`
+}
+
 type AccessWorkflowModel struct {
 	ID               types.String `tfsdk:"id"`
 	Name             types.String `tfsdk:"name"`
@@ -28,6 +33,7 @@ type AccessWorkflowModel struct {
 	Priority         types.Int64  `tfsdk:"priority"`
 	ActivationExpiry types.Int64  `tfsdk:"activation_expiry"`
 	DefaultDuration  types.Int64  `tfsdk:"default_duration_seconds"`
+	Validation       *Validations `tfsdk:"validation"`
 }
 
 // AccessRuleResource is the data source implementation.
@@ -104,6 +110,13 @@ func (r *AccessWorkflowResource) Schema(ctx context.Context, req resource.Schema
 				MarkdownDescription: "The default duration of the access workflow",
 				Optional:            true,
 			},
+			"validation": schema.ObjectAttribute{
+				MarkdownDescription: "Validation requirements to be set with this workflow",
+				Optional:            true,
+				AttributeTypes: map[string]attr.Type{
+					"has_reason": types.BoolType,
+				},
+			},
 		},
 		MarkdownDescription: `Access Workflows are used to describe how long access should be applied. Created Workflows can be referenced in other resources created.`,
 	}
@@ -149,11 +162,14 @@ func (r *AccessWorkflowResource) Create(ctx context.Context, req resource.Create
 		createReq.ActivationExpiry = durationpb.New(activationExpiry)
 	}
 
-	// set default duration to access duration by default
-	defaultDuration := accessDuration
-	if !data.DefaultDuration.IsNull() {
-		defaultDuration = time.Second * time.Duration(data.DefaultDuration.ValueInt64())
+	if data.Validation != nil {
 
+		createReq.Validation = &configv1alpha1.ValidationConfig{HasReason: data.Validation.HasReason.ValueBool()}
+	}
+
+	if !data.DefaultDuration.IsNull() {
+
+		defaultDuration := time.Second * time.Duration(data.DefaultDuration.ValueInt64())
 		if defaultDuration > accessDuration {
 			resp.Diagnostics.AddError(
 				"Invalid Default Duration",
@@ -163,12 +179,8 @@ func (r *AccessWorkflowResource) Create(ctx context.Context, req resource.Create
 			)
 			return
 		}
-
-	} else {
-		defaultDuration = accessDuration
+		createReq.DefaultDuration = durationpb.New(defaultDuration)
 	}
-
-	createReq.DefaultDuration = durationpb.New(defaultDuration)
 
 	res, err := r.client.CreateAccessWorkflow(ctx, connect.NewRequest(createReq))
 
@@ -243,6 +255,12 @@ func (r *AccessWorkflowResource) Read(ctx context.Context, req resource.ReadRequ
 
 	}
 
+	if res.Msg.Workflow.Validation != nil {
+		state.Validation = &Validations{
+			HasReason: types.BoolValue(res.Msg.Workflow.Validation.HasReason),
+		}
+	}
+
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }
 
@@ -285,11 +303,14 @@ func (r *AccessWorkflowResource) Update(ctx context.Context, req resource.Update
 		updateReq.Workflow.ActivationExpiry = durationpb.New(activationExpiry)
 	}
 
-	// set default duration to access duration by default
-	defaultDuration := accessDuration
+	if data.Validation != nil {
+
+		updateReq.Workflow.Validation = &configv1alpha1.ValidationConfig{HasReason: data.Validation.HasReason.ValueBool()}
+	}
+
 	if !data.DefaultDuration.IsNull() {
 
-		defaultDuration = time.Second * time.Duration(data.DefaultDuration.ValueInt64())
+		defaultDuration := time.Second * time.Duration(data.DefaultDuration.ValueInt64())
 		if defaultDuration > accessDuration {
 			resp.Diagnostics.AddError(
 				"Invalid Default Duration",
@@ -299,11 +320,8 @@ func (r *AccessWorkflowResource) Update(ctx context.Context, req resource.Update
 			)
 			return
 		}
-	} else {
-		defaultDuration = accessDuration
+		updateReq.Workflow.DefaultDuration = durationpb.New(defaultDuration)
 	}
-
-	updateReq.Workflow.DefaultDuration = durationpb.New(defaultDuration)
 
 	res, err := r.client.UpdateAccessWorkflow(ctx, connect.NewRequest(updateReq))
 
@@ -329,6 +347,13 @@ func (r *AccessWorkflowResource) Update(ctx context.Context, req resource.Update
 		data.ActivationExpiry = types.Int64Null()
 	} else {
 		data.ActivationExpiry = types.Int64Value(res.Msg.Workflow.ActivationExpiry.Seconds)
+
+	}
+
+	if res.Msg.Workflow.DefaultDuration == nil {
+		data.DefaultDuration = types.Int64Null()
+	} else {
+		data.DefaultDuration = types.Int64Value(res.Msg.Workflow.DefaultDuration.Seconds)
 
 	}
 
