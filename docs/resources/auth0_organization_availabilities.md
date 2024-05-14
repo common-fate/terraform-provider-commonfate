@@ -17,7 +17,7 @@ A specifier to make Auth0 Organizations available for selection under a particul
 
 ### Required
 
-- `auth0_selector_id` (String) The target to make available. Should be a Selector entity.
+- `auth0_organization_selector_id` (String) The target to make available. Should be a Selector entity.
 - `auth0_tenant_id` (String) The Auth0 tenant ID
 - `role` (String) The Auth0 Role. You can use 'Member' here to denote the membership to an organization.
 - `workflow_id` (String) The Access Workflow ID
