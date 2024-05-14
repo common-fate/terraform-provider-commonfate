@@ -1,4 +1,4 @@
-package okta
+package auth0
 
 import (
 	"context"
@@ -16,44 +16,44 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-type OktaGroupSelector struct {
-	ID             types.String `tfsdk:"id"`
-	Name           types.String `tfsdk:"name"`
-	OrganizationID types.String `tfsdk:"organization_id"`
-	When           types.String `tfsdk:"when"`
+type Auth0OrganizationSelector struct {
+	ID       types.String `tfsdk:"id"`
+	Name     types.String `tfsdk:"name"`
+	TenantID types.String `tfsdk:"auth0_tenant_id"`
+	When     types.String `tfsdk:"when"`
 }
 
-func (s OktaGroupSelector) ToAPI() *configv1alpha1.Selector {
+func (s Auth0OrganizationSelector) ToAPI() *configv1alpha1.Selector {
 	return &configv1alpha1.Selector{
 		Id:           s.ID.ValueString(),
 		Name:         s.Name.ValueString(),
-		ResourceType: "Okta::Group",
+		ResourceType: "Auth0::Organization",
 		BelongingTo: &entityv1alpha1.EID{
-			Type: "Okta::Organization",
-			Id:   s.OrganizationID.ValueString(),
+			Type: "Auth0::Tenant",
+			Id:   s.TenantID.ValueString(),
 		},
 		When: s.When.ValueString(),
 	}
 }
 
 // AccessRuleResource is the data source implementation.
-type OktaGroupSelectorResource struct {
+type Auth0OrganizationSelectorResource struct {
 	client *configsvc.Client
 }
 
 var (
-	_ resource.Resource                = &OktaGroupSelectorResource{}
-	_ resource.ResourceWithConfigure   = &OktaGroupSelectorResource{}
-	_ resource.ResourceWithImportState = &OktaGroupSelectorResource{}
+	_ resource.Resource                = &Auth0OrganizationSelectorResource{}
+	_ resource.ResourceWithConfigure   = &Auth0OrganizationSelectorResource{}
+	_ resource.ResourceWithImportState = &Auth0OrganizationSelectorResource{}
 )
 
 // Metadata returns the data source type name.
-func (r *OktaGroupSelectorResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_okta_group_selector"
+func (r *Auth0OrganizationSelectorResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_auth0_organization_selector"
 }
 
 // Configure adds the provider configured client to the data source.
-func (r *OktaGroupSelectorResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *Auth0OrganizationSelectorResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -74,10 +74,10 @@ func (r *OktaGroupSelectorResource) Configure(_ context.Context, req resource.Co
 
 // GetSchema defines the schema for the data source.
 // schema is based off the governance api
-func (r *OktaGroupSelectorResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *Auth0OrganizationSelectorResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 
 	resp.Schema = schema.Schema{
-		Description: "A Selector to match Okta Groups with a criteria based on the 'when' field.",
+		Description: "A Selector to match Auth0 Organizations with a criteria based on the 'when' field.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				MarkdownDescription: "The ID of the selector",
@@ -89,8 +89,8 @@ func (r *OktaGroupSelectorResource) Schema(ctx context.Context, req resource.Sch
 				Optional:            true,
 			},
 
-			"organization_id": schema.StringAttribute{
-				MarkdownDescription: "The Okta Organization ID",
+			"auth0_tenant_id": schema.StringAttribute{
+				MarkdownDescription: "The Auth0 Tenant ID",
 				Required:            true,
 			},
 
@@ -99,11 +99,11 @@ func (r *OktaGroupSelectorResource) Schema(ctx context.Context, req resource.Sch
 				Required:            true,
 			},
 		},
-		MarkdownDescription: `A Selector to match Okta Groups with a criteria based on the 'when' field.`,
+		MarkdownDescription: `A Selector to match Auth0 Organizations with a criteria based on the 'when' field.`,
 	}
 }
 
-func (r *OktaGroupSelectorResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+func (r *Auth0OrganizationSelectorResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 
 	if r.client == nil {
 		resp.Diagnostics.AddError(
@@ -113,7 +113,7 @@ func (r *OktaGroupSelectorResource) Create(ctx context.Context, req resource.Cre
 
 		return
 	}
-	var data *OktaGroupSelector
+	var data *Auth0OrganizationSelector
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -153,7 +153,7 @@ func (r *OktaGroupSelectorResource) Create(ctx context.Context, req resource.Cre
 }
 
 // Read refreshes the Terraform state with the latest data.
-func (r *OktaGroupSelectorResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+func (r *Auth0OrganizationSelectorResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	if r.client == nil {
 		resp.Diagnostics.AddError(
 			"Unconfigured HTTP Client",
@@ -162,7 +162,7 @@ func (r *OktaGroupSelectorResource) Read(ctx context.Context, req resource.ReadR
 
 		return
 	}
-	var state OktaGroupSelector
+	var state Auth0OrganizationSelector
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
@@ -184,20 +184,20 @@ func (r *OktaGroupSelectorResource) Read(ctx context.Context, req resource.ReadR
 	}
 
 	state.Name = types.StringValue(res.Msg.Selector.Name)
-	state.OrganizationID = types.StringValue(res.Msg.Selector.BelongingTo.Id)
+	state.TenantID = types.StringValue(res.Msg.Selector.BelongingTo.Id)
 	state.When = types.StringValue(res.Msg.Selector.When)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }
 
-func (r *OktaGroupSelectorResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *Auth0OrganizationSelectorResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	if r.client == nil {
 		resp.Diagnostics.AddError(
 			"Unconfigured HTTP Client",
 			"Expected configured HTTP client. Please report this issue to the provider developers.",
 		)
 	}
-	var data OktaGroupSelector
+	var data Auth0OrganizationSelector
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -233,14 +233,14 @@ func (r *OktaGroupSelectorResource) Update(ctx context.Context, req resource.Upd
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *OktaGroupSelectorResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+func (r *Auth0OrganizationSelectorResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	if r.client == nil {
 		resp.Diagnostics.AddError(
 			"Unconfigured HTTP Client",
 			"Expected configured HTTP client. Please report this issue to the provider developers.",
 		)
 	}
-	var data *OktaGroupSelector
+	var data *Auth0OrganizationSelector
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -269,7 +269,7 @@ func (r *OktaGroupSelectorResource) Delete(ctx context.Context, req resource.Del
 	}
 }
 
-func (r *OktaGroupSelectorResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *Auth0OrganizationSelectorResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	// Retrieve import ID and save to id attribute
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
