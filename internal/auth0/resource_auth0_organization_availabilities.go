@@ -82,7 +82,7 @@ func (r *Auth0OrganizationAvailabilitiesResource) Schema(ctx context.Context, re
 				MarkdownDescription: "The Auth0 Role. You can use 'Member' here to denote the membership to an organization.",
 				Required:            true,
 			},
-			"auth0_selector_id": schema.StringAttribute{
+			"auth0_organization_selector_id": schema.StringAttribute{
 				MarkdownDescription: "The target to make available. Should be a Selector entity.",
 				Required:            true,
 			},
