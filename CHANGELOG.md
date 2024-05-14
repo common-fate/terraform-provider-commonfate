@@ -1,5 +1,17 @@
 # @common-fate/terraform-provider-commonfate
 
+## 2.17.0
+
+### Minor Changes
+
+- eaa448a: Adds support for configuring the Common Fate Auth0 integration.
+
+### Patch Changes
+
+- 79e779e: Fix typo in access selector documentation.
+- 2cd50fb: Adds validation options to the commonfate-access-workflow resource. You can now configure workflows to require a reason to be provided.
+- 7adc52a: Add default duration to access workflow.
+
 ## 2.16.1
 
 ### Patch Changes
