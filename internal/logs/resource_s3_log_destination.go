@@ -119,7 +119,6 @@ Available actions that you can filter on include:
 - grant.revoked
 - grant.provisioning_error
 - grant.deprovisioning_error
-- authz.evaluated
 `,
 				ElementType: types.StringType,
 				Optional:    true,
