@@ -27,6 +27,7 @@ type SlackAlertModel struct {
 	SlackWorkspaceID               types.String `tfsdk:"slack_workspace_id"`
 	UseWebConsoleForApprovalAction types.Bool   `tfsdk:"use_web_console_for_approval_action"`
 	SendDirectMessagesToApprovers  types.Bool   `tfsdk:"send_direct_message_to_approvers"`
+	DisableInteractivityHandlers   types.Bool   `tfsdk:"disable_interactivity_handlers"`
 }
 
 // AccessRuleResource is the data source implementation.
@@ -103,6 +104,12 @@ func (r *SlackAlertResource) Schema(ctx context.Context, req resource.SchemaRequ
 			},
 			"send_direct_message_to_approvers": schema.BoolAttribute{
 				MarkdownDescription: "If Slack is connected, it will send notifications to the requesting user. Cannot be used in conjunction with 'slack_channel_id'",
+				Optional:            true,
+				Computed:            true,
+				Default:             booldefault.StaticBool(false),
+			},
+			"disable_interactivity_handlers": schema.BoolAttribute{
+				MarkdownDescription: "Disables all webhook handlers for the Slack integration.",
 				Optional:            true,
 				Computed:            true,
 				Default:             booldefault.StaticBool(false),
