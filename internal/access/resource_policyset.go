@@ -6,6 +6,7 @@ import (
 
 	"connectrpc.com/connect"
 	config_client "github.com/common-fate/sdk/config"
+	authzv1alpha1 "github.com/common-fate/sdk/gen/commonfate/authz/v1alpha1"
 	"github.com/common-fate/sdk/service/authz/policyset"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -175,24 +176,74 @@ func (r *PolicySetResource) Update(ctx context.Context, req resource.UpdateReque
 		return
 	}
 
-	got, err := r.client.Update(ctx, policyset.UpdateInput{
-		PolicySet: policyset.Input{
-			ID:   data.ID.ValueString(),
-			Text: data.Text.ValueString(),
-		},
-	})
-
-	if err != nil {
+	var original PolicyModel
+	resp.Diagnostics.Append(req.State.Get(ctx, &original)...)
+	if resp.Diagnostics.HasError() {
 		resp.Diagnostics.AddError(
-			"error updating policy",
-			"JSON Error: "+err.Error(),
+			"Unable to Create Resource",
+			"An unexpected error occurred while parsing the resource creation response.",
 		)
-
 		return
 	}
 
-	data.ID = types.StringValue(got.PolicySet.Id)
-	data.Text = types.StringValue(got.PolicySet.Text)
+	// We support changing the name(id) of a policy by recreating the policy set with the new ID then deleting the old one
+	var out *authzv1alpha1.PolicySet
+	if !original.ID.Equal(data.ID) {
+		got, err := r.client.Create(ctx, policyset.CreateInput{
+			PolicySet: policyset.Input{
+				ID:   data.ID.ValueString(),
+				Text: data.Text.ValueString(),
+			},
+		})
+		if err != nil {
+			resp.Diagnostics.AddError(
+				"error updating policy",
+				"JSON Error: "+err.Error(),
+			)
+
+			return
+		}
+		out = got.PolicySet
+		_, err = r.client.Delete(ctx, policyset.DeleteInput{
+			ID: original.ID.ValueString(),
+		})
+		if err != nil {
+			resp.Diagnostics.AddError(
+				"error updating policy",
+				"JSON Error: "+err.Error(),
+			)
+
+			return
+		}
+		if err != nil {
+			resp.Diagnostics.AddError(
+				"error updating policy",
+				"JSON Error: "+err.Error(),
+			)
+
+			return
+		}
+	} else {
+		got, err := r.client.Update(ctx, policyset.UpdateInput{
+			PolicySet: policyset.Input{
+				ID:   data.ID.ValueString(),
+				Text: data.Text.ValueString(),
+			},
+		})
+
+		if err != nil {
+			resp.Diagnostics.AddError(
+				"error updating policy",
+				"JSON Error: "+err.Error(),
+			)
+
+			return
+		}
+		out = got.PolicySet
+	}
+
+	data.ID = types.StringValue(out.Id)
+	data.Text = types.StringValue(out.Text)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
