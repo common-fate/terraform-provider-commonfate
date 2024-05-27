@@ -1,5 +1,18 @@
 # @common-fate/terraform-provider-commonfate
 
+## 2.18.0
+
+### Minor Changes
+
+- eb15d50: Adds support for configuring Amazon S3 log destinations using the Terraform provider.
+
+### Patch Changes
+
+- 7555944: Update SDK for policy API Client
+- bc57b5c: Support renaming commonfate_policyset resources
+- 24450ff: Fixes an issue where terraform plan would always show a change for commonfate_slack_alert when the send_direct_message_to_approvers field is true
+- 1de9dd6: Fixes commonfate_datastax_organization_selector always wanting to update if name is not set
+
 ## 2.17.0
 
 ### Minor Changes
