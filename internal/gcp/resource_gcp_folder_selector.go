@@ -9,7 +9,7 @@ import (
 	configv1alpha1 "github.com/common-fate/sdk/gen/commonfate/control/config/v1alpha1"
 	entityv1alpha1 "github.com/common-fate/sdk/gen/commonfate/entity/v1alpha1"
 	"github.com/common-fate/sdk/service/control/configsvc"
-	"github.com/common-fate/terraform-provider-commonfate/internal/utilities/diags"
+	"github.com/common-fate/terraform-provider-commonfate/pkg/diags"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"

@@ -12,6 +12,7 @@ import (
 	"github.com/common-fate/terraform-provider-commonfate/internal/entra"
 	"github.com/common-fate/terraform-provider-commonfate/internal/gcp"
 	"github.com/common-fate/terraform-provider-commonfate/internal/generic"
+	"github.com/common-fate/terraform-provider-commonfate/internal/logs"
 	"github.com/common-fate/terraform-provider-commonfate/internal/okta"
 	"github.com/common-fate/terraform-provider-commonfate/internal/opsgenie"
 	"github.com/common-fate/terraform-provider-commonfate/internal/pagerduty"
@@ -167,6 +168,7 @@ func (p *CommonFateProvider) Resources(_ context.Context) []func() resource.Reso
 		NewAuth0IntegrationResource,
 		NewAuth0OrganizationSelectorResource,
 		NewAuth0OrganizationAvailabilitiesResource,
+		logs.NewS3LogDestinationResource,
 	}
 }
 
