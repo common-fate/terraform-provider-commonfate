@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"connectrpc.com/connect"
+	"github.com/common-fate/grab"
 	config_client "github.com/common-fate/sdk/config"
 	configv1alpha1 "github.com/common-fate/sdk/gen/commonfate/control/config/v1alpha1"
 	entityv1alpha1 "github.com/common-fate/sdk/gen/commonfate/entity/v1alpha1"
@@ -177,7 +178,7 @@ func (r *DataStaxOrganizationSelectorResource) Read(ctx context.Context, req res
 		return
 	}
 
-	state.Name = types.StringValue(res.Msg.Selector.Name)
+	state.Name = types.StringPointerValue(grab.If(res.Msg.Selector.Name == "", nil, &res.Msg.Selector.Name))
 	state.OrgID = types.StringValue(res.Msg.Selector.BelongingTo.Id)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
