@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"connectrpc.com/connect"
+	"github.com/common-fate/grab"
 	config_client "github.com/common-fate/sdk/config"
 	configv1alpha1 "github.com/common-fate/sdk/gen/commonfate/control/config/v1alpha1"
 	configv1alpha1connect "github.com/common-fate/sdk/gen/commonfate/control/config/v1alpha1/configv1alpha1connect"
@@ -221,9 +222,10 @@ func (r *SlackAlertResource) Read(ctx context.Context, req resource.ReadRequest,
 
 	//refresh state
 	state = SlackAlertModel{
-		ID:                             types.StringValue(res.Msg.Alert.Id),
-		WorkflowID:                     types.StringValue(res.Msg.Alert.WorkflowId),
-		SlackChannelID:                 types.StringValue(res.Msg.Alert.SlackChannelId),
+		ID:         types.StringValue(res.Msg.Alert.Id),
+		WorkflowID: types.StringValue(res.Msg.Alert.WorkflowId),
+		// ensure that if channel ID is not provided that it doesn't show an update is going to happen
+		SlackChannelID:                 types.StringPointerValue(grab.If(res.Msg.Alert.SlackChannelId == "", nil, &res.Msg.Alert.SlackChannelId)),
 		SlackWorkspaceID:               types.StringValue(res.Msg.Alert.SlackWorkspaceId),
 		SlackIntegrationID:             types.StringPointerValue(res.Msg.Alert.IntegrationId),
 		UseWebConsoleForApprovalAction: types.BoolPointerValue(&res.Msg.Alert.UseWebConsoleForApproveAction),
