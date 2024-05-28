@@ -18,14 +18,15 @@ import (
 )
 
 type AWSIDCIntegrationModel struct {
-	Id              types.String `tfsdk:"id"`
-	Name            types.String `tfsdk:"name"`
-	SSOInstanceARN  types.String `tfsdk:"sso_instance_arn"`
-	IdentityStoreID types.String `tfsdk:"identity_store_id"`
-	SSORegion       types.String `tfsdk:"sso_region"`
-	ReaderRoleARN   types.String `tfsdk:"reader_role_arn"`
-	AuditRoleName   types.String `tfsdk:"audit_role_name"`
-	ResourceRegions types.Set    `tfsdk:"resource_regions"`
+	Id                 types.String `tfsdk:"id"`
+	Name               types.String `tfsdk:"name"`
+	SSOInstanceARN     types.String `tfsdk:"sso_instance_arn"`
+	IdentityStoreID    types.String `tfsdk:"identity_store_id"`
+	SSORegion          types.String `tfsdk:"sso_region"`
+	ReaderRoleARN      types.String `tfsdk:"reader_role_arn"`
+	AuditRoleName      types.String `tfsdk:"audit_role_name"`
+	ResourceRegions    types.Set    `tfsdk:"resource_regions"`
+	SSOAccessPortalURL types.String `tfsdk:"sso_access_portal_url"`
 }
 
 type AWSIDCIntegrationResource struct {
@@ -106,6 +107,10 @@ func (r *AWSIDCIntegrationResource) Schema(ctx context.Context, req resource.Sch
 				MarkdownDescription: "The regions to read reasources from in each account",
 				Optional:            true,
 			},
+			"sso_access_portal_url": schema.StringAttribute{
+				MarkdownDescription: "The SSO access portal URL, e.g https://example.awsapps.com/start",
+				Optional:            true,
+			},
 		},
 		MarkdownDescription: `Registers an AWS IAM Identity Center integration`,
 	}
@@ -147,12 +152,13 @@ func (r *AWSIDCIntegrationResource) Create(ctx context.Context, req resource.Cre
 		Config: &integrationv1alpha1.Config{
 			Config: &integrationv1alpha1.Config_AwsIdc{
 				AwsIdc: &integrationv1alpha1.AWSIDC{
-					SsoInstanceArn:  data.SSOInstanceARN.ValueString(),
-					IdentityStoreId: data.IdentityStoreID.ValueString(),
-					SsoRegion:       data.SSORegion.ValueString(),
-					ReaderRoleArn:   data.ReaderRoleARN.ValueString(),
-					AuditRoleName:   data.AuditRoleName.ValueString(),
-					ResourceRegions: resourceRegions,
+					SsoInstanceArn:     data.SSOInstanceARN.ValueString(),
+					IdentityStoreId:    data.IdentityStoreID.ValueString(),
+					SsoRegion:          data.SSORegion.ValueString(),
+					ReaderRoleArn:      data.ReaderRoleARN.ValueString(),
+					AuditRoleName:      data.AuditRoleName.ValueString(),
+					ResourceRegions:    resourceRegions,
+					SsoAccessPortalUrl: data.SSOAccessPortalURL.ValueString(),
 				},
 			},
 		},
@@ -242,12 +248,13 @@ func (r *AWSIDCIntegrationResource) Update(ctx context.Context, req resource.Upd
 			Config: &integrationv1alpha1.Config{
 				Config: &integrationv1alpha1.Config_AwsIdc{
 					AwsIdc: &integrationv1alpha1.AWSIDC{
-						SsoInstanceArn:  data.SSOInstanceARN.ValueString(),
-						IdentityStoreId: data.IdentityStoreID.ValueString(),
-						SsoRegion:       data.SSORegion.ValueString(),
-						ReaderRoleArn:   data.ReaderRoleARN.ValueString(),
-						AuditRoleName:   data.AuditRoleName.ValueString(),
-						ResourceRegions: resourceRegions,
+						SsoInstanceArn:     data.SSOInstanceARN.ValueString(),
+						IdentityStoreId:    data.IdentityStoreID.ValueString(),
+						SsoRegion:          data.SSORegion.ValueString(),
+						ReaderRoleArn:      data.ReaderRoleARN.ValueString(),
+						AuditRoleName:      data.AuditRoleName.ValueString(),
+						ResourceRegions:    resourceRegions,
+						SsoAccessPortalUrl: data.SSOAccessPortalURL.ValueString(),
 					},
 				},
 			},
