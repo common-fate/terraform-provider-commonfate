@@ -1,5 +1,11 @@
 # @common-fate/terraform-provider-commonfate
 
+## 2.18.1
+
+### Patch Changes
+
+- 1041e78: Add sso_access_portal_url field to aws_idc_integration field
+
 ## 2.18.0
 
 ### Minor Changes
