@@ -27,6 +27,7 @@ type AWSIDCIntegrationModel struct {
 	AuditRoleName      types.String `tfsdk:"audit_role_name"`
 	ResourceRegions    types.Set    `tfsdk:"resource_regions"`
 	SSOAccessPortalURL types.String `tfsdk:"sso_access_portal_url"`
+	ProvisionerRoleARN types.String `tfsdk:"provisioner_role_arn"`
 }
 
 type AWSIDCIntegrationResource struct {
@@ -98,6 +99,10 @@ func (r *AWSIDCIntegrationResource) Schema(ctx context.Context, req resource.Sch
 				MarkdownDescription: "The ARN of the role to assume in order to read AWS IAM Identity Store data",
 				Required:            true,
 			},
+			"provisioner_role_arn": schema.StringAttribute{
+				MarkdownDescription: "The ARN of the role to assume in order to provision access in AWS IAM Identity Store",
+				Required:            true,
+			},
 			"audit_role_name": schema.StringAttribute{
 				MarkdownDescription: "The name of the role to assume in each AWS Account in order to read resources",
 				Optional:            true,
@@ -156,6 +161,7 @@ func (r *AWSIDCIntegrationResource) Create(ctx context.Context, req resource.Cre
 					IdentityStoreId:    data.IdentityStoreID.ValueString(),
 					SsoRegion:          data.SSORegion.ValueString(),
 					ReaderRoleArn:      data.ReaderRoleARN.ValueString(),
+					ProvisionerRoleArn: data.ProvisionerRoleARN.ValueString(),
 					AuditRoleName:      data.AuditRoleName.ValueString(),
 					ResourceRegions:    resourceRegions,
 					SsoAccessPortalUrl: data.SSOAccessPortalURL.ValueString(),
@@ -252,6 +258,7 @@ func (r *AWSIDCIntegrationResource) Update(ctx context.Context, req resource.Upd
 						IdentityStoreId:    data.IdentityStoreID.ValueString(),
 						SsoRegion:          data.SSORegion.ValueString(),
 						ReaderRoleArn:      data.ReaderRoleARN.ValueString(),
+						ProvisionerRoleArn: data.ProvisionerRoleARN.ValueString(),
 						AuditRoleName:      data.AuditRoleName.ValueString(),
 						ResourceRegions:    resourceRegions,
 						SsoAccessPortalUrl: data.SSOAccessPortalURL.ValueString(),
