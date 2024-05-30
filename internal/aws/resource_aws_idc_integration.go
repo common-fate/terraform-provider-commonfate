@@ -101,7 +101,7 @@ func (r *AWSIDCIntegrationResource) Schema(ctx context.Context, req resource.Sch
 			},
 			"provisioner_role_arn": schema.StringAttribute{
 				MarkdownDescription: "The ARN of the role to assume in order to provision access in AWS IAM Identity Store",
-				Required:            true,
+				Optional:            true,
 			},
 			"audit_role_name": schema.StringAttribute{
 				MarkdownDescription: "The name of the role to assume in each AWS Account in order to read resources",
