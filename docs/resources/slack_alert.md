@@ -33,6 +33,7 @@ resource "commonfate-slack_alert" "demo" {
 
 ### Optional
 
+- `disable_interactivity_handlers` (Boolean) Disables all webhook handlers for the Slack integration.
 - `integration_id` (String) The ID for the integration set up to slack.
 - `send_direct_message_to_approvers` (Boolean) If Slack is connected, it will send notifications to the requesting user. Cannot be used in conjunction with 'slack_channel_id'
 - `slack_channel_id` (String) If Slack is connected, it will send notifications to this slack channel. Must be the ID of the channel and not the name. See below on how to find this ID.

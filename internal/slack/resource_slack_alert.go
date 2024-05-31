@@ -27,6 +27,7 @@ type SlackAlertModel struct {
 	SlackWorkspaceID               types.String `tfsdk:"slack_workspace_id"`
 	UseWebConsoleForApprovalAction types.Bool   `tfsdk:"use_web_console_for_approval_action"`
 	SendDirectMessagesToApprovers  types.Bool   `tfsdk:"send_direct_message_to_approvers"`
+	DisableInteractivityHandlers   types.Bool   `tfsdk:"disable_interactivity_handlers"`
 }
 
 // AccessRuleResource is the data source implementation.
@@ -107,6 +108,12 @@ func (r *SlackAlertResource) Schema(ctx context.Context, req resource.SchemaRequ
 				Computed:            true,
 				Default:             booldefault.StaticBool(false),
 			},
+			"disable_interactivity_handlers": schema.BoolAttribute{
+				MarkdownDescription: "Disables all webhook handlers for the Slack integration.",
+				Optional:            true,
+				Computed:            true,
+				Default:             booldefault.StaticBool(false),
+			},
 		},
 		MarkdownDescription: `Links a Slack message being send to a particular channel or workspace based on actions made against a workflow.`,
 	}
@@ -159,6 +166,7 @@ func (r *SlackAlertResource) Create(ctx context.Context, req resource.CreateRequ
 		SlackWorkspaceId:              data.SlackWorkspaceID.ValueString(),
 		UseWebConsoleForApproveAction: data.UseWebConsoleForApprovalAction.ValueBool(),
 		SendDirectMessagesToApprovers: data.SendDirectMessagesToApprovers.ValueBool(),
+		DisableInteractivityHandlers:  data.DisableInteractivityHandlers.ValueBool(),
 	}
 
 	if !data.SlackChannelID.IsNull() {
@@ -230,6 +238,7 @@ func (r *SlackAlertResource) Read(ctx context.Context, req resource.ReadRequest,
 		SlackIntegrationID:             types.StringPointerValue(res.Msg.Alert.IntegrationId),
 		UseWebConsoleForApprovalAction: types.BoolPointerValue(&res.Msg.Alert.UseWebConsoleForApproveAction),
 		SendDirectMessagesToApprovers:  types.BoolPointerValue(&res.Msg.Alert.SendDirectMessagesToApprovers),
+		DisableInteractivityHandlers:   types.BoolPointerValue(&res.Msg.Alert.DisableInteractivityHandlers),
 	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
@@ -280,6 +289,7 @@ func (r *SlackAlertResource) Update(ctx context.Context, req resource.UpdateRequ
 			SlackWorkspaceId:              data.SlackWorkspaceID.ValueString(),
 			UseWebConsoleForApproveAction: data.UseWebConsoleForApprovalAction.ValueBool(),
 			SendDirectMessagesToApprovers: data.SendDirectMessagesToApprovers.ValueBool(),
+			DisableInteractivityHandlers:  data.DisableInteractivityHandlers.ValueBool(),
 		},
 	}
 
