@@ -20,12 +20,14 @@ import (
 )
 
 type GCPIntegrationModel struct {
-	Id                                  types.String `tfsdk:"id"`
-	Name                                types.String `tfsdk:"name"`
-	WorkloadIdentityConfig              types.String `tfsdk:"reader_workload_identity_config"`
-	ServiceAccountCredentialsSecretPath types.String `tfsdk:"reader_service_account_credentials_secret_path"`
-	OrganizationID                      types.String `tfsdk:"organization_id"`
-	GoogleWorkspaceCustomerID           types.String `tfsdk:"google_workspace_customer_id"`
+	Id                                             types.String `tfsdk:"id"`
+	Name                                           types.String `tfsdk:"name"`
+	ReaderWorkloadIdentityConfig                   types.String `tfsdk:"reader_workload_identity_config"`
+	ReaderServiceAccountCredentialsSecretPath      types.String `tfsdk:"reader_service_account_credentials_secret_path"`
+	OrganizationID                                 types.String `tfsdk:"organization_id"`
+	GoogleWorkspaceCustomerID                      types.String `tfsdk:"google_workspace_customer_id"`
+	ProvisionerWorkloadIdentityConfig              types.String `tfsdk:"provisioner_workload_identity_config"`
+	ProvisionerServiceAccountCredentialsSecretPath types.String `tfsdk:"provisioner_service_account_credentials_secret_path"`
 }
 
 type GCPIntegrationResource struct {
@@ -89,6 +91,14 @@ func (r *GCPIntegrationResource) Schema(ctx context.Context, req resource.Schema
 				MarkdownDescription: "Path to secret for Service account credentials",
 				Optional:            true,
 			},
+			"provisioner_workload_identity_config": schema.StringAttribute{
+				MarkdownDescription: "GCP Workload Identity Config as a JSON string. If you don't know where to find this, check out our documentation [here](https://enterprise.docs.commonfate.io/deploy)",
+				Optional:            true,
+			},
+			"provisioner_service_account_credentials_secret_path": schema.StringAttribute{
+				MarkdownDescription: "Path to secret for Service account credentials",
+				Optional:            true,
+			},
 			"organization_id": schema.StringAttribute{
 				MarkdownDescription: "GCP organization ID",
 				Required:            true,
@@ -131,10 +141,12 @@ func (r *GCPIntegrationResource) Create(ctx context.Context, req resource.Create
 		Config: &integrationv1alpha1.Config{
 			Config: &integrationv1alpha1.Config_Gcp{
 				Gcp: &integrationv1alpha1.GCP{
-					ReaderWorkloadIdentityConfig:              data.WorkloadIdentityConfig.ValueString(),
-					ReaderServiceAccountCredentialsSecretPath: data.ServiceAccountCredentialsSecretPath.ValueString(),
-					OrganizationId:                            data.OrganizationID.ValueString(),
-					GoogleWorkspaceCustomerId:                 data.GoogleWorkspaceCustomerID.ValueString(),
+					ReaderWorkloadIdentityConfig:                   data.ReaderWorkloadIdentityConfig.ValueString(),
+					ReaderServiceAccountCredentialsSecretPath:      data.ReaderServiceAccountCredentialsSecretPath.ValueString(),
+					ProvisionerWorkloadIdentityConfig:              data.ProvisionerWorkloadIdentityConfig.ValueString(),
+					ProvisionerServiceAccountCredentialsSecretPath: data.ProvisionerServiceAccountCredentialsSecretPath.ValueString(),
+					OrganizationId:            data.OrganizationID.ValueString(),
+					GoogleWorkspaceCustomerId: data.GoogleWorkspaceCustomerID.ValueString(),
 				},
 			},
 		},
@@ -199,12 +211,14 @@ func (r *GCPIntegrationResource) Read(ctx context.Context, req resource.ReadRequ
 	}
 
 	state = GCPIntegrationModel{
-		Id:                                  types.StringValue(state.Id.ValueString()),
-		Name:                                types.StringValue(res.Msg.Integration.Name),
-		WorkloadIdentityConfig:              grab.If(integ.ReaderWorkloadIdentityConfig == "", types.StringNull(), types.StringValue(integ.ReaderWorkloadIdentityConfig)),
-		ServiceAccountCredentialsSecretPath: grab.If(integ.ReaderServiceAccountCredentialsSecretPath == "", types.StringNull(), types.StringValue(integ.ReaderServiceAccountCredentialsSecretPath)),
-		OrganizationID:                      types.StringValue(integ.OrganizationId),
-		GoogleWorkspaceCustomerID:           types.StringValue(integ.GoogleWorkspaceCustomerId),
+		Id:                           types.StringValue(state.Id.ValueString()),
+		Name:                         types.StringValue(res.Msg.Integration.Name),
+		ReaderWorkloadIdentityConfig: grab.If(integ.ReaderWorkloadIdentityConfig == "", types.StringNull(), types.StringValue(integ.ReaderWorkloadIdentityConfig)),
+		ReaderServiceAccountCredentialsSecretPath:      grab.If(integ.ReaderServiceAccountCredentialsSecretPath == "", types.StringNull(), types.StringValue(integ.ReaderServiceAccountCredentialsSecretPath)),
+		ProvisionerWorkloadIdentityConfig:              grab.If(integ.ProvisionerWorkloadIdentityConfig == "", types.StringNull(), types.StringValue(integ.ProvisionerWorkloadIdentityConfig)),
+		ProvisionerServiceAccountCredentialsSecretPath: grab.If(integ.ProvisionerServiceAccountCredentialsSecretPath == "", types.StringNull(), types.StringValue(integ.ProvisionerServiceAccountCredentialsSecretPath)),
+		OrganizationID:            types.StringValue(integ.OrganizationId),
+		GoogleWorkspaceCustomerID: types.StringValue(integ.GoogleWorkspaceCustomerId),
 	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
@@ -237,10 +251,12 @@ func (r *GCPIntegrationResource) Update(ctx context.Context, req resource.Update
 			Config: &integrationv1alpha1.Config{
 				Config: &integrationv1alpha1.Config_Gcp{
 					Gcp: &integrationv1alpha1.GCP{
-						ReaderWorkloadIdentityConfig:              data.WorkloadIdentityConfig.ValueString(),
-						ReaderServiceAccountCredentialsSecretPath: data.ServiceAccountCredentialsSecretPath.ValueString(),
-						OrganizationId:                            data.OrganizationID.ValueString(),
-						GoogleWorkspaceCustomerId:                 data.GoogleWorkspaceCustomerID.ValueString(),
+						ReaderWorkloadIdentityConfig:                   data.ReaderWorkloadIdentityConfig.ValueString(),
+						ReaderServiceAccountCredentialsSecretPath:      data.ReaderServiceAccountCredentialsSecretPath.ValueString(),
+						ProvisionerWorkloadIdentityConfig:              data.ProvisionerWorkloadIdentityConfig.ValueString(),
+						ProvisionerServiceAccountCredentialsSecretPath: data.ProvisionerServiceAccountCredentialsSecretPath.ValueString(),
+						OrganizationId:            data.OrganizationID.ValueString(),
+						GoogleWorkspaceCustomerId: data.GoogleWorkspaceCustomerID.ValueString(),
 					},
 				},
 			},

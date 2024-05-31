@@ -36,6 +36,7 @@ resource "commonfate_aws_idc_integration" "demo" {
 ### Optional
 
 - `audit_role_name` (String) The name of the role to assume in each AWS Account in order to read resources
+- `provisioner_role_arn` (String) The ARN of the role to assume in order to provision access in AWS IAM Identity Store
 - `resource_regions` (Set of String) The regions to read reasources from in each account
 - `sso_access_portal_url` (String) The SSO access portal URL, e.g https://example.awsapps.com/start
 
