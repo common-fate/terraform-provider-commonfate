@@ -1,5 +1,12 @@
 # @common-fate/terraform-provider-commonfate
 
+## 2.19.0
+
+### Minor Changes
+
+- ac1c825: Adds new provisioner fields on commonfate_gcp_integration and commonfate_aws_idc_integration to support migration away from specifying integration config in the infrastructure configuration.
+- 8b68262: Support disabling all webhook handlers for the Slack integration.
+
 ## 2.18.1
 
 ### Patch Changes
