@@ -22,6 +22,7 @@ Registers a webhook integration
 
 ### Optional
 
+- `filter_for_actions` (Set of String) Filter for event actions to send to the webhook
 - `headers` (Attributes List) HTTP headers to use when sending the webhook event (see [below for nested schema](#nestedatt--headers))
 - `send_audit_log_events` (Boolean) Set to true to dispatch Audit Log events to the webhook.
 - `send_authorization_events` (Boolean) Set to true to dispatch authorization events to the webhook
