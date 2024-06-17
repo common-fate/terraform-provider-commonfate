@@ -117,6 +117,10 @@ func (r *SlackAlertResource) Schema(ctx context.Context, req resource.SchemaRequ
 				Computed:            true,
 				Default:             booldefault.StaticBool(false),
 			},
+			"notify_expiry_in_seconds": schema.Int64Attribute{
+				MarkdownDescription: "The duration before access expiration at which Slack will notify the user about the upcoming expiration.",
+				Optional:            true,
+			},
 		},
 		MarkdownDescription: `Links a Slack message being send to a particular channel or workspace based on actions made against a workflow.`,
 	}
@@ -246,7 +250,10 @@ func (r *SlackAlertResource) Read(ctx context.Context, req resource.ReadRequest,
 		UseWebConsoleForApprovalAction: types.BoolPointerValue(&res.Msg.Alert.UseWebConsoleForApproveAction),
 		SendDirectMessagesToApprovers:  types.BoolPointerValue(&res.Msg.Alert.SendDirectMessagesToApprovers),
 		DisableInteractivityHandlers:   types.BoolPointerValue(&res.Msg.Alert.DisableInteractivityHandlers),
-		NotifyExpiryInSeconds:          types.Int64Value(res.Msg.Alert.NotifyExpiryInSeconds.Seconds),
+	}
+
+	if res.Msg.Alert.NotifyExpiryInSeconds != nil {
+		state.NotifyExpiryInSeconds = types.Int64Value(res.Msg.Alert.NotifyExpiryInSeconds.Seconds)
 	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
