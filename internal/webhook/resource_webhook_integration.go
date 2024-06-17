@@ -26,6 +26,7 @@ type WebhookIntegrationModel struct {
 	SendAuditLogEvents      types.Bool   `tfsdk:"send_audit_log_events"`
 	SendAuthorizationEvents types.Bool   `tfsdk:"send_authorization_events"`
 	Headers                 []Header     `tfsdk:"headers"`
+	FilterForActions        types.Set    `tfsdk:"filter_for_actions"`
 }
 
 type Header struct {
@@ -117,6 +118,11 @@ func (r *WebhookIntegrationResource) Schema(ctx context.Context, req resource.Sc
 					},
 				},
 			},
+			"filter_for_actions": schema.SetAttribute{
+				MarkdownDescription: "Filter for event actions to send to the webhook",
+				Optional:            true,
+				ElementType:         types.StringType,
+			},
 		},
 		MarkdownDescription: `Registers a webhook integration`,
 	}
@@ -144,11 +150,17 @@ func (r *WebhookIntegrationResource) Create(ctx context.Context, req resource.Cr
 
 		return
 	}
-
+	var filterForActions []string
+	diag := data.FilterForActions.ElementsAs(ctx, &filterForActions, false)
+	if diag.HasError() {
+		resp.Diagnostics.Append(diag...)
+		return
+	}
 	integ := integrationv1alpha1.Webhook{
 		Url:                     data.URL.ValueString(),
 		SendAuditLogEvents:      data.SendAuditLogEvents.ValueBool(),
 		SendAuthorizationEvents: data.SendAuthorizationEvents.ValueBool(),
+		FilterForActions:        filterForActions,
 	}
 
 	for _, h := range data.Headers {
@@ -234,6 +246,12 @@ func (r *WebhookIntegrationResource) Read(ctx context.Context, req resource.Read
 		})
 	}
 
+	filterForActions, diag := types.SetValueFrom(ctx, types.StringType, integ.FilterForActions)
+	if diag.HasError() {
+		resp.Diagnostics.Append(diag...)
+		return
+	}
+
 	state = WebhookIntegrationModel{
 		Id:                      types.StringValue(state.Id.ValueString()),
 		Name:                    types.StringValue(res.Msg.Integration.Name),
@@ -241,6 +259,8 @@ func (r *WebhookIntegrationResource) Read(ctx context.Context, req resource.Read
 		SendAuditLogEvents:      types.BoolValue(integ.SendAuditLogEvents),
 		SendAuthorizationEvents: types.BoolValue(integ.SendAuthorizationEvents),
 		Headers:                 headers,
+
+		FilterForActions: filterForActions,
 	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
@@ -265,11 +285,17 @@ func (r *WebhookIntegrationResource) Update(ctx context.Context, req resource.Up
 
 		return
 	}
-
+	var filterForActions []string
+	diag := data.FilterForActions.ElementsAs(ctx, &filterForActions, false)
+	if diag.HasError() {
+		resp.Diagnostics.Append(diag...)
+		return
+	}
 	integ := integrationv1alpha1.Webhook{
 		Url:                     data.URL.ValueString(),
 		SendAuditLogEvents:      data.SendAuditLogEvents.ValueBool(),
 		SendAuthorizationEvents: data.SendAuthorizationEvents.ValueBool(),
+		FilterForActions:        filterForActions,
 	}
 
 	for _, h := range data.Headers {
