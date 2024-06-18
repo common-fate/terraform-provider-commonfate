@@ -37,7 +37,7 @@ var (
 
 // Metadata returns the data source type name.
 func (r *AWSRDSDatabaseResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_aws_idc_integration"
+	resp.TypeName = req.ProviderTypeName + "_aws_rds_database"
 }
 
 // Configure adds the provider configured client to the data source.
