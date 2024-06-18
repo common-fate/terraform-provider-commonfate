@@ -24,7 +24,7 @@ A specifier to make GCP BigQuery Datasets available for selection under a partic
 
 ### Optional
 
-- `priority` (Number) The priority that governs which role will be suggested to use in the web app when requesting access. The availability spec with the highest priority will have its role suggested first in the UI
+- `role_priority` (Number) The priority that governs which role will be suggested to use in the web app when requesting access. The availability spec with the highest priority will have its role suggested first in the UI
 
 ### Read-Only
 
