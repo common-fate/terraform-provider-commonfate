@@ -23,7 +23,7 @@ type AWSIDCAccountAvailabilities struct {
 	PermissionSetARN   types.String `tfsdk:"aws_permission_set_arn"`
 	AccountSelectorID  types.String `tfsdk:"aws_account_selector_id"`
 	AWSIdentityStoreID types.String `tfsdk:"aws_identity_store_id"`
-	Priority           types.Int64  `tfsdk:"priority"`
+	RolePriority       types.Int64  `tfsdk:"role_priority"`
 }
 
 type AWSIDCAccountAvailabilitiesResource struct {
@@ -92,7 +92,7 @@ func (r *AWSIDCAccountAvailabilitiesResource) Schema(ctx context.Context, req re
 				MarkdownDescription: "The IAM Identity Center identity store ID",
 				Required:            true,
 			},
-			"priority": schema.Int64Attribute{
+			"role_priority": schema.Int64Attribute{
 				MarkdownDescription: "The priority that governs which role will be suggested to use in the web app when requesting access. The availability spec with the highest priority will have its role suggested first in the UI",
 				Optional:            true,
 			},
@@ -140,9 +140,9 @@ func (r *AWSIDCAccountAvailabilitiesResource) Create(ctx context.Context, req re
 			Id:   data.AWSIdentityStoreID.ValueString(),
 		},
 	}
-	if !data.Priority.IsNull() {
-		priority := data.Priority.ValueInt64()
-		input.Priority = &priority
+	if !data.RolePriority.IsNull() {
+		priority := data.RolePriority.ValueInt64()
+		input.RolePriority = &priority
 	}
 
 	res, err := r.client.AvailabilitySpec().CreateAvailabilitySpec(ctx, connect.NewRequest(input))
@@ -246,9 +246,9 @@ func (r *AWSIDCAccountAvailabilitiesResource) Update(ctx context.Context, req re
 		},
 	}
 
-	if !data.Priority.IsNull() {
-		priority := data.Priority.ValueInt64()
-		input.Priority = &priority
+	if !data.RolePriority.IsNull() {
+		priority := data.RolePriority.ValueInt64()
+		input.RolePriority = &priority
 	}
 
 	res, err := r.client.AvailabilitySpec().UpdateAvailabilitySpec(ctx, connect.NewRequest(&configv1alpha1.UpdateAvailabilitySpecRequest{

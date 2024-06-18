@@ -23,7 +23,7 @@ type Auth0OrganizationAvailabilities struct {
 	Auth0OrganizationSelectorID types.String `tfsdk:"auth0_organization_selector_id"`
 	Auth0TenantID               types.String `tfsdk:"auth0_tenant_id"`
 	Role                        types.String `tfsdk:"role"`
-	Priority                    types.Int64  `tfsdk:"priority"`
+	RolePriority                types.Int64  `tfsdk:"role_priority"`
 }
 
 type Auth0OrganizationAvailabilitiesResource struct {
@@ -91,7 +91,7 @@ func (r *Auth0OrganizationAvailabilitiesResource) Schema(ctx context.Context, re
 				MarkdownDescription: "The Auth0 tenant ID",
 				Required:            true,
 			},
-			"priority": schema.Int64Attribute{
+			"role_priority": schema.Int64Attribute{
 				MarkdownDescription: "The priority that governs which role will be suggested to use in the web app when requesting access. The availability spec with the highest priority will have its role suggested first in the UI",
 				Optional:            true,
 			},
@@ -135,9 +135,9 @@ func (r *Auth0OrganizationAvailabilitiesResource) Create(ctx context.Context, re
 			Id:   data.Auth0OrganizationSelectorID.ValueString(),
 		},
 	}
-	if !data.Priority.IsNull() {
-		priority := data.Priority.ValueInt64()
-		input.Priority = &priority
+	if !data.RolePriority.IsNull() {
+		priority := data.RolePriority.ValueInt64()
+		input.RolePriority = &priority
 	}
 
 	res, err := r.client.AvailabilitySpec().CreateAvailabilitySpec(ctx, connect.NewRequest(input))
@@ -231,9 +231,9 @@ func (r *Auth0OrganizationAvailabilitiesResource) Update(ctx context.Context, re
 			Id:   data.Auth0OrganizationSelectorID.ValueString(),
 		},
 	}
-	if !data.Priority.IsNull() {
-		priority := data.Priority.ValueInt64()
-		input.Priority = &priority
+	if !data.RolePriority.IsNull() {
+		priority := data.RolePriority.ValueInt64()
+		input.RolePriority = &priority
 	}
 
 	res, err := r.client.AvailabilitySpec().UpdateAvailabilitySpec(ctx, connect.NewRequest(&configv1alpha1.UpdateAvailabilitySpecRequest{

@@ -22,7 +22,7 @@ type OktaGroupAvailabilities struct {
 	WorkflowID          types.String `tfsdk:"workflow_id"`
 	OktaGroupSelectorID types.String `tfsdk:"okta_group_selector_id"`
 	OktaOrganizationID  types.String `tfsdk:"organization_id"`
-	Priority            types.Int64  `tfsdk:"priority"`
+	RolePriority        types.Int64  `tfsdk:"role_priority"`
 }
 
 type OktaGroupAvailabilitiesResource struct {
@@ -86,7 +86,7 @@ func (r *OktaGroupAvailabilitiesResource) Schema(ctx context.Context, req resour
 				MarkdownDescription: "The Okta Organization ID",
 				Required:            true,
 			},
-			"priority": schema.Int64Attribute{
+			"role_priority": schema.Int64Attribute{
 				MarkdownDescription: "The priority that governs which role will be suggested to use in the web app when requesting access. The availability spec with the highest priority will have its role suggested first in the UI",
 				Optional:            true,
 			},
@@ -134,9 +134,9 @@ func (r *OktaGroupAvailabilitiesResource) Create(ctx context.Context, req resour
 			Id:   data.OktaOrganizationID.ValueString(),
 		},
 	}
-	if !data.Priority.IsNull() {
-		priority := data.Priority.ValueInt64()
-		input.Priority = &priority
+	if !data.RolePriority.IsNull() {
+		priority := data.RolePriority.ValueInt64()
+		input.RolePriority = &priority
 	}
 
 	res, err := r.client.AvailabilitySpec().CreateAvailabilitySpec(ctx, connect.NewRequest(input))
@@ -238,9 +238,9 @@ func (r *OktaGroupAvailabilitiesResource) Update(ctx context.Context, req resour
 			Id:   data.OktaOrganizationID.ValueString(),
 		},
 	}
-	if !data.Priority.IsNull() {
-		priority := data.Priority.ValueInt64()
-		input.Priority = &priority
+	if !data.RolePriority.IsNull() {
+		priority := data.RolePriority.ValueInt64()
+		input.RolePriority = &priority
 	}
 
 	res, err := r.client.AvailabilitySpec().UpdateAvailabilitySpec(ctx, connect.NewRequest(&configv1alpha1.UpdateAvailabilitySpecRequest{

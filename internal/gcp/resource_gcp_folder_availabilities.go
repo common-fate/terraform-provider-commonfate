@@ -23,7 +23,7 @@ type GCPFolderAvailabilities struct {
 	Role                types.String `tfsdk:"gcp_role"`
 	FolderSelectorID    types.String `tfsdk:"gcp_folder_selector_id"`
 	WorkspaceCustomerID types.String `tfsdk:"google_workspace_customer_id"`
-	Priority            types.Int64  `tfsdk:"priority"`
+	RolePriority        types.Int64  `tfsdk:"role_priority"`
 }
 
 type GCPFolderAvailabilitiesResource struct {
@@ -95,7 +95,7 @@ func (r *GCPFolderAvailabilitiesResource) Schema(ctx context.Context, req resour
 				MarkdownDescription: "The ID of the Google Workspace customer associated with the folders",
 				Required:            true,
 			},
-			"priority": schema.Int64Attribute{
+			"role_priority": schema.Int64Attribute{
 				MarkdownDescription: "The priority that governs which role will be suggested to use in the web app when requesting access. The availability spec with the highest priority will have its role suggested first in the UI",
 				Optional:            true,
 			},
@@ -143,9 +143,9 @@ func (r *GCPFolderAvailabilitiesResource) Create(ctx context.Context, req resour
 			Id:   data.WorkspaceCustomerID.ValueString(),
 		},
 	}
-	if !data.Priority.IsNull() {
-		priority := data.Priority.ValueInt64()
-		input.Priority = &priority
+	if !data.RolePriority.IsNull() {
+		priority := data.RolePriority.ValueInt64()
+		input.RolePriority = &priority
 	}
 
 	res, err := r.client.AvailabilitySpec().CreateAvailabilitySpec(ctx, connect.NewRequest(input))
@@ -248,9 +248,9 @@ func (r *GCPFolderAvailabilitiesResource) Update(ctx context.Context, req resour
 			Id:   data.WorkspaceCustomerID.ValueString(),
 		},
 	}
-	if !data.Priority.IsNull() {
-		priority := data.Priority.ValueInt64()
-		input.Priority = &priority
+	if !data.RolePriority.IsNull() {
+		priority := data.RolePriority.ValueInt64()
+		input.RolePriority = &priority
 	}
 
 	res, err := r.client.AvailabilitySpec().UpdateAvailabilitySpec(ctx, connect.NewRequest(&configv1alpha1.UpdateAvailabilitySpecRequest{

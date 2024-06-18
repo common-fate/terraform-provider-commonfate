@@ -23,7 +23,7 @@ type AvailabilitySpec struct {
 	Role           eid.EID      `tfsdk:"role"`
 	Target         eid.EID      `tfsdk:"target"`
 	IdentityDomain *eid.EID     `tfsdk:"identity_domain"`
-	Priority       types.Int64  `tfsdk:"priority"`
+	RolePriority   types.Int64  `tfsdk:"role_priority"`
 }
 
 // AccessRuleResource is the data source implementation.
@@ -99,7 +99,7 @@ func (r *AvailabilitySpecResource) Schema(ctx context.Context, req resource.Sche
 				Optional:            true,
 				Attributes:          eid.EIDAttrs,
 			},
-			"priority": schema.Int64Attribute{
+			"role_priority": schema.Int64Attribute{
 				MarkdownDescription: "The priority that governs which role will be suggested to use in the web app when requesting access. The availability spec with the highest priority will have its role suggested first in the UI",
 				Optional:            true,
 			},
@@ -141,9 +141,9 @@ func (r *AvailabilitySpecResource) Create(ctx context.Context, req resource.Crea
 	if data.IdentityDomain != nil {
 		input.IdentityDomain = data.IdentityDomain.ToAPI()
 	}
-	if !data.Priority.IsNull() {
-		priority := data.Priority.ValueInt64()
-		input.Priority = &priority
+	if !data.RolePriority.IsNull() {
+		priority := data.RolePriority.ValueInt64()
+		input.RolePriority = &priority
 	}
 
 	res, err := r.client.AvailabilitySpec().CreateAvailabilitySpec(ctx, connect.NewRequest(input))
@@ -237,9 +237,9 @@ func (r *AvailabilitySpecResource) Update(ctx context.Context, req resource.Upda
 	if data.IdentityDomain != nil {
 		input.IdentityDomain = data.IdentityDomain.ToAPI()
 	}
-	if !data.Priority.IsNull() {
-		priority := data.Priority.ValueInt64()
-		input.Priority = &priority
+	if !data.RolePriority.IsNull() {
+		priority := data.RolePriority.ValueInt64()
+		input.RolePriority = &priority
 	}
 
 	res, err := r.client.AvailabilitySpec().UpdateAvailabilitySpec(ctx, connect.NewRequest(&configv1alpha1.UpdateAvailabilitySpecRequest{
