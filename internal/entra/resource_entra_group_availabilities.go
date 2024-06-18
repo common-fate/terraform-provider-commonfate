@@ -134,6 +134,10 @@ func (r *EntraGroupAvailabilitiesResource) Create(ctx context.Context, req resou
 			Id:   data.EntraTenantID.ValueString(),
 		},
 	}
+	if !data.Priority.IsNull() {
+		priority := data.Priority.ValueInt64()
+		input.Priority = &priority
+	}
 
 	res, err := r.client.AvailabilitySpec().CreateAvailabilitySpec(ctx, connect.NewRequest(input))
 
@@ -233,6 +237,10 @@ func (r *EntraGroupAvailabilitiesResource) Update(ctx context.Context, req resou
 			Type: "Entra::Tenant",
 			Id:   data.EntraTenantID.ValueString(),
 		},
+	}
+	if !data.Priority.IsNull() {
+		priority := data.Priority.ValueInt64()
+		input.Priority = &priority
 	}
 
 	res, err := r.client.AvailabilitySpec().UpdateAvailabilitySpec(ctx, connect.NewRequest(&configv1alpha1.UpdateAvailabilitySpecRequest{

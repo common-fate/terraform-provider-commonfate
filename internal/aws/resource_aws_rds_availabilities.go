@@ -134,6 +134,10 @@ func (r *AWSRDSAvailabilitiesResource) Create(ctx context.Context, req resource.
 			Id:   data.AWSIdentityStoreID.ValueString(),
 		},
 	}
+	if !data.Priority.IsNull() {
+		priority := data.Priority.ValueInt64()
+		input.Priority = &priority
+	}
 
 	res, err := r.client.AvailabilitySpec().CreateAvailabilitySpec(ctx, connect.NewRequest(input))
 
@@ -233,6 +237,10 @@ func (r *AWSRDSAvailabilitiesResource) Update(ctx context.Context, req resource.
 			Type: "AWS::IDC::IdentityStore",
 			Id:   data.AWSIdentityStoreID.ValueString(),
 		},
+	}
+	if !data.Priority.IsNull() {
+		priority := data.Priority.ValueInt64()
+		input.Priority = &priority
 	}
 
 	res, err := r.client.AvailabilitySpec().UpdateAvailabilitySpec(ctx, connect.NewRequest(&configv1alpha1.UpdateAvailabilitySpecRequest{

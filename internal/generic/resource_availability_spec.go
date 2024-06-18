@@ -141,6 +141,10 @@ func (r *AvailabilitySpecResource) Create(ctx context.Context, req resource.Crea
 	if data.IdentityDomain != nil {
 		input.IdentityDomain = data.IdentityDomain.ToAPI()
 	}
+	if !data.Priority.IsNull() {
+		priority := data.Priority.ValueInt64()
+		input.Priority = &priority
+	}
 
 	res, err := r.client.AvailabilitySpec().CreateAvailabilitySpec(ctx, connect.NewRequest(input))
 
@@ -232,6 +236,10 @@ func (r *AvailabilitySpecResource) Update(ctx context.Context, req resource.Upda
 
 	if data.IdentityDomain != nil {
 		input.IdentityDomain = data.IdentityDomain.ToAPI()
+	}
+	if !data.Priority.IsNull() {
+		priority := data.Priority.ValueInt64()
+		input.Priority = &priority
 	}
 
 	res, err := r.client.AvailabilitySpec().UpdateAvailabilitySpec(ctx, connect.NewRequest(&configv1alpha1.UpdateAvailabilitySpecRequest{

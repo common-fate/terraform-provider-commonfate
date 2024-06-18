@@ -143,6 +143,10 @@ func (r *GCPBigQueryDatasetAvailabilitiesResource) Create(ctx context.Context, r
 			Id:   data.WorkspaceCustomerID.ValueString(),
 		},
 	}
+	if !data.Priority.IsNull() {
+		priority := data.Priority.ValueInt64()
+		input.Priority = &priority
+	}
 
 	res, err := r.client.AvailabilitySpec().CreateAvailabilitySpec(ctx, connect.NewRequest(input))
 
@@ -243,6 +247,10 @@ func (r *GCPBigQueryDatasetAvailabilitiesResource) Update(ctx context.Context, r
 			Type: "Google::Workspace::Customer",
 			Id:   data.WorkspaceCustomerID.ValueString(),
 		},
+	}
+	if !data.Priority.IsNull() {
+		priority := data.Priority.ValueInt64()
+		input.Priority = &priority
 	}
 
 	res, err := r.client.AvailabilitySpec().UpdateAvailabilitySpec(ctx, connect.NewRequest(&configv1alpha1.UpdateAvailabilitySpecRequest{

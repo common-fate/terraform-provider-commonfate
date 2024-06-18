@@ -139,6 +139,10 @@ func (r *DataStaxOrganizationAvailabilitiesResource) Create(ctx context.Context,
 			Id:   data.OrganizationID.ValueString(),
 		},
 	}
+	if !data.Priority.IsNull() {
+		priority := data.Priority.ValueInt64()
+		input.Priority = &priority
+	}
 
 	res, err := r.client.AvailabilitySpec().CreateAvailabilitySpec(ctx, connect.NewRequest(input))
 
@@ -239,6 +243,10 @@ func (r *DataStaxOrganizationAvailabilitiesResource) Update(ctx context.Context,
 			Type: "DataStax::Organization",
 			Id:   data.OrganizationID.ValueString(),
 		},
+	}
+	if !data.Priority.IsNull() {
+		priority := data.Priority.ValueInt64()
+		input.Priority = &priority
 	}
 
 	res, err := r.client.AvailabilitySpec().UpdateAvailabilitySpec(ctx, connect.NewRequest(&configv1alpha1.UpdateAvailabilitySpecRequest{

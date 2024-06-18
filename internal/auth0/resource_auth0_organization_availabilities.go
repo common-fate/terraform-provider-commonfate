@@ -91,6 +91,10 @@ func (r *Auth0OrganizationAvailabilitiesResource) Schema(ctx context.Context, re
 				MarkdownDescription: "The Auth0 tenant ID",
 				Required:            true,
 			},
+			"priority": schema.Int64Attribute{
+				MarkdownDescription: "The priority that governs which role will be suggested to use in the web app when requesting access. The availability spec with the highest priority will have its role suggested first in the UI",
+				Optional:            true,
+			},
 		},
 		MarkdownDescription: `A specifier to make Auth0 Organizations available for selection under a particular Access Workflow`,
 	}
@@ -130,6 +134,10 @@ func (r *Auth0OrganizationAvailabilitiesResource) Create(ctx context.Context, re
 			Type: "Access::Selector",
 			Id:   data.Auth0OrganizationSelectorID.ValueString(),
 		},
+	}
+	if !data.Priority.IsNull() {
+		priority := data.Priority.ValueInt64()
+		input.Priority = &priority
 	}
 
 	res, err := r.client.AvailabilitySpec().CreateAvailabilitySpec(ctx, connect.NewRequest(input))
@@ -222,6 +230,10 @@ func (r *Auth0OrganizationAvailabilitiesResource) Update(ctx context.Context, re
 			Type: "Access::Selector",
 			Id:   data.Auth0OrganizationSelectorID.ValueString(),
 		},
+	}
+	if !data.Priority.IsNull() {
+		priority := data.Priority.ValueInt64()
+		input.Priority = &priority
 	}
 
 	res, err := r.client.AvailabilitySpec().UpdateAvailabilitySpec(ctx, connect.NewRequest(&configv1alpha1.UpdateAvailabilitySpecRequest{
