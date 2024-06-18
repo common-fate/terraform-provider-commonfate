@@ -22,6 +22,7 @@ type EntraGroupAvailabilities struct {
 	WorkflowID           types.String `tfsdk:"workflow_id"`
 	EntraGroupSelectorID types.String `tfsdk:"entra_group_selector_id"`
 	EntraTenantID        types.String `tfsdk:"tenant_id"`
+	Priority             types.Int64  `tfsdk:"priority"`
 }
 
 type EntraGroupAvailabilitiesResource struct {
@@ -84,6 +85,10 @@ func (r *EntraGroupAvailabilitiesResource) Schema(ctx context.Context, req resou
 			"tenant_id": schema.StringAttribute{
 				MarkdownDescription: "The Entra Tenant ID",
 				Required:            true,
+			},
+			"priority": schema.Int64Attribute{
+				MarkdownDescription: "The priority that governs which role will be suggested to use in the web app when requesting access. The availability spec with the highest priority will have its role suggested first in the UI",
+				Optional:            true,
 			},
 		},
 		MarkdownDescription: `A specifier to make Entra Groups available for selection under a particular Access Workflow`,

@@ -23,6 +23,7 @@ type GCPBigQueryTableAvailabilities struct {
 	Role                types.String `tfsdk:"gcp_role"`
 	TableSelectorID     types.String `tfsdk:"gcp_bigquery_table_selector_id"`
 	WorkspaceCustomerID types.String `tfsdk:"google_workspace_customer_id"`
+	Priority            types.Int64  `tfsdk:"priority"`
 }
 
 type GCPBigQueryTableAvailabilitiesResource struct {
@@ -93,6 +94,10 @@ func (r *GCPBigQueryTableAvailabilitiesResource) Schema(ctx context.Context, req
 			"google_workspace_customer_id": schema.StringAttribute{
 				MarkdownDescription: "The ID of the Google Workspace customer associated with the projects",
 				Required:            true,
+			},
+			"priority": schema.Int64Attribute{
+				MarkdownDescription: "The priority that governs which role will be suggested to use in the web app when requesting access. The availability spec with the highest priority will have its role suggested first in the UI",
+				Optional:            true,
 			},
 		},
 		MarkdownDescription: `A specifier to make GCP BigQuery tables available for selection under a particular Access Workflow`,

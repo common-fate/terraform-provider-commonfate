@@ -23,6 +23,7 @@ type DataStaxOrganizationAvailabilities struct {
 	OrganizationID types.String `tfsdk:"datastax_organization_id"`
 	SelectorID     types.String `tfsdk:"datastax_organization_selector_id"`
 	RoleID         types.String `tfsdk:"role_id"`
+	Priority       types.Int64  `tfsdk:"priority"`
 }
 
 type DataStaxOrganizationAvailabilitiesResource struct {
@@ -89,6 +90,10 @@ func (r *DataStaxOrganizationAvailabilitiesResource) Schema(ctx context.Context,
 			"datastax_organization_selector_id": schema.StringAttribute{
 				MarkdownDescription: "The DataStax Organization selector ID. Should be the ID of a 'commonfate_datastax_organization_selector' Terraform resource.",
 				Required:            true,
+			},
+			"priority": schema.Int64Attribute{
+				MarkdownDescription: "The priority that governs which role will be suggested to use in the web app when requesting access. The availability spec with the highest priority will have its role suggested first in the UI",
+				Optional:            true,
 			},
 		},
 		MarkdownDescription: `A specifier to make DataStax roles available for selection under a particular Access Workflow`,

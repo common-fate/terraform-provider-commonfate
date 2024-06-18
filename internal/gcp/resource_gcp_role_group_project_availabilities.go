@@ -23,6 +23,7 @@ type GCPRoleGroupProjectAvailabilities struct {
 	RoleGroup           types.String `tfsdk:"gcp_role_group_id"`
 	ProjectSelectorID   types.String `tfsdk:"gcp_project_selector_id"`
 	WorkspaceCustomerID types.String `tfsdk:"google_workspace_customer_id"`
+	Priority            types.Int64  `tfsdk:"priority"`
 }
 
 type GCPRoleGroupProjectAvailabilitiesResource struct {
@@ -93,6 +94,10 @@ func (r *GCPRoleGroupProjectAvailabilitiesResource) Schema(ctx context.Context, 
 			"google_workspace_customer_id": schema.StringAttribute{
 				MarkdownDescription: "The ID of the Google Workspace customer associated with the projects",
 				Required:            true,
+			},
+			"priority": schema.Int64Attribute{
+				MarkdownDescription: "The priority that governs which role will be suggested to use in the web app when requesting access. The availability spec with the highest priority will have its role suggested first in the UI",
+				Optional:            true,
 			},
 		},
 		MarkdownDescription: `A specifier to make GCP projects available for selection under a particular Access Workflow`,

@@ -23,6 +23,7 @@ type AvailabilitySpec struct {
 	Role           eid.EID      `tfsdk:"role"`
 	Target         eid.EID      `tfsdk:"target"`
 	IdentityDomain *eid.EID     `tfsdk:"identity_domain"`
+	Priority       types.Int64  `tfsdk:"priority"`
 }
 
 // AccessRuleResource is the data source implementation.
@@ -97,6 +98,10 @@ func (r *AvailabilitySpecResource) Schema(ctx context.Context, req resource.Sche
 				MarkdownDescription: "The identity domain associated with the integration",
 				Optional:            true,
 				Attributes:          eid.EIDAttrs,
+			},
+			"priority": schema.Int64Attribute{
+				MarkdownDescription: "The priority that governs which role will be suggested to use in the web app when requesting access. The availability spec with the highest priority will have its role suggested first in the UI",
+				Optional:            true,
 			},
 		},
 		MarkdownDescription: `A specifier to make resources available for selection under a particular Access Workflow`,

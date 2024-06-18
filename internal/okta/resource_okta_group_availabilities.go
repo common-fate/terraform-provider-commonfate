@@ -22,6 +22,7 @@ type OktaGroupAvailabilities struct {
 	WorkflowID          types.String `tfsdk:"workflow_id"`
 	OktaGroupSelectorID types.String `tfsdk:"okta_group_selector_id"`
 	OktaOrganizationID  types.String `tfsdk:"organization_id"`
+	Priority            types.Int64  `tfsdk:"priority"`
 }
 
 type OktaGroupAvailabilitiesResource struct {
@@ -84,6 +85,10 @@ func (r *OktaGroupAvailabilitiesResource) Schema(ctx context.Context, req resour
 			"organization_id": schema.StringAttribute{
 				MarkdownDescription: "The Okta Organization ID",
 				Required:            true,
+			},
+			"priority": schema.Int64Attribute{
+				MarkdownDescription: "The priority that governs which role will be suggested to use in the web app when requesting access. The availability spec with the highest priority will have its role suggested first in the UI",
+				Optional:            true,
 			},
 		},
 		MarkdownDescription: `A specifier to make Okta Groups available for selection under a particular Access Workflow`,

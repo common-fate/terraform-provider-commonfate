@@ -23,6 +23,7 @@ type Auth0OrganizationAvailabilities struct {
 	Auth0OrganizationSelectorID types.String `tfsdk:"auth0_organization_selector_id"`
 	Auth0TenantID               types.String `tfsdk:"auth0_tenant_id"`
 	Role                        types.String `tfsdk:"role"`
+	Priority                    types.Int64  `tfsdk:"priority"`
 }
 
 type Auth0OrganizationAvailabilitiesResource struct {

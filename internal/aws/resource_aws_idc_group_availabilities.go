@@ -22,6 +22,7 @@ type AWSIDCGroupAvailabilities struct {
 	WorkflowID         types.String `tfsdk:"workflow_id"`
 	GroupSelectorID    types.String `tfsdk:"aws_idc_group_selector_id"`
 	AWSIdentityStoreID types.String `tfsdk:"aws_identity_store_id"`
+	Priority           types.Int64  `tfsdk:"priority"`
 }
 
 type AWSIDCGroupAvailabilitiesResource struct {
@@ -85,6 +86,10 @@ func (r *AWSIDCGroupAvailabilitiesResource) Schema(ctx context.Context, req reso
 			"aws_identity_store_id": schema.StringAttribute{
 				MarkdownDescription: "The IAM Identity Center identity store ID",
 				Required:            true,
+			},
+			"priority": schema.Int64Attribute{
+				MarkdownDescription: "The priority that governs which role will be suggested to use in the web app when requesting access. The availability spec with the highest priority will have its role suggested first in the UI",
+				Optional:            true,
 			},
 		},
 		MarkdownDescription: `A specifier to make AWS IAM Identity Center groups available for selection under a particular Access Workflow`,
