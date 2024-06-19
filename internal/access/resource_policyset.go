@@ -215,14 +215,6 @@ func (r *PolicySetResource) Update(ctx context.Context, req resource.UpdateReque
 
 			return
 		}
-		if err != nil {
-			resp.Diagnostics.AddError(
-				"error updating policy",
-				"JSON Error: "+err.Error(),
-			)
-
-			return
-		}
 	} else {
 		got, err := r.client.Update(ctx, policyset.UpdateInput{
 			PolicySet: policyset.Input{
