@@ -27,19 +27,19 @@ type Validations struct {
 }
 
 type ExtendAccess struct {
-	MaxExtensions          types.Int64 `tfsdk:"max_extensions"`
-	ExtensionDuration      types.Int64 `tfsdk:"extension_duration_seconds"`
+	MaxExtensions     types.Int64 `tfsdk:"max_extensions"`
+	ExtensionDuration types.Int64 `tfsdk:"extension_duration_seconds"`
 }
 
 type AccessWorkflowModel struct {
-	ID               types.String `tfsdk:"id"`
-	Name             types.String `tfsdk:"name"`
-	AccessDuration   types.Int64  `tfsdk:"access_duration_seconds"`
-	TryExtendAfter   types.Int64  `tfsdk:"try_extend_after_seconds"`
-	Priority         types.Int64  `tfsdk:"priority"`
-	ActivationExpiry types.Int64  `tfsdk:"activation_expiry"`
-	DefaultDuration  types.Int64  `tfsdk:"default_duration_seconds"`
-	Validation       *Validations `tfsdk:"validation"`
+	ID               types.String  `tfsdk:"id"`
+	Name             types.String  `tfsdk:"name"`
+	AccessDuration   types.Int64   `tfsdk:"access_duration_seconds"`
+	TryExtendAfter   types.Int64   `tfsdk:"try_extend_after_seconds"`
+	Priority         types.Int64   `tfsdk:"priority"`
+	ActivationExpiry types.Int64   `tfsdk:"activation_expiry"`
+	DefaultDuration  types.Int64   `tfsdk:"default_duration_seconds"`
+	Validation       *Validations  `tfsdk:"validation"`
 	ExtendAccess     *ExtendAccess `tfsdk:"extend_access"`
 }
 
@@ -127,11 +127,12 @@ func (r *AccessWorkflowResource) Schema(ctx context.Context, req resource.Schema
 			"extend_access": schema.SingleNestedAttribute{
 				MarkdownDescription: "Configuration for extending access",
 				Optional:            true,
-			
+
 				Attributes: map[string]schema.Attribute{
 					"max_extensions": schema.Int64Attribute{
 						MarkdownDescription: "The maximum number of allowed extensions (set to 0 to disable extensions). If not set, it defaults to 1.",
-						Default: int64default.StaticInt64(1),
+						Default:             int64default.StaticInt64(1),
+						Computed:            true,
 						Optional:            true,
 					},
 					"extension_duration_seconds": schema.Int64Attribute{
@@ -203,7 +204,7 @@ func (r *AccessWorkflowResource) Create(ctx context.Context, req resource.Create
 		}
 		createReq.DefaultDuration = durationpb.New(defaultDuration)
 	}
-	
+
 	if data.ExtendAccess != nil {
 
 		extendAccess := &configv1alpha1.ExtendAccess{}
@@ -299,7 +300,7 @@ func (r *AccessWorkflowResource) Read(ctx context.Context, req resource.ReadRequ
 			HasReason: types.BoolValue(res.Msg.Workflow.Validation.HasReason),
 		}
 	}
-		
+
 	if res.Msg.Workflow.ExtendAccess != nil {
 
 		extendAccess := &ExtendAccess{}
