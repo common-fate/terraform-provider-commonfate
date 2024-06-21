@@ -7,6 +7,7 @@ import (
 
 	"connectrpc.com/connect"
 
+	accessv1alpha1 "github.com/common-fate/sdk/gen/commonfate/access/v1alpha1"
 	config_client "github.com/common-fate/sdk/config"
 	configv1alpha1 "github.com/common-fate/sdk/gen/commonfate/control/config/v1alpha1"
 	configv1alpha1connect "github.com/common-fate/sdk/gen/commonfate/control/config/v1alpha1/configv1alpha1connect"
@@ -15,6 +16,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -23,6 +25,11 @@ import (
 
 type Validations struct {
 	HasReason types.Bool `tfsdk:"has_reason"`
+}
+
+type Extension struct {
+	MaxExtensions     types.Int64 `tfsdk:"maximum_number_of_extensions"`
+	ExtensionDuration types.Int64 `tfsdk:"extension_duration_seconds"`
 }
 
 type AccessWorkflowModel struct {
@@ -34,6 +41,7 @@ type AccessWorkflowModel struct {
 	ActivationExpiry types.Int64  `tfsdk:"activation_expiry"`
 	DefaultDuration  types.Int64  `tfsdk:"default_duration_seconds"`
 	Validation       *Validations `tfsdk:"validation"`
+	Extension        *Extension   `tfsdk:"extension"`
 }
 
 // AccessRuleResource is the data source implementation.
@@ -95,7 +103,7 @@ func (r *AccessWorkflowResource) Schema(ctx context.Context, req resource.Schema
 				Required:            true,
 			},
 			"try_extend_after_seconds": schema.Int64Attribute{
-				MarkdownDescription: "The amount of time after access is activated that extending access can be attempted. As a starting point we recommend setting this to half of the `access_duration_seconds`.",
+				MarkdownDescription: "(Deprecated) The amount of time after access is activated that extending access can be attempted. As a starting point we recommend setting this to half of the `access_duration_seconds`.",
 				Required:            true,
 			},
 			"priority": schema.Int64Attribute{
@@ -115,6 +123,23 @@ func (r *AccessWorkflowResource) Schema(ctx context.Context, req resource.Schema
 				Optional:            true,
 				AttributeTypes: map[string]attr.Type{
 					"has_reason": types.BoolType,
+				},
+			},
+			"extension": schema.SingleNestedAttribute{
+				MarkdownDescription: "Configuration for extending access",
+				Optional:            true,
+
+				Attributes: map[string]schema.Attribute{
+					"maximum_number_of_extensions": schema.Int64Attribute{
+						MarkdownDescription: "The maximum number of allowed extensions (set to 0 to disable extensions). If not set, it defaults to 1.",
+						Default:             int64default.StaticInt64(1),
+						Computed:            true,
+						Optional:            true,
+					},
+					"extension_duration_seconds": schema.Int64Attribute{
+						MarkdownDescription: "Specifies the duration for each extension. Defaults to the value of access_duration_seconds if not provided.",
+						Optional:            true,
+					},
 				},
 			},
 		},
@@ -179,6 +204,23 @@ func (r *AccessWorkflowResource) Create(ctx context.Context, req resource.Create
 			return
 		}
 		createReq.DefaultDuration = durationpb.New(defaultDuration)
+	}
+
+	if data.Extension != nil {
+
+		extendAccess := &accessv1alpha1.Extension{}
+
+		// Default is already set to 1 if not set
+		extendAccess.MaximumNumberOfExtensions = int32(data.Extension.MaxExtensions.ValueInt64())
+
+		// Set a default to be the access duration
+		extensionDuration := accessDuration
+		if !data.Extension.ExtensionDuration.IsNull() {
+			extensionDuration = time.Second * time.Duration(data.Extension.ExtensionDuration.ValueInt64())
+		}
+		extendAccess.ExtensionDurationSeconds = durationpb.New(extensionDuration)
+
+		createReq.Extension = extendAccess
 	}
 
 	res, err := r.client.CreateAccessWorkflow(ctx, connect.NewRequest(createReq))
@@ -260,6 +302,22 @@ func (r *AccessWorkflowResource) Read(ctx context.Context, req resource.ReadRequ
 		}
 	}
 
+	if res.Msg.Workflow.Extension != nil {
+
+		extendAccess := &Extension{}
+
+		extendAccess.MaxExtensions = types.Int64Value(int64(res.Msg.Workflow.Extension.MaximumNumberOfExtensions))
+
+		// Set a default to be the access duration
+		extensionDuration := res.Msg.Workflow.AccessDuration.Seconds
+		if res.Msg.Workflow.Extension.ExtensionDurationSeconds != nil {
+			extensionDuration = res.Msg.Workflow.Extension.ExtensionDurationSeconds.Seconds
+		}
+		extendAccess.ExtensionDuration = types.Int64Value(extensionDuration)
+
+		state.Extension = extendAccess
+	}
+
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }
 
@@ -323,6 +381,23 @@ func (r *AccessWorkflowResource) Update(ctx context.Context, req resource.Update
 		updateReq.Workflow.DefaultDuration = durationpb.New(defaultDuration)
 	}
 
+	if data.Extension != nil {
+
+		extendAccess := &accessv1alpha1.Extension{}
+
+		// Default is already set to 1 if not set
+		extendAccess.MaximumNumberOfExtensions = int32(data.Extension.MaxExtensions.ValueInt64())
+
+		// Set a default to be the access duration
+		extensionDuration := accessDuration
+		if !data.Extension.ExtensionDuration.IsNull() {
+			extensionDuration = time.Second * time.Duration(data.Extension.ExtensionDuration.ValueInt64())
+		}
+		extendAccess.ExtensionDurationSeconds = durationpb.New(extensionDuration)
+
+		updateReq.Workflow.Extension = extendAccess
+	}
+
 	res, err := r.client.UpdateAccessWorkflow(ctx, connect.NewRequest(updateReq))
 
 	if err != nil {
@@ -354,7 +429,14 @@ func (r *AccessWorkflowResource) Update(ctx context.Context, req resource.Update
 		data.DefaultDuration = types.Int64Null()
 	} else {
 		data.DefaultDuration = types.Int64Value(res.Msg.Workflow.DefaultDuration.Seconds)
+	}
 
+	if res.Msg.Workflow.Extension != nil {
+		if res.Msg.Workflow.Extension.ExtensionDurationSeconds == nil {
+			data.Extension.ExtensionDuration = types.Int64Null()
+		} else {
+			data.Extension.ExtensionDuration = types.Int64Value(res.Msg.Workflow.Extension.ExtensionDurationSeconds.Seconds)
+		}
 	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)

@@ -30,12 +30,13 @@ resource "commonfate-access_workflow" "workflow-demo" {
 ### Required
 
 - `access_duration_seconds` (Number) The maximum allowable duration for the access workflow
-- `try_extend_after_seconds` (Number) The amount of time after access is activated that extending access can be attempted. As a starting point we recommend setting this to half of the `access_duration_seconds`.
+- `try_extend_after_seconds` (Number) (Deprecated) The amount of time after access is activated that extending access can be attempted. As a starting point we recommend setting this to half of the `access_duration_seconds`.
 
 ### Optional
 
 - `activation_expiry` (Number) The amount of time after access is activated before the request will be expired
 - `default_duration_seconds` (Number) The default duration of the access workflow
+- `extension` (Attributes) Configuration for extending access (see [below for nested schema](#nestedatt--extension))
 - `name` (String) A unique name for the workflow so you know how to identify it.
 - `priority` (Number) The priority that governs whether the policy will be used. If a different policy with a higher priority and the same role exists that one will be used over another.
 - `validation` (Object) Validation requirements to be set with this workflow (see [below for nested schema](#nestedatt--validation))
@@ -43,6 +44,15 @@ resource "commonfate-access_workflow" "workflow-demo" {
 ### Read-Only
 
 - `id` (String) The internal approval workflow ID
+
+<a id="nestedatt--extension"></a>
+### Nested Schema for `extension`
+
+Optional:
+
+- `extension_duration_seconds` (Number) Specifies the duration for each extension. Defaults to the value of access_duration_seconds if not provided.
+- `maximum_number_of_extensions` (Number) The maximum number of allowed extensions (set to 0 to disable extensions). If not set, it defaults to 1.
+
 
 <a id="nestedatt--validation"></a>
 ### Nested Schema for `validation`
