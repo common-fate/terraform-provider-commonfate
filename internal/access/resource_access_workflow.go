@@ -7,6 +7,7 @@ import (
 
 	"connectrpc.com/connect"
 
+	accessv1alpha1 "github.com/common-fate/sdk/gen/commonfate/access/v1alpha1"
 	config_client "github.com/common-fate/sdk/config"
 	configv1alpha1 "github.com/common-fate/sdk/gen/commonfate/control/config/v1alpha1"
 	configv1alpha1connect "github.com/common-fate/sdk/gen/commonfate/control/config/v1alpha1/configv1alpha1connect"
@@ -207,7 +208,7 @@ func (r *AccessWorkflowResource) Create(ctx context.Context, req resource.Create
 
 	if data.Extension != nil {
 
-		extendAccess := &configv1alpha1.Extension{}
+		extendAccess := &accessv1alpha1.Extension{}
 
 		// Default is already set to 1 if not set
 		extendAccess.MaximumNumberOfExtensions = int32(data.Extension.MaxExtensions.ValueInt64())
@@ -382,7 +383,7 @@ func (r *AccessWorkflowResource) Update(ctx context.Context, req resource.Update
 
 	if data.Extension != nil {
 
-		extendAccess := &configv1alpha1.Extension{}
+		extendAccess := &accessv1alpha1.Extension{}
 
 		// Default is already set to 1 if not set
 		extendAccess.MaximumNumberOfExtensions = int32(data.Extension.MaxExtensions.ValueInt64())
