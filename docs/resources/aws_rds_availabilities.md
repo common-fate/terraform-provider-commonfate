@@ -29,6 +29,10 @@ resource "commonfate_aws_rds_availabilities" "demo" {
 - `aws_rds_selector_id` (String) The target to make available. Should be a Selector entity.
 - `workflow_id` (String) The Access Workflow ID
 
+### Optional
+
+- `role_priority` (Number) The priority that governs which role will be suggested to use in the web app when requesting access. The availability spec with the highest priority will have its role suggested first in the UI
+
 ### Read-Only
 
 - `id` (String) The internal Common Fate ID

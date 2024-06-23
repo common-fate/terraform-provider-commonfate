@@ -31,6 +31,10 @@ resource "commonfate_gcp_project_availabilities" "example" {
 - `google_workspace_customer_id` (String) The ID of the Google Workspace customer associated with the projects
 - `workflow_id` (String) The Access Workflow ID
 
+### Optional
+
+- `role_priority` (Number) The priority that governs which role will be suggested to use in the web app when requesting access. The availability spec with the highest priority will have its role suggested first in the UI
+
 ### Read-Only
 
 - `id` (String) The internal Common Fate ID

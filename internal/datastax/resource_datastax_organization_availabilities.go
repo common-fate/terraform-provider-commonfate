@@ -23,6 +23,7 @@ type DataStaxOrganizationAvailabilities struct {
 	OrganizationID types.String `tfsdk:"datastax_organization_id"`
 	SelectorID     types.String `tfsdk:"datastax_organization_selector_id"`
 	RoleID         types.String `tfsdk:"role_id"`
+	RolePriority   types.Int64  `tfsdk:"role_priority"`
 }
 
 type DataStaxOrganizationAvailabilitiesResource struct {
@@ -90,6 +91,10 @@ func (r *DataStaxOrganizationAvailabilitiesResource) Schema(ctx context.Context,
 				MarkdownDescription: "The DataStax Organization selector ID. Should be the ID of a 'commonfate_datastax_organization_selector' Terraform resource.",
 				Required:            true,
 			},
+			"role_priority": schema.Int64Attribute{
+				MarkdownDescription: "The priority that governs which role will be suggested to use in the web app when requesting access. The availability spec with the highest priority will have its role suggested first in the UI",
+				Optional:            true,
+			},
 		},
 		MarkdownDescription: `A specifier to make DataStax roles available for selection under a particular Access Workflow`,
 	}
@@ -133,6 +138,10 @@ func (r *DataStaxOrganizationAvailabilitiesResource) Create(ctx context.Context,
 			Type: "DataStax::Organization",
 			Id:   data.OrganizationID.ValueString(),
 		},
+	}
+	if !data.RolePriority.IsNull() {
+		priority := data.RolePriority.ValueInt64()
+		input.RolePriority = &priority
 	}
 
 	res, err := r.client.AvailabilitySpec().CreateAvailabilitySpec(ctx, connect.NewRequest(input))
@@ -234,6 +243,10 @@ func (r *DataStaxOrganizationAvailabilitiesResource) Update(ctx context.Context,
 			Type: "DataStax::Organization",
 			Id:   data.OrganizationID.ValueString(),
 		},
+	}
+	if !data.RolePriority.IsNull() {
+		priority := data.RolePriority.ValueInt64()
+		input.RolePriority = &priority
 	}
 
 	res, err := r.client.AvailabilitySpec().UpdateAvailabilitySpec(ctx, connect.NewRequest(&configv1alpha1.UpdateAvailabilitySpecRequest{
