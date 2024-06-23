@@ -3,6 +3,7 @@ package slack
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"connectrpc.com/connect"
 	"github.com/common-fate/grab"
@@ -17,6 +18,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"google.golang.org/protobuf/types/known/durationpb"
 )
 
 type SlackAlertModel struct {
@@ -28,6 +30,7 @@ type SlackAlertModel struct {
 	UseWebConsoleForApprovalAction types.Bool   `tfsdk:"use_web_console_for_approval_action"`
 	SendDirectMessagesToApprovers  types.Bool   `tfsdk:"send_direct_message_to_approvers"`
 	DisableInteractivityHandlers   types.Bool   `tfsdk:"disable_interactivity_handlers"`
+	NotifyExpiryInSeconds          types.Int64  `tfsdk:"notify_expiry_in_seconds"`
 }
 
 // AccessRuleResource is the data source implementation.
@@ -114,6 +117,10 @@ func (r *SlackAlertResource) Schema(ctx context.Context, req resource.SchemaRequ
 				Computed:            true,
 				Default:             booldefault.StaticBool(false),
 			},
+			"notify_expiry_in_seconds": schema.Int64Attribute{
+				MarkdownDescription: "The duration before access expiration at which Slack will notify the user about the upcoming expiration.",
+				Optional:            true,
+			},
 		},
 		MarkdownDescription: `Links a Slack message being send to a particular channel or workspace based on actions made against a workflow.`,
 	}
@@ -177,6 +184,10 @@ func (r *SlackAlertResource) Create(ctx context.Context, req resource.CreateRequ
 		createSlackAlert.IntegrationId = data.SlackIntegrationID.ValueStringPointer()
 	}
 
+	if !data.NotifyExpiryInSeconds.IsNull() {
+		notifyExpiry := time.Second * time.Duration(data.NotifyExpiryInSeconds.ValueInt64())
+		createSlackAlert.NotifyExpiryInSeconds = durationpb.New(notifyExpiry)
+	}
 	res, err := r.client.CreateSlackAlert(ctx, connect.NewRequest(createSlackAlert))
 
 	if err != nil {
@@ -241,6 +252,10 @@ func (r *SlackAlertResource) Read(ctx context.Context, req resource.ReadRequest,
 		DisableInteractivityHandlers:   types.BoolPointerValue(&res.Msg.Alert.DisableInteractivityHandlers),
 	}
 
+	if res.Msg.Alert.NotifyExpiryInSeconds != nil {
+		state.NotifyExpiryInSeconds = types.Int64Value(res.Msg.Alert.NotifyExpiryInSeconds.Seconds)
+	}
+
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }
 
@@ -299,6 +314,11 @@ func (r *SlackAlertResource) Update(ctx context.Context, req resource.UpdateRequ
 
 	if data.SlackIntegrationID.ValueString() != "" {
 		updateSlackAlert.Alert.IntegrationId = data.SlackIntegrationID.ValueStringPointer()
+	}
+
+	if !data.NotifyExpiryInSeconds.IsNull() {
+		notifyExpiry := time.Second * time.Duration(data.NotifyExpiryInSeconds.ValueInt64())
+		updateSlackAlert.Alert.NotifyExpiryInSeconds = durationpb.New(notifyExpiry)
 	}
 
 	res, err := r.client.UpdateSlackAlert(ctx, connect.NewRequest(updateSlackAlert))
