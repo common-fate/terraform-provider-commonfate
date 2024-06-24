@@ -20,6 +20,7 @@ resource "commonfate-slack_alert" "demo" {
   slack_channel_id                    = "demo"
   slack_workspace_id                  = "123"
   use_web_console_for_request_actions = false
+  notify_expiry_in_seconds            = 60 * 5 // 5 minutes
 }
 ```
 
