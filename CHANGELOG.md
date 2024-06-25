@@ -1,5 +1,13 @@
 # @common-fate/terraform-provider-commonfate
 
+## 2.20.0
+
+### Minor Changes
+
+- c7d66c5: Adds support for specifying a priority on availability specs. The highest priority entitlement role will be suggested in the UI when requesting access.
+- e474a0d: Add event action filtering to webhooks
+- 329ef4e: Add notify_expiry_in_seconds to slack notification so that users can be notified at a preset time before their access expires.
+
 ## 2.19.0
 
 ### Minor Changes
