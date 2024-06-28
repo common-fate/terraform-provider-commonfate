@@ -142,8 +142,7 @@ func (p *CommonFateProvider) Resources(_ context.Context) []func() resource.Reso
 		NewSlackAlertResource,
 		NewWebhookProvisionerResource,
 		NewAWSIDCIntegrationResource,
-		NewAWSRDSDatabaseResource,
-		NewAWSRDSDatabaseUserResource,
+		NewAWSRDSProxyIntegrationResource,
 		NewSlackIntegrationResource,
 		NewPagerDutyIntegrationResource,
 		NewAWSAccountSelectorResource,
@@ -242,11 +241,8 @@ func NewGCPIntegrationResource() resource.Resource {
 func NewAWSIDCIntegrationResource() resource.Resource {
 	return &aws.AWSIDCIntegrationResource{}
 }
-func NewAWSRDSDatabaseResource() resource.Resource {
-	return &aws.AWSRDSDatabaseResource{}
-}
-func NewAWSRDSDatabaseUserResource() resource.Resource {
-	return &aws.AWSRDSDatabaseUserResource{}
+func NewAWSRDSProxyIntegrationResource() resource.Resource {
+	return &aws.AWSRDSProxyIntegrationResource{}
 }
 
 func NewSlackIntegrationResource() resource.Resource {
