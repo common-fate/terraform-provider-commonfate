@@ -21,6 +21,10 @@ A specifier to make AWS IAM Identity Center groups available for selection under
 - `aws_identity_store_id` (String) The IAM Identity Center identity store ID
 - `workflow_id` (String) The Access Workflow ID
 
+### Optional
+
+- `role_priority` (Number) The priority that governs which role will be suggested to use in the web app when requesting access. The availability spec with the highest priority will have its role suggested first in the UI
+
 ### Read-Only
 
 - `id` (String) The internal Common Fate ID

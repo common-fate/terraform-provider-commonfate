@@ -18,6 +18,7 @@ resource "commonfate_aws_idc_account_availabilities" "demo" {
   aws_permission_set_arn  = "arn:aws:sso:::permissionSet/ssoins-12345667879812/ps-12345678912"
   aws_account_selector_id = "selector_id"
   aws_identity_store_id   = "d-12345678"
+  role_priority           = 100
 }
 ```
 
@@ -30,6 +31,10 @@ resource "commonfate_aws_idc_account_availabilities" "demo" {
 - `aws_identity_store_id` (String) The IAM Identity Center identity store ID
 - `aws_permission_set_arn` (String) The AWS Permission Set to make available
 - `workflow_id` (String) The Access Workflow ID
+
+### Optional
+
+- `role_priority` (Number) The priority that governs which role will be suggested to use in the web app when requesting access. The availability spec with the highest priority will have its role suggested first in the UI
 
 ### Read-Only
 

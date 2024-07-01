@@ -22,6 +22,10 @@ A specifier to make Auth0 Organizations available for selection under a particul
 - `role` (String) The Auth0 Role. You can use 'Member' here to denote the membership to an organization.
 - `workflow_id` (String) The Access Workflow ID
 
+### Optional
+
+- `role_priority` (Number) The priority that governs which role will be suggested to use in the web app when requesting access. The availability spec with the highest priority will have its role suggested first in the UI
+
 ### Read-Only
 
 - `id` (String) The internal Common Fate ID

@@ -20,6 +20,7 @@ resource "commonfate-slack_alert" "demo" {
   slack_channel_id                    = "demo"
   slack_workspace_id                  = "123"
   use_web_console_for_request_actions = false
+  notify_expiry_in_seconds            = 60 * 5 // 5 minutes
 }
 ```
 
@@ -35,6 +36,7 @@ resource "commonfate-slack_alert" "demo" {
 
 - `disable_interactivity_handlers` (Boolean) Disables all webhook handlers for the Slack integration.
 - `integration_id` (String) The ID for the integration set up to slack.
+- `notify_expiry_in_seconds` (Number) The duration before access expiration at which Slack will notify the user about the upcoming expiration.
 - `send_direct_message_to_approvers` (Boolean) If Slack is connected, it will send notifications to the requesting user. Cannot be used in conjunction with 'slack_channel_id'
 - `slack_channel_id` (String) If Slack is connected, it will send notifications to this slack channel. Must be the ID of the channel and not the name. See below on how to find this ID.
 - `slack_workspace_id` (String) The Slack Workspace ID. In Slack URLs, such as `https://app.slack.com/client/TXXXXXXX/CXXXXXXX` it is the string beginning with T.

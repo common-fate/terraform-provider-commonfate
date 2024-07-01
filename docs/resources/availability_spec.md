@@ -24,6 +24,7 @@ A specifier to make resources available for selection under a particular Access 
 ### Optional
 
 - `identity_domain` (Attributes) The identity domain associated with the integration (see [below for nested schema](#nestedatt--identity_domain))
+- `role_priority` (Number) The priority that governs which role will be suggested to use in the web app when requesting access. The availability spec with the highest priority will have its role suggested first in the UI
 
 ### Read-Only
 

@@ -22,6 +22,7 @@ type EntraGroupAvailabilities struct {
 	WorkflowID           types.String `tfsdk:"workflow_id"`
 	EntraGroupSelectorID types.String `tfsdk:"entra_group_selector_id"`
 	EntraTenantID        types.String `tfsdk:"tenant_id"`
+	RolePriority         types.Int64  `tfsdk:"role_priority"`
 }
 
 type EntraGroupAvailabilitiesResource struct {
@@ -85,6 +86,10 @@ func (r *EntraGroupAvailabilitiesResource) Schema(ctx context.Context, req resou
 				MarkdownDescription: "The Entra Tenant ID",
 				Required:            true,
 			},
+			"role_priority": schema.Int64Attribute{
+				MarkdownDescription: "The priority that governs which role will be suggested to use in the web app when requesting access. The availability spec with the highest priority will have its role suggested first in the UI",
+				Optional:            true,
+			},
 		},
 		MarkdownDescription: `A specifier to make Entra Groups available for selection under a particular Access Workflow`,
 	}
@@ -128,6 +133,10 @@ func (r *EntraGroupAvailabilitiesResource) Create(ctx context.Context, req resou
 			Type: "Entra::Tenant",
 			Id:   data.EntraTenantID.ValueString(),
 		},
+	}
+	if !data.RolePriority.IsNull() {
+		priority := data.RolePriority.ValueInt64()
+		input.RolePriority = &priority
 	}
 
 	res, err := r.client.AvailabilitySpec().CreateAvailabilitySpec(ctx, connect.NewRequest(input))
@@ -228,6 +237,10 @@ func (r *EntraGroupAvailabilitiesResource) Update(ctx context.Context, req resou
 			Type: "Entra::Tenant",
 			Id:   data.EntraTenantID.ValueString(),
 		},
+	}
+	if !data.RolePriority.IsNull() {
+		priority := data.RolePriority.ValueInt64()
+		input.RolePriority = &priority
 	}
 
 	res, err := r.client.AvailabilitySpec().UpdateAvailabilitySpec(ctx, connect.NewRequest(&configv1alpha1.UpdateAvailabilitySpecRequest{

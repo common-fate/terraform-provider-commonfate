@@ -23,6 +23,7 @@ type GCPBigQueryTableAvailabilities struct {
 	Role                types.String `tfsdk:"gcp_role"`
 	TableSelectorID     types.String `tfsdk:"gcp_bigquery_table_selector_id"`
 	WorkspaceCustomerID types.String `tfsdk:"google_workspace_customer_id"`
+	RolePriority        types.Int64  `tfsdk:"role_priority"`
 }
 
 type GCPBigQueryTableAvailabilitiesResource struct {
@@ -94,6 +95,10 @@ func (r *GCPBigQueryTableAvailabilitiesResource) Schema(ctx context.Context, req
 				MarkdownDescription: "The ID of the Google Workspace customer associated with the projects",
 				Required:            true,
 			},
+			"role_priority": schema.Int64Attribute{
+				MarkdownDescription: "The priority that governs which role will be suggested to use in the web app when requesting access. The availability spec with the highest priority will have its role suggested first in the UI",
+				Optional:            true,
+			},
 		},
 		MarkdownDescription: `A specifier to make GCP BigQuery tables available for selection under a particular Access Workflow`,
 	}
@@ -137,6 +142,10 @@ func (r *GCPBigQueryTableAvailabilitiesResource) Create(ctx context.Context, req
 			Type: "Google::Workspace::Customer",
 			Id:   data.WorkspaceCustomerID.ValueString(),
 		},
+	}
+	if !data.RolePriority.IsNull() {
+		priority := data.RolePriority.ValueInt64()
+		input.RolePriority = &priority
 	}
 
 	res, err := r.client.AvailabilitySpec().CreateAvailabilitySpec(ctx, connect.NewRequest(input))
@@ -238,6 +247,10 @@ func (r *GCPBigQueryTableAvailabilitiesResource) Update(ctx context.Context, req
 			Type: "Google::Workspace::Customer",
 			Id:   data.WorkspaceCustomerID.ValueString(),
 		},
+	}
+	if !data.RolePriority.IsNull() {
+		priority := data.RolePriority.ValueInt64()
+		input.RolePriority = &priority
 	}
 
 	res, err := r.client.AvailabilitySpec().UpdateAvailabilitySpec(ctx, connect.NewRequest(&configv1alpha1.UpdateAvailabilitySpecRequest{
