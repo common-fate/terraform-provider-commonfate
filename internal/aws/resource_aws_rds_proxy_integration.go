@@ -18,13 +18,17 @@ import (
 )
 
 type AWSRDSProxyIntegrationModel struct {
-	Id                    types.String `tfsdk:"id"`
-	Name                  types.String `tfsdk:"name"`
-	IDCInstanceARN        types.String `tfsdk:"idc_instance_arn"`
-	IDCRegion             types.String `tfsdk:"idc_region"`
-	IDCProvisionerRoleARN types.String `tfsdk:"idc_provisioner_role_arn"`
-	ProxyRegion           types.String `tfsdk:"proxy_region"`
-	ProxyAccount          types.String `tfsdk:"proxy_account"`
+	Id                      types.String `tfsdk:"id"`
+	Name                    types.String `tfsdk:"name"`
+	IDCInstanceARN          types.String `tfsdk:"idc_instance_arn"`
+	IDCRegion               types.String `tfsdk:"idc_region"`
+	IDCProvisionerRoleARN   types.String `tfsdk:"idc_provisioner_role_arn"`
+	Region                  types.String `tfsdk:"region"`
+	Account                 types.String `tfsdk:"account"`
+	ECSClusterName          types.String `tfsdk:"ecs_cluster_name"`
+	ECSTaskDefinitionFamily types.String `tfsdk:"ecs_task_definition_family"`
+	ECSContainerName        types.String `tfsdk:"ecs_container_name"`
+	ECSClusterReaderRoleARN types.String `tfsdk:"ecs_cluster_reader_role_arn"`
 }
 
 type AWSRDSProxyIntegrationResource struct {
@@ -92,12 +96,28 @@ func (r *AWSRDSProxyIntegrationResource) Schema(ctx context.Context, req resourc
 				MarkdownDescription: "The ARN of the role to assume in order to provision access in AWS RDS Proxy",
 				Required:            true,
 			},
-			"proxy_region": schema.StringAttribute{
+			"region": schema.StringAttribute{
 				MarkdownDescription: "The AWS region that the Proxy is hosted in",
 				Required:            true,
 			},
-			"proxy_account": schema.StringAttribute{
+			"account": schema.StringAttribute{
 				MarkdownDescription: "The AWS Account that the Proxy is hosted in",
+				Required:            true,
+			},
+			"ecs_cluster_name": schema.StringAttribute{
+				MarkdownDescription: "When deployed to ECS, the name of the cluster where the proxy is deployed",
+				Required:            true,
+			},
+			"ecs_task_definition_family": schema.StringAttribute{
+				MarkdownDescription: "When deployed to ECS, the name of the proxy task definition",
+				Required:            true,
+			},
+			"ecs_container_name": schema.StringAttribute{
+				MarkdownDescription: "When deployed to ECS, the name of the container for the proxy",
+				Required:            true,
+			},
+			"ecs_cluster_reader_role_arn": schema.StringAttribute{
+				MarkdownDescription: "When deployed to ECS, the ARN of the role which can be used to read the task ID and runtime ID of the proxy when provisioning access",
 				Required:            true,
 			},
 		},
@@ -134,11 +154,15 @@ func (r *AWSRDSProxyIntegrationResource) Create(ctx context.Context, req resourc
 		Config: &integrationv1alpha1.Config{
 			Config: &integrationv1alpha1.Config_AwsRdsProxy{
 				AwsRdsProxy: &integrationv1alpha1.AWSRDSProxy{
-					IdcInstanceArn:        data.IDCInstanceARN.ValueString(),
-					IdcRegion:             data.IDCRegion.ValueString(),
-					IdcProvisionerRoleArn: data.IDCProvisionerRoleARN.ValueString(),
-					ProxyAwsRegion:        data.ProxyRegion.ValueString(),
-					ProxyAwsAccount:       data.ProxyAccount.ValueString(),
+					IdcInstanceArn:          data.IDCInstanceARN.ValueString(),
+					IdcRegion:               data.IDCRegion.ValueString(),
+					IdcProvisionerRoleArn:   data.IDCProvisionerRoleARN.ValueString(),
+					Region:                  data.Region.ValueString(),
+					Account:                 data.Account.ValueString(),
+					EcsClusterName:          data.ECSClusterName.ValueString(),
+					EcsTaskDefinitionFamily: data.ECSTaskDefinitionFamily.ValueString(),
+					EcsContainerName:        data.ECSContainerName.ValueString(),
+					EcsClusterReaderRoleArn: data.ECSClusterReaderRoleARN.ValueString(),
 				},
 			},
 		},
@@ -222,11 +246,15 @@ func (r *AWSRDSProxyIntegrationResource) Update(ctx context.Context, req resourc
 			Config: &integrationv1alpha1.Config{
 				Config: &integrationv1alpha1.Config_AwsRdsProxy{
 					AwsRdsProxy: &integrationv1alpha1.AWSRDSProxy{
-						IdcInstanceArn:        data.IDCInstanceARN.ValueString(),
-						IdcRegion:             data.IDCRegion.ValueString(),
-						IdcProvisionerRoleArn: data.IDCProvisionerRoleARN.ValueString(),
-						ProxyAwsRegion:        data.ProxyRegion.ValueString(),
-						ProxyAwsAccount:       data.ProxyAccount.ValueString(),
+						IdcInstanceArn:          data.IDCInstanceARN.ValueString(),
+						IdcRegion:               data.IDCRegion.ValueString(),
+						IdcProvisionerRoleArn:   data.IDCProvisionerRoleARN.ValueString(),
+						Region:                  data.Region.ValueString(),
+						Account:                 data.Account.ValueString(),
+						EcsClusterName:          data.ECSClusterName.ValueString(),
+						EcsTaskDefinitionFamily: data.ECSTaskDefinitionFamily.ValueString(),
+						EcsContainerName:        data.ECSContainerName.ValueString(),
+						EcsClusterReaderRoleArn: data.ECSClusterReaderRoleARN.ValueString(),
 					},
 				},
 			},
