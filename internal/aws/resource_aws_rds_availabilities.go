@@ -17,31 +17,32 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-type AWSRDSAvailabilities struct {
-	ID                 types.String `tfsdk:"id"`
-	WorkflowID         types.String `tfsdk:"workflow_id"`
-	AWSRDSSelectorID   types.String `tfsdk:"aws_rds_selector_id"`
-	AWSIdentityStoreID types.String `tfsdk:"aws_identity_store_id"`
-	RolePriority       types.Int64  `tfsdk:"role_priority"`
+type AWSRDSDatabaseAvailabilities struct {
+	ID                       types.String `tfsdk:"id"`
+	WorkflowID               types.String `tfsdk:"workflow_id"`
+	AWSRDSDatabaseSelectorID types.String `tfsdk:"aws_rds_database_selector_id"`
+	AWSRDSDatabaseUserID     types.String `tfsdk:"aws_rds_database_user_id"`
+	AWSIdentityStoreID       types.String `tfsdk:"aws_identity_store_id"`
+	RolePriority             types.Int64  `tfsdk:"role_priority"`
 }
 
-type AWSRDSAvailabilitiesResource struct {
+type AWSRDSDatabaseAvailabilitiesResource struct {
 	client *configsvc.Client
 }
 
 var (
-	_ resource.Resource                = &AWSRDSAvailabilitiesResource{}
-	_ resource.ResourceWithConfigure   = &AWSRDSAvailabilitiesResource{}
-	_ resource.ResourceWithImportState = &AWSRDSAvailabilitiesResource{}
+	_ resource.Resource                = &AWSRDSDatabaseAvailabilitiesResource{}
+	_ resource.ResourceWithConfigure   = &AWSRDSDatabaseAvailabilitiesResource{}
+	_ resource.ResourceWithImportState = &AWSRDSDatabaseAvailabilitiesResource{}
 )
 
 // Metadata returns the data source type name.
-func (r *AWSRDSAvailabilitiesResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_aws_rds_availabilities"
+func (r *AWSRDSDatabaseAvailabilitiesResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_aws_rds_database_availabilities"
 }
 
 // Configure adds the provider configured client to the data source.
-func (r *AWSRDSAvailabilitiesResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *AWSRDSDatabaseAvailabilitiesResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -62,7 +63,7 @@ func (r *AWSRDSAvailabilitiesResource) Configure(_ context.Context, req resource
 
 // GetSchema defines the schema for the data source.
 // schema is based off the governance api
-func (r *AWSRDSAvailabilitiesResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *AWSRDSDatabaseAvailabilitiesResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 
 	resp.Schema = schema.Schema{
 		Description: "A specifier to make AWS RDS databases available for selection under a particular Access Workflow",
@@ -78,7 +79,7 @@ func (r *AWSRDSAvailabilitiesResource) Schema(ctx context.Context, req resource.
 				MarkdownDescription: "The Access Workflow ID",
 				Required:            true,
 			},
-			"aws_rds_selector_id": schema.StringAttribute{
+			"aws_rds_database_selector_id": schema.StringAttribute{
 				MarkdownDescription: "The target to make available. Should be a Selector entity.",
 				Required:            true,
 			},
@@ -95,7 +96,7 @@ func (r *AWSRDSAvailabilitiesResource) Schema(ctx context.Context, req resource.
 	}
 }
 
-func (r *AWSRDSAvailabilitiesResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+func (r *AWSRDSDatabaseAvailabilitiesResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 
 	if r.client == nil {
 		resp.Diagnostics.AddError(
@@ -105,7 +106,7 @@ func (r *AWSRDSAvailabilitiesResource) Create(ctx context.Context, req resource.
 
 		return
 	}
-	var data *AWSRDSAvailabilities
+	var data *AWSRDSDatabaseAvailabilities
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -121,13 +122,13 @@ func (r *AWSRDSAvailabilitiesResource) Create(ctx context.Context, req resource.
 
 	input := &configv1alpha1.CreateAvailabilitySpecRequest{
 		Role: &entityv1alpha1.EID{
-			Type: "CF::Database::Role",
-			Id:   "ReadWrite",
+			Type: "AWS::RDS::DatabaseUser",
+			Id:   data.AWSRDSDatabaseUserID.ValueString(),
 		},
 		WorkflowId: data.WorkflowID.ValueString(),
 		Target: &entityv1alpha1.EID{
 			Type: "Access::Selector",
-			Id:   data.AWSRDSSelectorID.ValueString(),
+			Id:   data.AWSRDSDatabaseSelectorID.ValueString(),
 		},
 		IdentityDomain: &entityv1alpha1.EID{
 			Type: "AWS::IDC::IdentityStore",
@@ -161,7 +162,7 @@ func (r *AWSRDSAvailabilitiesResource) Create(ctx context.Context, req resource.
 }
 
 // Read refreshes the Terraform state with the latest data.
-func (r *AWSRDSAvailabilitiesResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+func (r *AWSRDSDatabaseAvailabilitiesResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	if r.client == nil {
 		resp.Diagnostics.AddError(
 			"Unconfigured HTTP Client",
@@ -170,7 +171,7 @@ func (r *AWSRDSAvailabilitiesResource) Read(ctx context.Context, req resource.Re
 
 		return
 	}
-	var state AWSRDSAvailabilities
+	var state AWSRDSDatabaseAvailabilities
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
@@ -193,7 +194,8 @@ func (r *AWSRDSAvailabilitiesResource) Read(ctx context.Context, req resource.Re
 
 	state.ID = types.StringValue(res.Msg.AvailabilitySpec.Id)
 	state.WorkflowID = types.StringValue(res.Msg.AvailabilitySpec.WorkflowId)
-	state.AWSRDSSelectorID = types.StringValue(res.Msg.AvailabilitySpec.Target.Id)
+	state.AWSRDSDatabaseSelectorID = types.StringValue(res.Msg.AvailabilitySpec.Target.Id)
+	state.AWSRDSDatabaseUserID = types.StringValue(res.Msg.AvailabilitySpec.Role.Id)
 
 	if res.Msg.AvailabilitySpec.IdentityDomain != nil {
 		state.AWSIdentityStoreID = types.StringValue(res.Msg.AvailabilitySpec.IdentityDomain.Id)
@@ -202,14 +204,14 @@ func (r *AWSRDSAvailabilitiesResource) Read(ctx context.Context, req resource.Re
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }
 
-func (r *AWSRDSAvailabilitiesResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *AWSRDSDatabaseAvailabilitiesResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	if r.client == nil {
 		resp.Diagnostics.AddError(
 			"Unconfigured HTTP Client",
 			"Expected configured HTTP client. Please report this issue to the provider developers.",
 		)
 	}
-	var data AWSRDSAvailabilities
+	var data AWSRDSDatabaseAvailabilities
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -225,13 +227,13 @@ func (r *AWSRDSAvailabilitiesResource) Update(ctx context.Context, req resource.
 	input := &configv1alpha1.AvailabilitySpec{
 		Id: data.ID.ValueString(),
 		Role: &entityv1alpha1.EID{
-			Type: "CF::Database::Role",
-			Id:   "ReadWrite",
+			Type: "AWS::RDS::DatabaseUser",
+			Id:   data.AWSRDSDatabaseUserID.ValueString(),
 		},
 		WorkflowId: data.WorkflowID.ValueString(),
 		Target: &entityv1alpha1.EID{
 			Type: "Access::Selector",
-			Id:   data.AWSRDSSelectorID.ValueString(),
+			Id:   data.AWSRDSDatabaseSelectorID.ValueString(),
 		},
 		IdentityDomain: &entityv1alpha1.EID{
 			Type: "AWS::IDC::IdentityStore",
@@ -264,14 +266,14 @@ func (r *AWSRDSAvailabilitiesResource) Update(ctx context.Context, req resource.
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *AWSRDSAvailabilitiesResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+func (r *AWSRDSDatabaseAvailabilitiesResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	if r.client == nil {
 		resp.Diagnostics.AddError(
 			"Unconfigured HTTP Client",
 			"Expected configured HTTP client. Please report this issue to the provider developers.",
 		)
 	}
-	var data *AWSRDSAvailabilities
+	var data *AWSRDSDatabaseAvailabilities
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -300,7 +302,7 @@ func (r *AWSRDSAvailabilitiesResource) Delete(ctx context.Context, req resource.
 	}
 }
 
-func (r *AWSRDSAvailabilitiesResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *AWSRDSDatabaseAvailabilitiesResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	// Retrieve import ID and save to id attribute
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
