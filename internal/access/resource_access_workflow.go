@@ -7,8 +7,8 @@ import (
 
 	"connectrpc.com/connect"
 
-	accessv1alpha1 "github.com/common-fate/sdk/gen/commonfate/access/v1alpha1"
 	config_client "github.com/common-fate/sdk/config"
+	accessv1alpha1 "github.com/common-fate/sdk/gen/commonfate/access/v1alpha1"
 	configv1alpha1 "github.com/common-fate/sdk/gen/commonfate/control/config/v1alpha1"
 	configv1alpha1connect "github.com/common-fate/sdk/gen/commonfate/control/config/v1alpha1/configv1alpha1connect"
 	accessworkflow_handler "github.com/common-fate/sdk/service/control/config/accessworkflow"
@@ -131,8 +131,8 @@ func (r *AccessWorkflowResource) Schema(ctx context.Context, req resource.Schema
 
 				Attributes: map[string]schema.Attribute{
 					"maximum_number_of_extensions": schema.Int64Attribute{
-						MarkdownDescription: "The maximum number of allowed extensions (set to 0 to disable extensions). If not set, it defaults to 1.",
-						Default:             int64default.StaticInt64(1),
+						MarkdownDescription: "The maximum number of allowed extensions (set to 0 to disable extensions). If not set, it defaults to 0.",
+						Default:             int64default.StaticInt64(0),
 						Computed:            true,
 						Optional:            true,
 					},
