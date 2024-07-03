@@ -210,7 +210,7 @@ func (r *AccessWorkflowResource) Create(ctx context.Context, req resource.Create
 
 		extendAccess := &accessv1alpha1.Extension{}
 
-		// Default is already set to 1 if not set
+		// Default is already set to 0 if not set
 		extendAccess.MaximumNumberOfExtensions = int32(data.Extension.MaxExtensions.ValueInt64())
 
 		// Set a default to be the access duration
@@ -385,7 +385,7 @@ func (r *AccessWorkflowResource) Update(ctx context.Context, req resource.Update
 
 		extendAccess := &accessv1alpha1.Extension{}
 
-		// Default is already set to 1 if not set
+		// Default is already set to 0 if not set
 		extendAccess.MaximumNumberOfExtensions = int32(data.Extension.MaxExtensions.ValueInt64())
 
 		// Set a default to be the access duration
