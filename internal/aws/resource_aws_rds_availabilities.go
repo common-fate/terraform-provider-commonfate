@@ -83,6 +83,10 @@ func (r *AWSRDSDatabaseAvailabilitiesResource) Schema(ctx context.Context, req r
 				MarkdownDescription: "The target to make available. Should be a Selector entity.",
 				Required:            true,
 			},
+			"aws_rds_database_user_id": schema.StringAttribute{
+				MarkdownDescription: "The role to make available. Should be an AWS::RDS::DatabaseUser id.",
+				Required:            true,
+			},
 			"aws_identity_store_id": schema.StringAttribute{
 				MarkdownDescription: "The IAM Identity Center identity store ID",
 				Required:            true,

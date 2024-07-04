@@ -38,8 +38,6 @@ github.com/common-fate/clio v1.2.3 h1:hHwUYZjn66qGYDpgANl0EB/92hyi/Jsnd07qB09rvn
 github.com/common-fate/clio v1.2.3/go.mod h1:NkozaS15SA+6Y9zb+82eIj1i41aWShorTqA01GKQ7A8=
 github.com/common-fate/grab v1.1.0 h1:HLZPtltdHScYu6qtt/UC78rvwylCTWuyoZoiQXV4QHc=
 github.com/common-fate/grab v1.1.0/go.mod h1:L0qa03RwqOMZz9PrrWw9eI145i5FQRf+iLtNSJypQvY=
-github.com/common-fate/sdk v1.41.2-0.20240703233310-3b85aa814209 h1:IuxiM9L5/f65OIk/m9wlrruCaAkX4rHcSFTFEZ9Yiuw=
-github.com/common-fate/sdk v1.41.2-0.20240703233310-3b85aa814209/go.mod h1:Y7yRweNikBpi/LRYPRx+wl/mlOx1VQ9xapglkGKEdcM=
 github.com/common-fate/sdk v1.41.2-0.20240704012402-849c2a95df2f h1:jSRD4iA3zEzkzz1+eBSnbMwfgBSjq7s9I9ocnFfh6E4=
 github.com/common-fate/sdk v1.41.2-0.20240704012402-849c2a95df2f/go.mod h1:Y7yRweNikBpi/LRYPRx+wl/mlOx1VQ9xapglkGKEdcM=
 github.com/cyphar/filepath-securejoin v0.2.4 h1:Ugdm7cg7i6ZK6x3xDF1oEu1nfkyfH53EtKeQYTC3kyg=
