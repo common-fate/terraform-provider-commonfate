@@ -19,6 +19,7 @@ A specifier to make AWS rds databases available for selection under a particular
 
 - `aws_identity_store_id` (String) The IAM Identity Center identity store ID
 - `aws_rds_database_selector_id` (String) The target to make available. Should be a Selector entity.
+- `aws_rds_database_user_id` (String) The role to make available. Should be an AWS::RDS::DatabaseUser id.
 - `workflow_id` (String) The Access Workflow ID
 
 ### Optional
