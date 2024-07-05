@@ -36,7 +36,7 @@ resource "commonfate-access_workflow" "workflow-demo" {
 
 - `activation_expiry` (Number) The amount of time after access is activated before the request will be expired
 - `default_duration_seconds` (Number) The default duration of the access workflow
-- `extension` (Attributes) Configuration for extending access (see [below for nested schema](#nestedatt--extension))
+- `extension_conditions` (Attributes) Configuration for extending access (see [below for nested schema](#nestedatt--extension_conditions))
 - `name` (String) A unique name for the workflow so you know how to identify it.
 - `priority` (Number) The priority that governs whether the policy will be used. If a different policy with a higher priority and the same role exists that one will be used over another.
 - `validation` (Object) Validation requirements to be set with this workflow (see [below for nested schema](#nestedatt--validation))
@@ -45,8 +45,8 @@ resource "commonfate-access_workflow" "workflow-demo" {
 
 - `id` (String) The internal approval workflow ID
 
-<a id="nestedatt--extension"></a>
-### Nested Schema for `extension`
+<a id="nestedatt--extension_conditions"></a>
+### Nested Schema for `extension_conditions`
 
 Optional:
 
