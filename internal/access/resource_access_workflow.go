@@ -8,6 +8,7 @@ import (
 	"connectrpc.com/connect"
 
 	config_client "github.com/common-fate/sdk/config"
+	accessv1alpha1 "github.com/common-fate/sdk/gen/commonfate/access/v1alpha1"
 	configv1alpha1 "github.com/common-fate/sdk/gen/commonfate/control/config/v1alpha1"
 	configv1alpha1connect "github.com/common-fate/sdk/gen/commonfate/control/config/v1alpha1/configv1alpha1connect"
 	accessworkflow_handler "github.com/common-fate/sdk/service/control/config/accessworkflow"
@@ -15,6 +16,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -25,15 +27,21 @@ type Validations struct {
 	HasReason types.Bool `tfsdk:"has_reason"`
 }
 
+type ExtensionConditions struct {
+	MaxExtensions     types.Int64 `tfsdk:"maximum_number_of_extensions"`
+	ExtensionDuration types.Int64 `tfsdk:"extension_duration_seconds"`
+}
+
 type AccessWorkflowModel struct {
-	ID               types.String `tfsdk:"id"`
-	Name             types.String `tfsdk:"name"`
-	AccessDuration   types.Int64  `tfsdk:"access_duration_seconds"`
-	TryExtendAfter   types.Int64  `tfsdk:"try_extend_after_seconds"`
-	Priority         types.Int64  `tfsdk:"priority"`
-	ActivationExpiry types.Int64  `tfsdk:"activation_expiry"`
-	DefaultDuration  types.Int64  `tfsdk:"default_duration_seconds"`
-	Validation       *Validations `tfsdk:"validation"`
+	ID                  types.String         `tfsdk:"id"`
+	Name                types.String         `tfsdk:"name"`
+	AccessDuration      types.Int64          `tfsdk:"access_duration_seconds"`
+	TryExtendAfter      types.Int64          `tfsdk:"try_extend_after_seconds"`
+	Priority            types.Int64          `tfsdk:"priority"`
+	ActivationExpiry    types.Int64          `tfsdk:"activation_expiry"`
+	DefaultDuration     types.Int64          `tfsdk:"default_duration_seconds"`
+	Validation          *Validations         `tfsdk:"validation"`
+	ExtensionConditions *ExtensionConditions `tfsdk:"extension_conditions"`
 }
 
 // AccessRuleResource is the data source implementation.
@@ -95,7 +103,7 @@ func (r *AccessWorkflowResource) Schema(ctx context.Context, req resource.Schema
 				Required:            true,
 			},
 			"try_extend_after_seconds": schema.Int64Attribute{
-				MarkdownDescription: "The amount of time after access is activated that extending access can be attempted. As a starting point we recommend setting this to half of the `access_duration_seconds`.",
+				MarkdownDescription: "(Deprecated) The amount of time after access is activated that extending access can be attempted. As a starting point we recommend setting this to half of the `access_duration_seconds`.",
 				Required:            true,
 			},
 			"priority": schema.Int64Attribute{
@@ -115,6 +123,23 @@ func (r *AccessWorkflowResource) Schema(ctx context.Context, req resource.Schema
 				Optional:            true,
 				AttributeTypes: map[string]attr.Type{
 					"has_reason": types.BoolType,
+				},
+			},
+			"extension_conditions": schema.SingleNestedAttribute{
+				MarkdownDescription: "Configuration for extending access",
+				Optional:            true,
+
+				Attributes: map[string]schema.Attribute{
+					"maximum_number_of_extensions": schema.Int64Attribute{
+						MarkdownDescription: "The maximum number of allowed extensions (set to 0 to disable extensions). If not set, it defaults to 0.",
+						Default:             int64default.StaticInt64(0),
+						Computed:            true,
+						Optional:            true,
+					},
+					"extension_duration_seconds": schema.Int64Attribute{
+						MarkdownDescription: "Specifies the duration for each extension. Defaults to the value of access_duration_seconds if not provided.",
+						Optional:            true,
+					},
 				},
 			},
 		},
@@ -180,6 +205,23 @@ func (r *AccessWorkflowResource) Create(ctx context.Context, req resource.Create
 		}
 		createReq.DefaultDuration = durationpb.New(defaultDuration)
 	}
+
+	// Set the defaults for extension
+	extensionDuration := accessDuration
+	maxExtensions := 0
+	if data.ExtensionConditions != nil {
+
+		maxExtensions = int(data.ExtensionConditions.MaxExtensions.ValueInt64())
+
+		if !data.ExtensionConditions.ExtensionDuration.IsNull() {
+			extensionDuration = time.Second * time.Duration(data.ExtensionConditions.ExtensionDuration.ValueInt64())
+		}
+	}
+	extendAccess := &accessv1alpha1.ExtensionConditions{
+		ExtensionDurationSeconds:  durationpb.New(extensionDuration),
+		MaximumNumberOfExtensions: int32(maxExtensions),
+	}
+	createReq.ExtensionConditions = extendAccess
 
 	res, err := r.client.CreateAccessWorkflow(ctx, connect.NewRequest(createReq))
 
@@ -260,6 +302,13 @@ func (r *AccessWorkflowResource) Read(ctx context.Context, req resource.ReadRequ
 		}
 	}
 
+	if res.Msg.Workflow.ExtensionConditions != nil {
+		state.ExtensionConditions = &ExtensionConditions{
+			ExtensionDuration: types.Int64Value(res.Msg.Workflow.ExtensionConditions.ExtensionDurationSeconds.Seconds),
+			MaxExtensions:     types.Int64Value(int64(res.Msg.Workflow.ExtensionConditions.MaximumNumberOfExtensions)),
+		}
+	}
+
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }
 
@@ -323,6 +372,23 @@ func (r *AccessWorkflowResource) Update(ctx context.Context, req resource.Update
 		updateReq.Workflow.DefaultDuration = durationpb.New(defaultDuration)
 	}
 
+	// Set the defaults for extension
+	extensionDuration := accessDuration
+	maxExtensions := 0
+	if data.ExtensionConditions != nil {
+
+		maxExtensions = int(data.ExtensionConditions.MaxExtensions.ValueInt64())
+
+		if !data.ExtensionConditions.ExtensionDuration.IsNull() {
+			extensionDuration = time.Second * time.Duration(data.ExtensionConditions.ExtensionDuration.ValueInt64())
+		}
+	}
+	extendAccess := &accessv1alpha1.ExtensionConditions{
+		ExtensionDurationSeconds:  durationpb.New(extensionDuration),
+		MaximumNumberOfExtensions: int32(maxExtensions),
+	}
+	updateReq.Workflow.ExtensionConditions = extendAccess
+
 	res, err := r.client.UpdateAccessWorkflow(ctx, connect.NewRequest(updateReq))
 
 	if err != nil {
@@ -354,7 +420,14 @@ func (r *AccessWorkflowResource) Update(ctx context.Context, req resource.Update
 		data.DefaultDuration = types.Int64Null()
 	} else {
 		data.DefaultDuration = types.Int64Value(res.Msg.Workflow.DefaultDuration.Seconds)
+	}
 
+	if res.Msg.Workflow.ExtensionConditions == nil {
+		data.ExtensionConditions.ExtensionDuration = types.Int64Null()
+	} else {
+		if res.Msg.Workflow.ExtensionConditions.ExtensionDurationSeconds == nil {
+			data.ExtensionConditions.ExtensionDuration = types.Int64Null()
+		}
 	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
