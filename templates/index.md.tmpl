@@ -51,7 +51,6 @@ resource "commonfate_gcp_integration" "demo" {
 resource "commonfate_access_workflow" "demo" {
   name="demo"
   access_duration_seconds="7200"
-  try_extend_after_seconds="3500"
   priority="100"
   default_duration_seconds="3600"
 }
