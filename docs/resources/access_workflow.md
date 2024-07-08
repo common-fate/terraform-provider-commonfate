@@ -17,7 +17,6 @@ Access Workflows are used to describe how long access should be applied. Created
 resource "commonfate-access_workflow" "workflow-demo" {
   name                     = "demo"
   access_duration_seconds  = 60 * 60
-  try_extend_after_seconds = 10 * 60
   priority                 = "100"
   default_duration_seconds = 30 * 60
 }
@@ -30,7 +29,6 @@ resource "commonfate-access_workflow" "workflow-demo" {
 ### Required
 
 - `access_duration_seconds` (Number) The maximum allowable duration for the access workflow
-- `try_extend_after_seconds` (Number) (Deprecated) The amount of time after access is activated that extending access can be attempted. As a starting point we recommend setting this to half of the `access_duration_seconds`.
 
 ### Optional
 
@@ -39,6 +37,7 @@ resource "commonfate-access_workflow" "workflow-demo" {
 - `extension_conditions` (Attributes) Configuration for extending access (see [below for nested schema](#nestedatt--extension_conditions))
 - `name` (String) A unique name for the workflow so you know how to identify it.
 - `priority` (Number) The priority that governs whether the policy will be used. If a different policy with a higher priority and the same role exists that one will be used over another.
+- `try_extend_after_seconds` (Number) (Deprecated) The amount of time after access is activated that extending access can be attempted. As a starting point we recommend setting this to half of the `access_duration_seconds`.
 - `validation` (Object) Validation requirements to be set with this workflow (see [below for nested schema](#nestedatt--validation))
 
 ### Read-Only

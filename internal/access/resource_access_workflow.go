@@ -104,7 +104,7 @@ func (r *AccessWorkflowResource) Schema(ctx context.Context, req resource.Schema
 			},
 			"try_extend_after_seconds": schema.Int64Attribute{
 				MarkdownDescription: "(Deprecated) The amount of time after access is activated that extending access can be attempted. As a starting point we recommend setting this to half of the `access_duration_seconds`.",
-				Required:            true,
+				Optional:            true,
 			},
 			"priority": schema.Int64Attribute{
 				MarkdownDescription: "The priority that governs whether the policy will be used. If a different policy with a higher priority and the same role exists that one will be used over another.",
