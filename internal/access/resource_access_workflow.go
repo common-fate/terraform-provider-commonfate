@@ -106,6 +106,8 @@ func (r *AccessWorkflowResource) Schema(ctx context.Context, req resource.Schema
 				MarkdownDescription: "The amount of time after access is activated that extending access can be attempted. As a starting point we recommend setting this to half of the `access_duration_seconds`.",
 				Optional:            true,
 				DeprecationMessage:  "This field is no longer supported. Use extension_conditions to configure access workflow extensions",
+				Default:             int64default.StaticInt64(0),
+				Computed:            true,
 			},
 			"priority": schema.Int64Attribute{
 				MarkdownDescription: "The priority that governs whether the policy will be used. If a different policy with a higher priority and the same role exists that one will be used over another.",
