@@ -106,6 +106,8 @@ func (r *AccessWorkflowResource) Schema(ctx context.Context, req resource.Schema
 				MarkdownDescription: "The amount of time after access is activated that extending access can be attempted. As a starting point we recommend setting this to half of the `access_duration_seconds`.",
 				Optional:            true,
 				DeprecationMessage:  "This field is no longer supported. Use extension_conditions to configure access workflow extensions",
+				Default:             int64default.StaticInt64(0),
+				Computed:            true,
 			},
 			"priority": schema.Int64Attribute{
 				MarkdownDescription: "The priority that governs whether the policy will be used. If a different policy with a higher priority and the same role exists that one will be used over another.",
@@ -175,7 +177,7 @@ func (r *AccessWorkflowResource) Create(ctx context.Context, req resource.Create
 	accessDuration := time.Second * time.Duration(data.AccessDuration.ValueInt64())
 
 	var tryExtendAfter time.Duration
-	if data.TryExtendAfter.IsNull() {
+	if !data.TryExtendAfter.IsNull() {
 		tryExtendAfter = time.Second * time.Duration(data.TryExtendAfter.ValueInt64())
 	}
 
@@ -289,7 +291,10 @@ func (r *AccessWorkflowResource) Read(ctx context.Context, req resource.ReadRequ
 		Name:           types.StringValue(res.Msg.Workflow.Name),
 		AccessDuration: types.Int64Value(res.Msg.Workflow.AccessDuration.Seconds),
 		Priority:       types.Int64Value(int64(res.Msg.Workflow.Priority)),
-		TryExtendAfter: types.Int64Value(res.Msg.Workflow.TryExtendAfter.Seconds),
+	}
+
+	if res.Msg.Workflow.TryExtendAfter != nil {
+		state.TryExtendAfter = types.Int64Value(res.Msg.Workflow.TryExtendAfter.Seconds)
 	}
 
 	if res.Msg.Workflow.DefaultDuration != nil {
@@ -339,7 +344,7 @@ func (r *AccessWorkflowResource) Update(ctx context.Context, req resource.Update
 
 	accessDuration := time.Second * time.Duration(data.AccessDuration.ValueInt64())
 	var tryExtendAfter time.Duration
-	if data.TryExtendAfter.IsNull() {
+	if !data.TryExtendAfter.IsNull() {
 		tryExtendAfter = time.Second * time.Duration(data.TryExtendAfter.ValueInt64())
 	}
 
