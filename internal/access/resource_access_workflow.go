@@ -175,11 +175,7 @@ func (r *AccessWorkflowResource) Create(ctx context.Context, req resource.Create
 	}
 
 	accessDuration := time.Second * time.Duration(data.AccessDuration.ValueInt64())
-
-	var tryExtendAfter time.Duration
-	if !data.TryExtendAfter.IsNull() {
-		tryExtendAfter = time.Second * time.Duration(data.TryExtendAfter.ValueInt64())
-	}
+	tryExtendAfter := time.Second * time.Duration(data.TryExtendAfter.ValueInt64())
 
 	createReq := &configv1alpha1.CreateAccessWorkflowRequest{
 		Name:           data.Name.ValueString(),
@@ -291,10 +287,7 @@ func (r *AccessWorkflowResource) Read(ctx context.Context, req resource.ReadRequ
 		Name:           types.StringValue(res.Msg.Workflow.Name),
 		AccessDuration: types.Int64Value(res.Msg.Workflow.AccessDuration.Seconds),
 		Priority:       types.Int64Value(int64(res.Msg.Workflow.Priority)),
-	}
-
-	if res.Msg.Workflow.TryExtendAfter != nil {
-		state.TryExtendAfter = types.Int64Value(res.Msg.Workflow.TryExtendAfter.Seconds)
+		TryExtendAfter: types.Int64Value(res.Msg.Workflow.TryExtendAfter.Seconds),
 	}
 
 	if res.Msg.Workflow.DefaultDuration != nil {
@@ -343,10 +336,7 @@ func (r *AccessWorkflowResource) Update(ctx context.Context, req resource.Update
 	}
 
 	accessDuration := time.Second * time.Duration(data.AccessDuration.ValueInt64())
-	var tryExtendAfter time.Duration
-	if !data.TryExtendAfter.IsNull() {
-		tryExtendAfter = time.Second * time.Duration(data.TryExtendAfter.ValueInt64())
-	}
+	tryExtendAfter := time.Second * time.Duration(data.TryExtendAfter.ValueInt64())
 
 	updateReq := &configv1alpha1.UpdateAccessWorkflowRequest{
 		Workflow: &configv1alpha1.AccessWorkflow{
