@@ -47,7 +47,7 @@ resource "commonfate-access_workflow" "workflow-demo" {
 <a id="nestedatt--extension_conditions"></a>
 ### Nested Schema for `extension_conditions`
 
-Optional:
+Required:
 
 - `extension_duration_seconds` (Number) Specifies the duration for each extension. Defaults to the value of access_duration_seconds if not provided.
 - `maximum_number_of_extensions` (Number) The maximum number of allowed extensions (set to 0 to disable extensions). If not set, it defaults to 0.
