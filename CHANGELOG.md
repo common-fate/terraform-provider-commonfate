@@ -1,5 +1,15 @@
 # @common-fate/terraform-provider-commonfate
 
+## 2.21.0
+
+### Minor Changes
+
+- 26b6be4: Add support for extend access configuration with max extensions and extension duration in access workflows.
+
+### Patch Changes
+
+- aa6fe28: Deprecate tryExtendAfter and make it an optional field.
+
 ## 2.20.0
 
 ### Minor Changes
