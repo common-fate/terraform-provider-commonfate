@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"connectrpc.com/connect"
+	"github.com/common-fate/grab"
 	config_client "github.com/common-fate/sdk/config"
 	authzv1alpha1 "github.com/common-fate/sdk/gen/commonfate/authz/v1alpha1"
 	"github.com/common-fate/sdk/service/authz/policyset"
@@ -12,11 +13,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
-
-type PolicyModel struct {
-	ID   types.String `tfsdk:"id"`
-	Text types.String `tfsdk:"text"`
-}
 
 type PolicySetResource struct {
 	client *policyset.Client
@@ -151,7 +147,9 @@ func (r *PolicySetResource) Read(ctx context.Context, req resource.ReadRequest, 
 	}
 
 	state.ID = types.StringValue(got.PolicySet.ID)
-	state.Text = types.StringValue(got.PolicySet.Text)
+
+	//todo: nil check this
+	state.Text = grab.Ptr(types.StringValue(got.PolicySet.Text))
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }
@@ -235,7 +233,8 @@ func (r *PolicySetResource) Update(ctx context.Context, req resource.UpdateReque
 	}
 
 	data.ID = types.StringValue(out.Id)
-	data.Text = types.StringValue(out.Text)
+	//todo: nil check this
+	data.Text = grab.Ptr(types.StringValue(out.Text))
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
