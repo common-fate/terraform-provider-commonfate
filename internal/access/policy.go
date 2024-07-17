@@ -43,16 +43,14 @@ const cedarPolicyTemplate = `{{.Effect.ValueString}} (
     principal{{if .Principal}} {{.Principal.Expression}} {{.Principal.Resource.Type.ValueString}}::{{.Principal.Resource.ID}}{{else}}{{end}},
     action{{if .Action}} {{.Action.Expression}} {{.Action.Resource.Type.ValueString}}::{{.Action.Resource.ID}}{{else}}{{end}},
     resource{{if .Resource}} {{.Resource.Expression}} {{.Resource.Resource.Type.ValueString}}::{{.Resource.Resource.ID}}{{else}}{{end}}
-);{{if .When}} when {
-    {{if .When}}
-    {{if .When.Text}}
-    {{.When.Text}}
-    {{else if .When.EmbeddedExpression}}
-    {{.When.EmbeddedExpression.Resource}}{{.When.EmbeddedExpression.Expression}}{{.When.EmbeddedExpression.Value}}
-    {{end}}
-    {{else}}
-	{{end}}
-}{{end}}`
+){{if .When}}
+when {
+ {{if .When}}{{if .When.Text}}{{.When.Text.ValueString}}{{else if .When.EmbeddedExpression}}{{.When.EmbeddedExpression.Resource.ValueString}} {{.When.EmbeddedExpression.Expression.ValueString}} {{.When.EmbeddedExpression.Value.ValueString}}{{end}}{{else}}{{end}}
+ }{{end}}
+{{if .Unless}}
+unless {
+ {{if .Unless}}{{if .Unless.Text}}{{.Unless.Text.ValueString}}{{else if .Unless.EmbeddedExpression}}{{.Unless.EmbeddedExpression.Resource.ValueString}} {{.Unless.EmbeddedExpression.Expression.ValueString}} {{.Unless.EmbeddedExpression.Value.ValueString}}{{end}}{{else}}{{end}}
+ }{{end}};`
 
 func PolicyToString(policy Policy) (string, error) {
 	tmpl, err := template.New("cedarPolicy").Parse(cedarPolicyTemplate)
