@@ -4,7 +4,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/common-fate/grab"
 	"github.com/common-fate/terraform-provider-commonfate/pkg/eid"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/stretchr/testify/assert"
@@ -32,21 +31,21 @@ func TestReviewer_Approve(t *testing.T) {
 			name: "simple cedar policy converts correctly",
 			policy: Policy{
 				Effect: types.StringValue("permit"),
-				Principal: &CedarEntity{
+				Principal: &CedarScopeEntity{
 					Expression: "==",
 					Resource: eid.EID{
 						Type: types.StringValue("CF::User"),
 						ID:   types.StringValue("user1"),
 					},
 				},
-				Action: &CedarEntity{
+				Action: &CedarScopeEntity{
 					Expression: "==",
 					Resource: eid.EID{
 						Type: types.StringValue("Action::Access"),
 						ID:   types.StringValue("Request"),
 					},
 				},
-				Resource: &CedarEntity{
+				Resource: &CedarScopeEntity{
 					Expression: "==",
 					Resource: eid.EID{
 						Type: types.StringValue("Test::Vault"),
@@ -64,29 +63,29 @@ func TestReviewer_Approve(t *testing.T) {
 			name: "simple cedar policy with text when converts correctly",
 			policy: Policy{
 				Effect: types.StringValue("permit"),
-				Principal: &CedarEntity{
+				Principal: &CedarScopeEntity{
 					Expression: "==",
 					Resource: eid.EID{
 						Type: types.StringValue("CF::User"),
 						ID:   types.StringValue("user1"),
 					},
 				},
-				Action: &CedarEntity{
+				Action: &CedarScopeEntity{
 					Expression: "==",
 					Resource: eid.EID{
 						Type: types.StringValue("Action::Access"),
 						ID:   types.StringValue("Request"),
 					},
 				},
-				Resource: &CedarEntity{
+				Resource: &CedarScopeEntity{
 					Expression: "==",
 					Resource: eid.EID{
 						Type: types.StringValue("Test::Vault"),
 						ID:   types.StringValue("test1"),
 					},
 				},
-				When: &EmbeddedExpression{
-					Text: grab.Ptr(types.StringValue("true")),
+				When: &CedarConditionEntity{
+					Text: types.StringValue("true"),
 				},
 			},
 			wantPolicy: `permit (
@@ -100,28 +99,28 @@ when { true };`,
 			name: "simple cedar policy with embedded expression when converts correctly",
 			policy: Policy{
 				Effect: types.StringValue("permit"),
-				Principal: &CedarEntity{
+				Principal: &CedarScopeEntity{
 					Expression: "==",
 					Resource: eid.EID{
 						Type: types.StringValue("CF::User"),
 						ID:   types.StringValue("user1"),
 					},
 				},
-				Action: &CedarEntity{
+				Action: &CedarScopeEntity{
 					Expression: "==",
 					Resource: eid.EID{
 						Type: types.StringValue("Action::Access"),
 						ID:   types.StringValue("Request"),
 					},
 				},
-				Resource: &CedarEntity{
+				Resource: &CedarScopeEntity{
 					Expression: "==",
 					Resource: eid.EID{
 						Type: types.StringValue("Test::Vault"),
 						ID:   types.StringValue("test1"),
 					},
 				},
-				When: &EmbeddedExpression{
+				When: &CedarConditionEntity{
 					EmbeddedExpression: &StructuredEmbeddedExpression{
 						Resource:   types.StringValue("resource.test"),
 						Expression: types.StringValue("=="),
@@ -140,29 +139,29 @@ when { resource.test == test };`,
 			name: "simple cedar policy with text unless converts correctly",
 			policy: Policy{
 				Effect: types.StringValue("permit"),
-				Principal: &CedarEntity{
+				Principal: &CedarScopeEntity{
 					Expression: "==",
 					Resource: eid.EID{
 						Type: types.StringValue("CF::User"),
 						ID:   types.StringValue("user1"),
 					},
 				},
-				Action: &CedarEntity{
+				Action: &CedarScopeEntity{
 					Expression: "==",
 					Resource: eid.EID{
 						Type: types.StringValue("Action::Access"),
 						ID:   types.StringValue("Request"),
 					},
 				},
-				Resource: &CedarEntity{
+				Resource: &CedarScopeEntity{
 					Expression: "==",
 					Resource: eid.EID{
 						Type: types.StringValue("Test::Vault"),
 						ID:   types.StringValue("test1"),
 					},
 				},
-				Unless: &EmbeddedExpression{
-					Text: grab.Ptr(types.StringValue("true")),
+				Unless: &CedarConditionEntity{
+					Text: types.StringValue("true"),
 				},
 			},
 			wantPolicy: `permit (
@@ -176,28 +175,28 @@ unless { true };`,
 			name: "simple cedar policy with embedded expression unless converts correctly",
 			policy: Policy{
 				Effect: types.StringValue("permit"),
-				Principal: &CedarEntity{
+				Principal: &CedarScopeEntity{
 					Expression: "==",
 					Resource: eid.EID{
 						Type: types.StringValue("CF::User"),
 						ID:   types.StringValue("user1"),
 					},
 				},
-				Action: &CedarEntity{
+				Action: &CedarScopeEntity{
 					Expression: "==",
 					Resource: eid.EID{
 						Type: types.StringValue("Action::Access"),
 						ID:   types.StringValue("Request"),
 					},
 				},
-				Resource: &CedarEntity{
+				Resource: &CedarScopeEntity{
 					Expression: "==",
 					Resource: eid.EID{
 						Type: types.StringValue("Test::Vault"),
 						ID:   types.StringValue("test1"),
 					},
 				},
-				Unless: &EmbeddedExpression{
+				Unless: &CedarConditionEntity{
 					EmbeddedExpression: &StructuredEmbeddedExpression{
 						Resource:   types.StringValue("resource.test"),
 						Expression: types.StringValue("=="),

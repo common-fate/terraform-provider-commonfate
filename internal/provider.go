@@ -120,7 +120,9 @@ func (p *CommonFateProvider) Configure(ctx context.Context, req provider.Configu
 
 // DataSources defines the data sources implemented in the provider.
 func (p *CommonFateProvider) DataSources(_ context.Context) []func() datasource.DataSource {
-	return []func() datasource.DataSource{}
+	return []func() datasource.DataSource{
+		NewPolicyDataSource,
+	}
 }
 
 func (p *CommonFateProvider) Resources(_ context.Context) []func() resource.Resource {
@@ -331,4 +333,8 @@ func NewAuth0OrganizationSelectorResource() resource.Resource {
 
 func NewAuth0IntegrationResource() resource.Resource {
 	return &auth0.Auth0IntegrationResource{}
+}
+
+func NewPolicyDataSource() datasource.DataSource {
+	return &access.PolicyDataSource{}
 }
