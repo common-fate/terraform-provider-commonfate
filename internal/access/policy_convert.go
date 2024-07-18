@@ -39,10 +39,10 @@ const cedarPolicyTemplate = `{{.Effect.ValueString}} (
     resource{{if .Resource}} {{.Resource.Expression}} {{.Resource.Resource.Type.ValueString}}::{{.Resource.Resource.ID}}{{end}}
 ){{if .When}}
 when {
-{{if .When.Text}} {{.When.Text.ValueString}}{{else if .When.EmbeddedExpression}} {{.When.EmbeddedExpression.Resource.ValueString}} {{.When.EmbeddedExpression.Expression.ValueString}} {{.When.EmbeddedExpression.Value.ValueString}}{{end}}
+{{if .When.Text}} {{.When.Text.ValueString}} {{else if .When.EmbeddedExpression}} {{.When.EmbeddedExpression.Resource.ValueString}} {{.When.EmbeddedExpression.Expression.ValueString}} {{.When.EmbeddedExpression.Value.ValueString}}{{end}}
 }{{end}}{{if .Unless}}
 unless {
-{{if .Unless.Text}} {{.Unless.Text.ValueString}}{{else if .Unless.EmbeddedExpression}} {{.Unless.EmbeddedExpression.Resource.ValueString}} {{.Unless.EmbeddedExpression.Expression.ValueString}} {{.Unless.EmbeddedExpression.Value.ValueString}}{{end}}
+{{if .Unless.Text}} {{.Unless.Text.ValueString}} {{else if .Unless.EmbeddedExpression}} {{.Unless.EmbeddedExpression.Resource.ValueString}} {{.Unless.EmbeddedExpression.Expression.ValueString}} {{.Unless.EmbeddedExpression.Value.ValueString}}{{end}}
 }{{end}};`
 
 func PolicyToString(policy Policy) (string, error) {
