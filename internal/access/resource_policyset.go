@@ -14,8 +14,9 @@ import (
 )
 
 type PolicyModel struct {
-	ID   types.String `tfsdk:"id"`
-	Text types.String `tfsdk:"text"`
+	ID       types.String `tfsdk:"id"`
+	Text     types.String `tfsdk:"text"`
+	Policies []Policy     `tfsdk:"policies"`
 }
 
 type PolicySetResource struct {
