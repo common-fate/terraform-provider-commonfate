@@ -169,6 +169,7 @@ func (p *CommonFateProvider) Resources(_ context.Context) []func() resource.Reso
 		NewAuth0OrganizationSelectorResource,
 		NewAuth0OrganizationAvailabilitiesResource,
 		logs.NewS3LogDestinationResource,
+		aws.NewAWSResourceScannerResource,
 	}
 }
 

@@ -29,14 +29,14 @@ resource "commonfate_aws_idc_integration" "demo" {
 
 - `identity_store_id` (String) The IAM Identity Center identity store ID
 - `name` (String) The name of the integration: use a short label which is descriptive of the organization you're connecting to
-- `reader_role_arn` (String) The ARN of the role to assume in order to read AWS IAM Identity Store data
+- `reader_role_arn` (String) The ARN of the role to assume in order to read AWS IAM Identity Center data
 - `sso_instance_arn` (String) The ARN of the IAM Identity Center SSO instance
 - `sso_region` (String) The AWS region that the SSO instance is hosted in
 
 ### Optional
 
 - `audit_role_name` (String) The name of the role to assume in each AWS Account in order to read resources
-- `provisioner_role_arn` (String) The ARN of the role to assume in order to provision access in AWS IAM Identity Store
+- `provisioner_role_arn` (String) The ARN of the role to assume in order to provision access in AWS IAM Identity Center
 - `resource_regions` (Set of String) The regions to read reasources from in each account
 - `sso_access_portal_url` (String) The SSO access portal URL, e.g https://example.awsapps.com/start
 

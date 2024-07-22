@@ -96,11 +96,11 @@ func (r *AWSIDCIntegrationResource) Schema(ctx context.Context, req resource.Sch
 				Required:            true,
 			},
 			"reader_role_arn": schema.StringAttribute{
-				MarkdownDescription: "The ARN of the role to assume in order to read AWS IAM Identity Store data",
+				MarkdownDescription: "The ARN of the role to assume in order to read AWS IAM Identity Center data",
 				Required:            true,
 			},
 			"provisioner_role_arn": schema.StringAttribute{
-				MarkdownDescription: "The ARN of the role to assume in order to provision access in AWS IAM Identity Store",
+				MarkdownDescription: "The ARN of the role to assume in order to provision access in AWS IAM Identity Center",
 				Optional:            true,
 			},
 			"audit_role_name": schema.StringAttribute{
@@ -172,7 +172,7 @@ func (r *AWSIDCIntegrationResource) Create(ctx context.Context, req resource.Cre
 
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to Create Resource: AWS IAM Identity Store Integration",
+			"Unable to Create Resource: AWS IAM Identity Center Integration",
 			"An unexpected error occurred while communicating with Common Fate API. "+
 				"Please report this issue to the provider developers.\n\n"+
 				"JSON Error: "+err.Error(),
@@ -212,7 +212,7 @@ func (r *AWSIDCIntegrationResource) Read(ctx context.Context, req resource.ReadR
 		return
 	} else if err != nil {
 		resp.Diagnostics.AddError(
-			"Failed to read AWS IAM Identity Store Integration",
+			"Failed to read AWS IAM Identity Center Integration",
 			err.Error(),
 		)
 		return
@@ -234,7 +234,7 @@ func (r *AWSIDCIntegrationResource) Update(ctx context.Context, req resource.Upd
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		resp.Diagnostics.AddError(
-			"Unable to update AWS IAM Identity Store Integration",
+			"Unable to update AWS IAM Identity Center Integration",
 			"An unexpected error occurred while parsing the resource update response.",
 		)
 
@@ -270,7 +270,7 @@ func (r *AWSIDCIntegrationResource) Update(ctx context.Context, req resource.Upd
 
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to Update AWS IAM Identity Store Integration",
+			"Unable to Update AWS IAM Identity Center Integration",
 			"An unexpected error occurred while communicating with Common Fate API. "+
 				"Please report this issue to the provider developers.\n\n"+
 				"JSON Error: "+err.Error(),
@@ -298,7 +298,7 @@ func (r *AWSIDCIntegrationResource) Delete(ctx context.Context, req resource.Del
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		resp.Diagnostics.AddError(
-			"Unable to delete AWS IAM Identity Store Integration",
+			"Unable to delete AWS IAM Identity Center Integration",
 			"An unexpected error occurred while parsing the resource creation response.",
 		)
 
@@ -311,7 +311,7 @@ func (r *AWSIDCIntegrationResource) Delete(ctx context.Context, req resource.Del
 
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to delete AWS IAM Identity Store Integration",
+			"Unable to delete AWS IAM Identity Center Integration",
 			"An unexpected error occurred while parsing the resource creation response. "+
 				"Please report this issue to the provider developers.\n\n"+
 				"JSON Error: "+err.Error(),
