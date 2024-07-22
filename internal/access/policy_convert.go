@@ -22,26 +22,26 @@ type CedarConditionEntity struct {
 type Policy struct {
 	Effect types.String `tfsdk:"effect"`
 
-	Principal   *eid.EID `tfsdk:"principal"`
-	PrincipalIn *eid.EID `tfsdk:"principal_in"`
-	PrincipalIs *eid.EID `tfsdk:"principal_is"`
+	Principal   *eid.EID   `tfsdk:"principal"`
+	PrincipalIn *[]eid.EID `tfsdk:"principal_in"`
+	PrincipalIs *eid.EID   `tfsdk:"principal_is"`
 
-	Action   *eid.EID `tfsdk:"action"`
-	ActionIn *eid.EID `tfsdk:"action_in"`
-	ActionIs *eid.EID `tfsdk:"action_is"`
+	Action   *eid.EID   `tfsdk:"action"`
+	ActionIn *[]eid.EID `tfsdk:"action_in"`
+	ActionIs *eid.EID   `tfsdk:"action_is"`
 
-	Resource   *eid.EID `tfsdk:"resource"`
-	ResourceIn *eid.EID `tfsdk:"resource_in"`
-	ResourceIs *eid.EID `tfsdk:"resource_is"`
+	Resource   *eid.EID   `tfsdk:"resource"`
+	ResourceIn *[]eid.EID `tfsdk:"resource_in"`
+	ResourceIs *eid.EID   `tfsdk:"resource_is"`
 
 	When   *CedarConditionEntity `tfsdk:"when"`
 	Unless *CedarConditionEntity `tfsdk:"unless"`
 }
 
 const cedarPolicyTemplate = `{{.Effect.ValueString}} (
-    principal{{if .Principal}} == {{.Principal.Type.ValueString}}::{{.Principal.ID}}{{end}}{{if .PrincipalIs}} is {{.PrincipalIs.Type.ValueString}}::{{.PrincipalIs.ID}}{{end}}{{if .PrincipalIn}} in {{.PrincipalIn.Type.ValueString}}::{{.PrincipalIn.ID}}{{end}},
-    action{{if .Action}} == {{.Action.Type.ValueString}}::{{.Action.ID}}{{end}}{{if .ActionIs}} is {{.ActionIs.Type.ValueString}}::{{.ActionIs.ID}}{{end}}{{if .ActionIn}} in {{.ActionIn.Type.ValueString}}::{{.ActionIn.ID}}{{end}},
-    resource{{if .Resource}} == {{.Resource.Type.ValueString}}::{{.Resource.ID}}{{end}}{{if .ResourceIs}} is {{.ResourceIs.Type.ValueString}}::{{.ResourceIs.ID}}{{end}}{{if .ResourceIn}} in {{.ResourceIn.Type.ValueString}}::{{.ResourceIn.ID}}{{end}}
+    principal{{if .Principal}} == {{.Principal.Type.ValueString}}::{{.Principal.ID}}{{end}}{{if .PrincipalIs}} is {{.PrincipalIs.Type.ValueString}}::{{.PrincipalIs.ID}}{{end}}{{if .PrincipalIn}}{{$len := len .PrincipalIn }} in [{{range $i, $val := .PrincipalIn}}{{$val.Type.ValueString}}::{{$val.ID}} {{if (ne $i $len)}}, {{end}}{{end}}] {{end}},
+    action{{if .Action}} == {{.Action.Type.ValueString}}::{{.Action.ID}}{{end}}{{if .ActionIs}} is {{.ActionIs.Type.ValueString}}::{{.ActionIs.ID}}{{end}}{{if .ActionIn}} in  [{{range $i, $val := .ActionIn}}{{$val.Type.ValueString}}::{{$val.ID}}{{if (gt $i 1)}}, {{end}}{{end}}] {{end}},
+    resource{{if .Resource}} == {{.Resource.Type.ValueString}}::{{.Resource.ID}}{{end}}{{if .ResourceIs}} is {{.ResourceIs.Type.ValueString}}::{{.ResourceIs.ID}}{{end}}{{if .ResourceIn}} in [{{range $i, $val := .ResourceIn}}{{$val.Type.ValueString}}::{{$val.ID}}{{if (gt $i 1)}}, {{end}}{{end}}] {{end}},
 ){{if .When}}
 when {
 {{if .When.Text}} {{.When.Text.ValueString}} {{else if .When.EmbeddedExpression}} {{.When.EmbeddedExpression.Resource.ValueString}} {{.When.EmbeddedExpression.Expression.ValueString}} {{.When.EmbeddedExpression.Value.ValueString}}{{end}}

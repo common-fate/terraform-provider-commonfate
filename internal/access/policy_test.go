@@ -173,6 +173,46 @@ unless { true };`,
 )
 unless { resource.test == test };`,
 		},
+		{
+			name: "test in condition",
+			policy: Policy{
+				Effect: types.StringValue("permit"),
+				PrincipalIn: &[]eid.EID{
+					eid.EID{
+						Type: types.StringValue("CF::User"),
+						ID:   types.StringValue("user1"),
+					},
+				},
+
+				ActionIn: &[]eid.EID{
+					eid.EID{
+						Type: types.StringValue("Action::Access"),
+						ID:   types.StringValue("Request"),
+					},
+				},
+
+				ResourceIn: &[]eid.EID{
+					eid.EID{
+						Type: types.StringValue("Test::Vault"),
+						ID:   types.StringValue("test1"),
+					},
+				},
+
+				Unless: &CedarConditionEntity{
+					EmbeddedExpression: &StructuredEmbeddedExpression{
+						Resource:   types.StringValue("resource.test"),
+						Expression: types.StringValue("=="),
+						Value:      types.StringValue("test"),
+					},
+				},
+			},
+			wantPolicy: `permit (
+principal in [CF::User::"user1"],
+action in [Action::Access::"Request"],
+resource in [Test::Vault::"test1"]
+)
+unless { resource.test == test };`,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
