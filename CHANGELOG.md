@@ -1,5 +1,16 @@
 # @common-fate/terraform-provider-commonfate
 
+## 2.22.0
+
+### Minor Changes
+
+- d5b60e4: Add support for extend access configuration with max extensions and extension duration in access workflows.
+- df67fca: Adds resources for the the AWS RDS Integration
+
+### Patch Changes
+
+- a1ae4b8: Improved error message when invalid_scope error is received
+
 ## 2.21.0
 
 ### Minor Changes
