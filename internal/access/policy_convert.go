@@ -17,7 +17,7 @@ type StructuredEmbeddedExpression struct {
 }
 
 type CedarConditionEntity struct {
-	Text               *types.String                 `tfsdk:"text"`
+	Text               types.String                  `tfsdk:"text"`
 	EmbeddedExpression *StructuredEmbeddedExpression `tfsdk:"structured_embedded_expression"`
 }
 
@@ -55,7 +55,7 @@ func buildCedarScopeField(scopeType string, includeTrailingComma bool) string {
 	return out
 }
 
-const cedarAdviceTemplate = `{{if .Advice }}@advice({{.Advice}}){{end}}`
+const cedarAdviceTemplate = `{{if not .Advice.IsNull }}@advice({{.Advice}}){{end}}`
 const cedarEffectTemplate = `{{.Effect.ValueString}}`
 
 var cedarPrincipalTemplate = buildCedarScopeField("Principal", true)
@@ -64,12 +64,12 @@ var cedarResourceTemplate = buildCedarScopeField("Resource", false)
 
 const cedarWhenTemplate = `{{if .When}}
 when {
-{{if .When.Text}} {{.When.Text.ValueString}} {{else if .When.EmbeddedExpression}} {{.When.EmbeddedExpression.Resource.ValueString}} {{.When.EmbeddedExpression.Expression.ValueString}} {{.When.EmbeddedExpression.Value.ValueString}} {{end}}
+{{if not .When.Text.IsNull}} {{.When.Text.ValueString}} {{else if .When.EmbeddedExpression}} {{.When.EmbeddedExpression.Resource.ValueString}} {{.When.EmbeddedExpression.Expression.ValueString}} {{.When.EmbeddedExpression.Value.ValueString}} {{end}}
 }{{end}}`
 
 const cedarUnlessTemplate = `{{if .Unless}}
 unless {
-{{if .Unless.Text}} {{.Unless.Text.ValueString}} {{else if .Unless.EmbeddedExpression}} {{.Unless.EmbeddedExpression.Resource.ValueString}} {{.Unless.EmbeddedExpression.Expression.ValueString}} {{.Unless.EmbeddedExpression.Value.ValueString}} {{end}}
+{{if not .Unless.Text.IsNull}} {{.Unless.Text.ValueString}} {{else if .Unless.EmbeddedExpression}} {{.Unless.EmbeddedExpression.Resource.ValueString}} {{.Unless.EmbeddedExpression.Expression.ValueString}} {{.Unless.EmbeddedExpression.Value.ValueString}} {{end}}
 }{{end}}`
 
 var cedarPolicyTemplateTest = cedarAdviceTemplate + cedarEffectTemplate + " ( " + cedarPrincipalTemplate + cedarActionTemplate + cedarResourceTemplate + " )" + cedarWhenTemplate + cedarUnlessTemplate + ";"

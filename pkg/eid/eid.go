@@ -2,7 +2,7 @@ package eid
 
 import (
 	entityv1alpha1 "github.com/common-fate/sdk/gen/commonfate/entity/v1alpha1"
-	datasourceSchema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
@@ -18,15 +18,9 @@ var EIDAttrs = map[string]schema.Attribute{
 	},
 }
 
-var EIDAttrsForDataSource = map[string]datasourceSchema.Attribute{
-	"type": datasourceSchema.StringAttribute{
-		Required:            true,
-		MarkdownDescription: "The entity type",
-	},
-	"id": datasourceSchema.StringAttribute{
-		Required:            true,
-		MarkdownDescription: "The entity ID",
-	},
+var EIDAttrsForDataSource = map[string]attr.Type{
+	"type": types.StringType,
+	"id":   types.StringType,
 }
 
 type EID struct {

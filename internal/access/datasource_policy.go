@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
 
 var _ datasource.DataSource = &PolicyDataSource{}
@@ -34,7 +35,7 @@ func (d *PolicyDataSource) Schema(ctx context.Context, req datasource.SchemaRequ
 
 			"policy_as_text": schema.StringAttribute{
 				MarkdownDescription: "The converted policy into text for to be used with the policyset resource",
-				Optional:            true,
+				Computed:            true,
 			},
 
 			"policies": schema.SetNestedAttribute{
@@ -50,101 +51,56 @@ func (d *PolicyDataSource) Schema(ctx context.Context, req datasource.SchemaRequ
 							MarkdownDescription: "The effect on the cedar policy that you want to make. Either 'permit' or 'forbid'",
 							Optional:            true,
 						},
-						"principal": schema.SingleNestedAttribute{
-							MarkdownDescription: "Specifies the duration for each extension. Defaults to the value of access_duration_seconds if not provided.",
+						"principal": schema.ObjectAttribute{
+							MarkdownDescription: "Validation requirements to be set with this workflow",
 							Optional:            true,
-							Attributes: map[string]schema.Attribute{
-								"eid": schema.SingleNestedAttribute{
-									Attributes: eid.EIDAttrsForDataSource,
-									Required:   true,
-								},
-							},
+							AttributeTypes:      eid.EIDAttrsForDataSource,
 						},
-						"principal_is": schema.SingleNestedAttribute{
+						"principal_is": schema.ObjectAttribute{
 							MarkdownDescription: "Specifies the duration for each extension. Defaults to the value of access_duration_seconds if not provided.",
 							Optional:            true,
-							Attributes: map[string]schema.Attribute{
-								"eid": schema.SingleNestedAttribute{
-									Attributes: eid.EIDAttrsForDataSource,
-									Required:   true,
-								},
-							},
+							AttributeTypes:      eid.EIDAttrsForDataSource,
 						},
-						"principal_in": schema.SingleNestedAttribute{
+						"principal_in": schema.ListAttribute{
 							MarkdownDescription: "Specifies the duration for each extension. Defaults to the value of access_duration_seconds if not provided.",
 							Optional:            true,
-							Attributes: map[string]schema.Attribute{
-								"eid": schema.ListNestedAttribute{
-									NestedObject: schema.NestedAttributeObject{
-										Attributes: eid.EIDAttrsForDataSource,
-									},
-									Required: true,
-								},
+							ElementType: basetypes.ObjectType{
+								AttrTypes: eid.EIDAttrsForDataSource,
 							},
 						},
 
-						"action": schema.SingleNestedAttribute{
+						"action": schema.ObjectAttribute{
 							MarkdownDescription: "Specifies the duration for each extension. Defaults to the value of access_duration_seconds if not provided.",
 							Optional:            true,
-							Attributes: map[string]schema.Attribute{
-								"eid": schema.SingleNestedAttribute{
-									Attributes: eid.EIDAttrsForDataSource,
-									Required:   true,
-								},
+							AttributeTypes:      eid.EIDAttrsForDataSource,
+						},
+						"action_is": schema.ObjectAttribute{
+							MarkdownDescription: "Specifies the duration for each extension. Defaults to the value of access_duration_seconds if not provided.",
+							Optional:            true,
+							AttributeTypes:      eid.EIDAttrsForDataSource,
+						},
+						"action_in": schema.ListAttribute{
+							MarkdownDescription: "Specifies the duration for each extension. Defaults to the value of access_duration_seconds if not provided.",
+							Optional:            true,
+							ElementType: basetypes.ObjectType{
+								AttrTypes: eid.EIDAttrsForDataSource,
 							},
 						},
-						"action_is": schema.SingleNestedAttribute{
+						"resource": schema.ObjectAttribute{
 							MarkdownDescription: "Specifies the duration for each extension. Defaults to the value of access_duration_seconds if not provided.",
 							Optional:            true,
-							Attributes: map[string]schema.Attribute{
-								"eid": schema.SingleNestedAttribute{
-									Attributes: eid.EIDAttrsForDataSource,
-									Required:   true,
-								},
-							},
+							AttributeTypes:      eid.EIDAttrsForDataSource,
 						},
-						"action_in": schema.SingleNestedAttribute{
+						"resource_is": schema.ObjectAttribute{
 							MarkdownDescription: "Specifies the duration for each extension. Defaults to the value of access_duration_seconds if not provided.",
 							Optional:            true,
-							Attributes: map[string]schema.Attribute{
-								"eid": schema.ListNestedAttribute{
-									NestedObject: schema.NestedAttributeObject{
-										Attributes: eid.EIDAttrsForDataSource,
-									},
-									Required: true,
-								},
-							},
+							AttributeTypes:      eid.EIDAttrsForDataSource,
 						},
-						"resource": schema.SingleNestedAttribute{
+						"resource_in": schema.ListAttribute{
 							MarkdownDescription: "Specifies the duration for each extension. Defaults to the value of access_duration_seconds if not provided.",
 							Optional:            true,
-							Attributes: map[string]schema.Attribute{
-								"eid": schema.SingleNestedAttribute{
-									Attributes: eid.EIDAttrsForDataSource,
-									Required:   true,
-								},
-							},
-						},
-						"resource_is": schema.SingleNestedAttribute{
-							MarkdownDescription: "Specifies the duration for each extension. Defaults to the value of access_duration_seconds if not provided.",
-							Optional:            true,
-							Attributes: map[string]schema.Attribute{
-								"eid": schema.SingleNestedAttribute{
-									Attributes: eid.EIDAttrsForDataSource,
-									Required:   true,
-								},
-							},
-						},
-						"resource_in": schema.SingleNestedAttribute{
-							MarkdownDescription: "Specifies the duration for each extension. Defaults to the value of access_duration_seconds if not provided.",
-							Optional:            true,
-							Attributes: map[string]schema.Attribute{
-								"eid": schema.ListNestedAttribute{
-									NestedObject: schema.NestedAttributeObject{
-										Attributes: eid.EIDAttrsForDataSource,
-									},
-									Required: true,
-								},
+							ElementType: basetypes.ObjectType{
+								AttrTypes: eid.EIDAttrsForDataSource,
 							},
 						},
 
