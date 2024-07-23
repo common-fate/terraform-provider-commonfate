@@ -18,7 +18,7 @@ description: |-
 ### Required
 
 - `id` (String) The internal Common Fate policy ID
-- `policies` (Attributes Set) Configuration for extending access (see [below for nested schema](#nestedatt--policies))
+- `policies` (Attributes Set) a list of policies to be used in Common Fate (see [below for nested schema](#nestedatt--policies))
 
 ### Read-Only
 
@@ -29,22 +29,22 @@ description: |-
 
 Required:
 
-- `effect` (String) The effect on the cedar policy that you want to make. Either 'permit' or 'forbid'
+- `effect` (String) The effect specifies the intent of the policy, to either permit` or forbid any request that matches the scope and conditions specified in the policy
 
 Optional:
 
-- `action` (Object) Specifies the duration for each extension. Defaults to the value of access_duration_seconds if not provided. (see [below for nested schema](#nestedatt--policies--action))
-- `action_in` (List of Object) Specifies the duration for each extension. Defaults to the value of access_duration_seconds if not provided. (see [below for nested schema](#nestedatt--policies--action_in))
-- `action_is` (Object) Specifies the duration for each extension. Defaults to the value of access_duration_seconds if not provided. (see [below for nested schema](#nestedatt--policies--action_is))
-- `advice` (String) The effect on the cedar policy that you want to make. Either 'permit' or 'forbid'
-- `principal` (Object) Validation requirements to be set with this workflow (see [below for nested schema](#nestedatt--policies--principal))
-- `principal_in` (List of Object) Specifies the duration for each extension. Defaults to the value of access_duration_seconds if not provided. (see [below for nested schema](#nestedatt--policies--principal_in))
-- `principal_is` (Object) Specifies the duration for each extension. Defaults to the value of access_duration_seconds if not provided. (see [below for nested schema](#nestedatt--policies--principal_is))
-- `resource` (Object) Specifies the duration for each extension. Defaults to the value of access_duration_seconds if not provided. (see [below for nested schema](#nestedatt--policies--resource))
-- `resource_in` (List of Object) Specifies the duration for each extension. Defaults to the value of access_duration_seconds if not provided. (see [below for nested schema](#nestedatt--policies--resource_in))
-- `resource_is` (Object) Specifies the duration for each extension. Defaults to the value of access_duration_seconds if not provided. (see [below for nested schema](#nestedatt--policies--resource_is))
+- `action` (Object) Actions define the operations that can be performed within Common Fate. (see [below for nested schema](#nestedatt--policies--action))
+- `action_in` (List of Object) actions_in define a set of operations that can be performed within Common Fate (see [below for nested schema](#nestedatt--policies--action_in))
+- `action_is` (Object) Actions define the operations that can be performed within Common Fate. (see [below for nested schema](#nestedatt--policies--action_is))
+- `advice` (String) Decorators are annotations added to Cedar policies to provide additional instructions or messages to end users
+- `principal` (Object) The principal component specifies the entity seeking access. (see [below for nested schema](#nestedatt--policies--principal))
+- `principal_in` (List of Object) a list of principal component's specifying the entities seeking access (see [below for nested schema](#nestedatt--policies--principal_in))
+- `principal_is` (Object) The principal component specifies the entity seeking access. (see [below for nested schema](#nestedatt--policies--principal_is))
+- `resource` (Object) The resource component specifies the target or subject of the action. It identifies the entity upon which actions are taken. (see [below for nested schema](#nestedatt--policies--resource))
+- `resource_in` (List of Object) resource_in component specifies a set of the target or subject of the action. It identifies the entity upon which actions are taken. (see [below for nested schema](#nestedatt--policies--resource_in))
+- `resource_is` (Object) The resource component specifies the target or subject of the action. It identifies the entity upon which actions are taken. (see [below for nested schema](#nestedatt--policies--resource_is))
 - `unless` (Attributes) Specifies the duration for each extension. Defaults to the value of access_duration_seconds if not provided. (see [below for nested schema](#nestedatt--policies--unless))
-- `when` (Attributes) Specifies the duration for each extension. Defaults to the value of access_duration_seconds if not provided. (see [below for nested schema](#nestedatt--policies--when))
+- `when` (Attributes) The when and unless components define additional conditions under which the action is allowed. (see [below for nested schema](#nestedatt--policies--when))
 
 <a id="nestedatt--policies--action"></a>
 ### Nested Schema for `policies.action`
@@ -132,11 +132,11 @@ Required:
 
 Required:
 
-- `text` (String) The Cedar policy to define permissions as policies in your Common Fate instance.
+- `text` (String) unless can be used with the text attribute to define the when clause in plain-text.
 
 Optional:
 
-- `structured_embedded_expression` (Attributes) (see [below for nested schema](#nestedatt--policies--unless--structured_embedded_expression))
+- `structured_embedded_expression` (Attributes) unless can be used with `structured_embedded_expression` to define a more structured when clause. (see [below for nested schema](#nestedatt--policies--unless--structured_embedded_expression))
 
 <a id="nestedatt--policies--unless--structured_embedded_expression"></a>
 ### Nested Schema for `policies.unless.structured_embedded_expression`
@@ -154,11 +154,11 @@ Required:
 
 Required:
 
-- `text` (String) The Cedar policy to define permissions as policies in your Common Fate instance.
+- `text` (String) when can be used with the text attribute to define the when clause in plain-text.
 
 Optional:
 
-- `structured_embedded_expression` (Attributes) (see [below for nested schema](#nestedatt--policies--when--structured_embedded_expression))
+- `structured_embedded_expression` (Attributes) when can be used with `structured_embedded_expression` to define a more structured when clause. (see [below for nested schema](#nestedatt--policies--when--structured_embedded_expression))
 
 <a id="nestedatt--policies--when--structured_embedded_expression"></a>
 ### Nested Schema for `policies.when.structured_embedded_expression`
