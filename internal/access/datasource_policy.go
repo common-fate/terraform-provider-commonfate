@@ -39,30 +39,30 @@ func (d *PolicyDataSource) Schema(ctx context.Context, req datasource.SchemaRequ
 			},
 
 			"policies": schema.SetNestedAttribute{
-				MarkdownDescription: "Configuration for extending access",
+				MarkdownDescription: "a list of policies to be used in Common Fate",
 				Required:            true,
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 						"effect": schema.StringAttribute{
-							MarkdownDescription: "The effect on the cedar policy that you want to make. Either 'permit' or 'forbid'",
+							MarkdownDescription: "The effect specifies the intent of the policy, to either permit` or forbid any request that matches the scope and conditions specified in the policy",
 							Required:            true,
 						},
 						"advice": schema.StringAttribute{
-							MarkdownDescription: "The effect on the cedar policy that you want to make. Either 'permit' or 'forbid'",
+							MarkdownDescription: "Decorators are annotations added to Cedar policies to provide additional instructions or messages to end users",
 							Optional:            true,
 						},
 						"principal": schema.ObjectAttribute{
-							MarkdownDescription: "Validation requirements to be set with this workflow",
+							MarkdownDescription: "The principal component specifies the entity seeking access.",
 							Optional:            true,
 							AttributeTypes:      eid.EIDAttrsForDataSource,
 						},
 						"principal_is": schema.ObjectAttribute{
-							MarkdownDescription: "Specifies the duration for each extension. Defaults to the value of access_duration_seconds if not provided.",
+							MarkdownDescription: "The principal component specifies the entity seeking access.",
 							Optional:            true,
 							AttributeTypes:      eid.EIDAttrsForDataSource,
 						},
 						"principal_in": schema.ListAttribute{
-							MarkdownDescription: "Specifies the duration for each extension. Defaults to the value of access_duration_seconds if not provided.",
+							MarkdownDescription: "a list of principal component's specifying the entities seeking access",
 							Optional:            true,
 							ElementType: basetypes.ObjectType{
 								AttrTypes: eid.EIDAttrsForDataSource,
@@ -70,34 +70,34 @@ func (d *PolicyDataSource) Schema(ctx context.Context, req datasource.SchemaRequ
 						},
 
 						"action": schema.ObjectAttribute{
-							MarkdownDescription: "Specifies the duration for each extension. Defaults to the value of access_duration_seconds if not provided.",
+							MarkdownDescription: "Actions define the operations that can be performed within Common Fate.",
 							Optional:            true,
 							AttributeTypes:      eid.EIDAttrsForDataSource,
 						},
 						"action_is": schema.ObjectAttribute{
-							MarkdownDescription: "Specifies the duration for each extension. Defaults to the value of access_duration_seconds if not provided.",
+							MarkdownDescription: "Actions define the operations that can be performed within Common Fate.",
 							Optional:            true,
 							AttributeTypes:      eid.EIDAttrsForDataSource,
 						},
 						"action_in": schema.ListAttribute{
-							MarkdownDescription: "Specifies the duration for each extension. Defaults to the value of access_duration_seconds if not provided.",
+							MarkdownDescription: "actions_in define a set of operations that can be performed within Common Fate",
 							Optional:            true,
 							ElementType: basetypes.ObjectType{
 								AttrTypes: eid.EIDAttrsForDataSource,
 							},
 						},
 						"resource": schema.ObjectAttribute{
-							MarkdownDescription: "Specifies the duration for each extension. Defaults to the value of access_duration_seconds if not provided.",
+							MarkdownDescription: "The resource component specifies the target or subject of the action. It identifies the entity upon which actions are taken.",
 							Optional:            true,
 							AttributeTypes:      eid.EIDAttrsForDataSource,
 						},
 						"resource_is": schema.ObjectAttribute{
-							MarkdownDescription: "Specifies the duration for each extension. Defaults to the value of access_duration_seconds if not provided.",
+							MarkdownDescription: "The resource component specifies the target or subject of the action. It identifies the entity upon which actions are taken.",
 							Optional:            true,
 							AttributeTypes:      eid.EIDAttrsForDataSource,
 						},
 						"resource_in": schema.ListAttribute{
-							MarkdownDescription: "Specifies the duration for each extension. Defaults to the value of access_duration_seconds if not provided.",
+							MarkdownDescription: "resource_in component specifies a set of the target or subject of the action. It identifies the entity upon which actions are taken.",
 							Optional:            true,
 							ElementType: basetypes.ObjectType{
 								AttrTypes: eid.EIDAttrsForDataSource,
@@ -105,15 +105,17 @@ func (d *PolicyDataSource) Schema(ctx context.Context, req datasource.SchemaRequ
 						},
 
 						"when": schema.SingleNestedAttribute{
-							MarkdownDescription: "Specifies the duration for each extension. Defaults to the value of access_duration_seconds if not provided.",
+							MarkdownDescription: "The when and unless components define additional conditions under which the action is allowed.",
 							Optional:            true,
 
 							Attributes: map[string]schema.Attribute{
 								"text": schema.StringAttribute{
-									MarkdownDescription: "The Cedar policy to define permissions as policies in your Common Fate instance.",
+									MarkdownDescription: "when can be used with the text attribute to define the when clause in plain-text.",
 									Required:            true,
 								},
 								"structured_embedded_expression": schema.SingleNestedAttribute{
+									MarkdownDescription: "when can be used with `structured_embedded_expression` to define a more structured when clause.",
+
 									Attributes: map[string]schema.Attribute{
 										"resource":   schema.StringAttribute{Required: true},
 										"expression": schema.StringAttribute{Required: true},
@@ -129,10 +131,12 @@ func (d *PolicyDataSource) Schema(ctx context.Context, req datasource.SchemaRequ
 
 							Attributes: map[string]schema.Attribute{
 								"text": schema.StringAttribute{
-									MarkdownDescription: "The Cedar policy to define permissions as policies in your Common Fate instance.",
+									MarkdownDescription: "unless can be used with the text attribute to define the when clause in plain-text.",
 									Required:            true,
 								},
 								"structured_embedded_expression": schema.SingleNestedAttribute{
+									MarkdownDescription: "unless can be used with `structured_embedded_expression` to define a more structured when clause.",
+
 									Attributes: map[string]schema.Attribute{
 										"resource":   schema.StringAttribute{Required: true},
 										"expression": schema.StringAttribute{Required: true},

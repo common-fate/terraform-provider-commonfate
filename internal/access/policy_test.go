@@ -4,7 +4,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/common-fate/grab"
 	"github.com/common-fate/terraform-provider-commonfate/pkg/eid"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/stretchr/testify/assert"
@@ -89,7 +88,7 @@ permit (
 					ID:   types.StringValue("test1"),
 				},
 				When: &CedarConditionEntity{
-					Text: grab.Ptr(types.StringValue("true")),
+					Text: types.StringValue("true"),
 				},
 			},
 			wantPolicy: `permit (
@@ -151,7 +150,7 @@ when { resource.test == test };`,
 				},
 
 				Unless: &CedarConditionEntity{
-					Text: grab.Ptr(types.StringValue("true")),
+					Text: types.StringValue("true"),
 				},
 			},
 			wantPolicy: `permit (
