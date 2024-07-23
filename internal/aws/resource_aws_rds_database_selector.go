@@ -16,18 +16,18 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-type AWSRDSSelector struct {
+type AWSRDSDatabaseSelector struct {
 	ID             types.String `tfsdk:"id"`
 	Name           types.String `tfsdk:"name"`
 	OrganizationID types.String `tfsdk:"aws_organization_id"`
 	When           types.String `tfsdk:"when"`
 }
 
-func (s AWSRDSSelector) ToAPI() *configv1alpha1.Selector {
+func (s AWSRDSDatabaseSelector) ToAPI() *configv1alpha1.Selector {
 	return &configv1alpha1.Selector{
 		Id:           s.ID.ValueString(),
 		Name:         s.Name.ValueString(),
-		ResourceType: "AWS::RDS::Instance",
+		ResourceType: "AWS::RDS::Database",
 		BelongingTo: &entityv1alpha1.EID{
 			Type: "AWS::Organization",
 			Id:   s.OrganizationID.ValueString(),
@@ -36,24 +36,24 @@ func (s AWSRDSSelector) ToAPI() *configv1alpha1.Selector {
 	}
 }
 
-// AccessRuleResource is the data source implementation.
-type AWSRDSSelectorResource struct {
+// AWSRDSDatabaseSelectorResource is the data source implementation.
+type AWSRDSDatabaseSelectorResource struct {
 	client *configsvc.Client
 }
 
 var (
-	_ resource.Resource                = &AWSRDSSelectorResource{}
-	_ resource.ResourceWithConfigure   = &AWSRDSSelectorResource{}
-	_ resource.ResourceWithImportState = &AWSRDSSelectorResource{}
+	_ resource.Resource                = &AWSRDSDatabaseSelectorResource{}
+	_ resource.ResourceWithConfigure   = &AWSRDSDatabaseSelectorResource{}
+	_ resource.ResourceWithImportState = &AWSRDSDatabaseSelectorResource{}
 )
 
 // Metadata returns the data source type name.
-func (r *AWSRDSSelectorResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_aws_rds_selector"
+func (r *AWSRDSDatabaseSelectorResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_aws_rds_database_selector"
 }
 
 // Configure adds the provider configured client to the data source.
-func (r *AWSRDSSelectorResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *AWSRDSDatabaseSelectorResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -74,7 +74,7 @@ func (r *AWSRDSSelectorResource) Configure(_ context.Context, req resource.Confi
 
 // GetSchema defines the schema for the data source.
 // schema is based off the governance api
-func (r *AWSRDSSelectorResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *AWSRDSDatabaseSelectorResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 
 	resp.Schema = schema.Schema{
 		Description: "A Selector to match AWS RDS databases with a criteria based on the 'when' field.",
@@ -90,7 +90,7 @@ func (r *AWSRDSSelectorResource) Schema(ctx context.Context, req resource.Schema
 			},
 
 			"aws_organization_id": schema.StringAttribute{
-				MarkdownDescription: "The AWS Account ID",
+				MarkdownDescription: "The AWS Organization ID",
 				Required:            true,
 			},
 
@@ -103,7 +103,7 @@ func (r *AWSRDSSelectorResource) Schema(ctx context.Context, req resource.Schema
 	}
 }
 
-func (r *AWSRDSSelectorResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+func (r *AWSRDSDatabaseSelectorResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 
 	if r.client == nil {
 		resp.Diagnostics.AddError(
@@ -113,7 +113,7 @@ func (r *AWSRDSSelectorResource) Create(ctx context.Context, req resource.Create
 
 		return
 	}
-	var data *AWSRDSSelector
+	var data *AWSRDSDatabaseSelector
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -153,7 +153,7 @@ func (r *AWSRDSSelectorResource) Create(ctx context.Context, req resource.Create
 }
 
 // Read refreshes the Terraform state with the latest data.
-func (r *AWSRDSSelectorResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+func (r *AWSRDSDatabaseSelectorResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	if r.client == nil {
 		resp.Diagnostics.AddError(
 			"Unconfigured HTTP Client",
@@ -162,7 +162,7 @@ func (r *AWSRDSSelectorResource) Read(ctx context.Context, req resource.ReadRequ
 
 		return
 	}
-	var state AWSRDSSelector
+	var state AWSRDSDatabaseSelector
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
@@ -190,14 +190,14 @@ func (r *AWSRDSSelectorResource) Read(ctx context.Context, req resource.ReadRequ
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }
 
-func (r *AWSRDSSelectorResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *AWSRDSDatabaseSelectorResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	if r.client == nil {
 		resp.Diagnostics.AddError(
 			"Unconfigured HTTP Client",
 			"Expected configured HTTP client. Please report this issue to the provider developers.",
 		)
 	}
-	var data AWSRDSSelector
+	var data AWSRDSDatabaseSelector
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -233,14 +233,14 @@ func (r *AWSRDSSelectorResource) Update(ctx context.Context, req resource.Update
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *AWSRDSSelectorResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+func (r *AWSRDSDatabaseSelectorResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	if r.client == nil {
 		resp.Diagnostics.AddError(
 			"Unconfigured HTTP Client",
 			"Expected configured HTTP client. Please report this issue to the provider developers.",
 		)
 	}
-	var data *AWSRDSSelector
+	var data *AWSRDSDatabaseSelector
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -269,7 +269,7 @@ func (r *AWSRDSSelectorResource) Delete(ctx context.Context, req resource.Delete
 	}
 }
 
-func (r *AWSRDSSelectorResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *AWSRDSDatabaseSelectorResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	// Retrieve import ID and save to id attribute
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }

@@ -296,6 +296,13 @@ func (r *AccessWorkflowResource) Read(ctx context.Context, req resource.ReadRequ
 		}
 	}
 
+	if res.Msg.Workflow.ExtensionConditions != nil {
+		state.ExtensionConditions = &ExtensionConditions{
+			ExtensionDuration: types.Int64Value(res.Msg.Workflow.ExtensionConditions.ExtensionDurationSeconds.Seconds),
+			MaxExtensions:     types.Int64Value(int64(res.Msg.Workflow.ExtensionConditions.MaximumNumberOfExtensions)),
+		}
+	}
+
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }
 
