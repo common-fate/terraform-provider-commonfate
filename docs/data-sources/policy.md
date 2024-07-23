@@ -20,7 +20,7 @@ description: |-
 - `id` (String) The internal Common Fate policy ID
 - `policies` (Attributes Set) Configuration for extending access (see [below for nested schema](#nestedatt--policies))
 
-### Optional
+### Read-Only
 
 - `policy_as_text` (String) The converted policy into text for to be used with the policyset resource
 
@@ -33,10 +33,16 @@ Required:
 
 Optional:
 
-- `action` (Attributes) Specifies the duration for each extension. Defaults to the value of access_duration_seconds if not provided. (see [below for nested schema](#nestedatt--policies--action))
+- `action` (Object) Specifies the duration for each extension. Defaults to the value of access_duration_seconds if not provided. (see [below for nested schema](#nestedatt--policies--action))
+- `action_in` (List of Object) Specifies the duration for each extension. Defaults to the value of access_duration_seconds if not provided. (see [below for nested schema](#nestedatt--policies--action_in))
+- `action_is` (Object) Specifies the duration for each extension. Defaults to the value of access_duration_seconds if not provided. (see [below for nested schema](#nestedatt--policies--action_is))
 - `advice` (String) The effect on the cedar policy that you want to make. Either 'permit' or 'forbid'
-- `principal` (Attributes) Specifies the duration for each extension. Defaults to the value of access_duration_seconds if not provided. (see [below for nested schema](#nestedatt--policies--principal))
-- `resource` (Attributes) Specifies the duration for each extension. Defaults to the value of access_duration_seconds if not provided. (see [below for nested schema](#nestedatt--policies--resource))
+- `principal` (Object) Validation requirements to be set with this workflow (see [below for nested schema](#nestedatt--policies--principal))
+- `principal_in` (List of Object) Specifies the duration for each extension. Defaults to the value of access_duration_seconds if not provided. (see [below for nested schema](#nestedatt--policies--principal_in))
+- `principal_is` (Object) Specifies the duration for each extension. Defaults to the value of access_duration_seconds if not provided. (see [below for nested schema](#nestedatt--policies--principal_is))
+- `resource` (Object) Specifies the duration for each extension. Defaults to the value of access_duration_seconds if not provided. (see [below for nested schema](#nestedatt--policies--resource))
+- `resource_in` (List of Object) Specifies the duration for each extension. Defaults to the value of access_duration_seconds if not provided. (see [below for nested schema](#nestedatt--policies--resource_in))
+- `resource_is` (Object) Specifies the duration for each extension. Defaults to the value of access_duration_seconds if not provided. (see [below for nested schema](#nestedatt--policies--resource_is))
 - `unless` (Attributes) Specifies the duration for each extension. Defaults to the value of access_duration_seconds if not provided. (see [below for nested schema](#nestedatt--policies--unless))
 - `when` (Attributes) Specifies the duration for each extension. Defaults to the value of access_duration_seconds if not provided. (see [below for nested schema](#nestedatt--policies--when))
 
@@ -45,17 +51,26 @@ Optional:
 
 Required:
 
-- `expression` (String) The Cedar policy to define permissions as policies in your Common Fate instance.
-- `resource` (Attributes) (see [below for nested schema](#nestedatt--policies--action--resource))
+- `id` (String)
+- `type` (String)
 
-<a id="nestedatt--policies--action--resource"></a>
-### Nested Schema for `policies.action.resource`
+
+<a id="nestedatt--policies--action_in"></a>
+### Nested Schema for `policies.action_in`
 
 Required:
 
-- `id` (String) The entity ID
-- `type` (String) The entity type
+- `id` (String)
+- `type` (String)
 
+
+<a id="nestedatt--policies--action_is"></a>
+### Nested Schema for `policies.action_is`
+
+Required:
+
+- `id` (String)
+- `type` (String)
 
 
 <a id="nestedatt--policies--principal"></a>
@@ -63,17 +78,26 @@ Required:
 
 Required:
 
-- `expression` (String) The Cedar policy to define permissions as policies in your Common Fate instance.
-- `resource` (Attributes) (see [below for nested schema](#nestedatt--policies--principal--resource))
+- `id` (String)
+- `type` (String)
 
-<a id="nestedatt--policies--principal--resource"></a>
-### Nested Schema for `policies.principal.resource`
+
+<a id="nestedatt--policies--principal_in"></a>
+### Nested Schema for `policies.principal_in`
 
 Required:
 
-- `id` (String) The entity ID
-- `type` (String) The entity type
+- `id` (String)
+- `type` (String)
 
+
+<a id="nestedatt--policies--principal_is"></a>
+### Nested Schema for `policies.principal_is`
+
+Required:
+
+- `id` (String)
+- `type` (String)
 
 
 <a id="nestedatt--policies--resource"></a>
@@ -81,17 +105,26 @@ Required:
 
 Required:
 
-- `expression` (String) The Cedar policy to define permissions as policies in your Common Fate instance.
-- `resource` (Attributes) (see [below for nested schema](#nestedatt--policies--resource--resource))
+- `id` (String)
+- `type` (String)
 
-<a id="nestedatt--policies--resource--resource"></a>
-### Nested Schema for `policies.resource.resource`
+
+<a id="nestedatt--policies--resource_in"></a>
+### Nested Schema for `policies.resource_in`
 
 Required:
 
-- `id` (String) The entity ID
-- `type` (String) The entity type
+- `id` (String)
+- `type` (String)
 
+
+<a id="nestedatt--policies--resource_is"></a>
+### Nested Schema for `policies.resource_is`
+
+Required:
+
+- `id` (String)
+- `type` (String)
 
 
 <a id="nestedatt--policies--unless"></a>
