@@ -22,7 +22,7 @@ func TestReviewer_Approve(t *testing.T) {
 			name: "simple allow all with advice correctly converts",
 			policy: Policy{
 				Effect: types.StringValue("permit"),
-				Advice: grab.Ptr(types.StringValue("test")),
+				Advice: types.StringValue("test"),
 			},
 			wantPolicy: `@advice("test")
 permit (
@@ -41,7 +41,7 @@ permit (
 			name: "simple allow all with advice correctly converts",
 			policy: Policy{
 				Effect: types.StringValue("permit"),
-				Advice: grab.Ptr(types.StringValue("test")),
+				Advice: types.StringValue("test"),
 			},
 			wantPolicy: `@advice("test")
 permit (

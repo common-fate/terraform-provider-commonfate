@@ -15,7 +15,7 @@ type PolicyDataSource struct{}
 
 type PolicyDataSourceModel struct {
 	ID           types.String `tfsdk:"id"`
-	Policies     *[]Policy    `tfsdk:"policies"`
+	Policies     []Policy     `tfsdk:"policies"`
 	PolicyAsText types.String `tfsdk:"policy_as_text"`
 }
 
@@ -53,48 +53,101 @@ func (d *PolicyDataSource) Schema(ctx context.Context, req datasource.SchemaRequ
 						"principal": schema.SingleNestedAttribute{
 							MarkdownDescription: "Specifies the duration for each extension. Defaults to the value of access_duration_seconds if not provided.",
 							Optional:            true,
-
 							Attributes: map[string]schema.Attribute{
-								"expression": schema.StringAttribute{
-									MarkdownDescription: "The Cedar policy to define permissions as policies in your Common Fate instance.",
-									Required:            true,
-								},
-								"resource": schema.SingleNestedAttribute{
+								"eid": schema.SingleNestedAttribute{
 									Attributes: eid.EIDAttrsForDataSource,
 									Required:   true,
 								},
 							},
 						},
+						"principal_is": schema.SingleNestedAttribute{
+							MarkdownDescription: "Specifies the duration for each extension. Defaults to the value of access_duration_seconds if not provided.",
+							Optional:            true,
+							Attributes: map[string]schema.Attribute{
+								"eid": schema.SingleNestedAttribute{
+									Attributes: eid.EIDAttrsForDataSource,
+									Required:   true,
+								},
+							},
+						},
+						"principal_in": schema.SingleNestedAttribute{
+							MarkdownDescription: "Specifies the duration for each extension. Defaults to the value of access_duration_seconds if not provided.",
+							Optional:            true,
+							Attributes: map[string]schema.Attribute{
+								"eid": schema.ListNestedAttribute{
+									NestedObject: schema.NestedAttributeObject{
+										Attributes: eid.EIDAttrsForDataSource,
+									},
+									Required: true,
+								},
+							},
+						},
+
 						"action": schema.SingleNestedAttribute{
 							MarkdownDescription: "Specifies the duration for each extension. Defaults to the value of access_duration_seconds if not provided.",
 							Optional:            true,
-
 							Attributes: map[string]schema.Attribute{
-								"expression": schema.StringAttribute{
-									MarkdownDescription: "The Cedar policy to define permissions as policies in your Common Fate instance.",
-									Required:            true,
-								},
-								"resource": schema.SingleNestedAttribute{
+								"eid": schema.SingleNestedAttribute{
 									Attributes: eid.EIDAttrsForDataSource,
 									Required:   true,
+								},
+							},
+						},
+						"action_is": schema.SingleNestedAttribute{
+							MarkdownDescription: "Specifies the duration for each extension. Defaults to the value of access_duration_seconds if not provided.",
+							Optional:            true,
+							Attributes: map[string]schema.Attribute{
+								"eid": schema.SingleNestedAttribute{
+									Attributes: eid.EIDAttrsForDataSource,
+									Required:   true,
+								},
+							},
+						},
+						"action_in": schema.SingleNestedAttribute{
+							MarkdownDescription: "Specifies the duration for each extension. Defaults to the value of access_duration_seconds if not provided.",
+							Optional:            true,
+							Attributes: map[string]schema.Attribute{
+								"eid": schema.ListNestedAttribute{
+									NestedObject: schema.NestedAttributeObject{
+										Attributes: eid.EIDAttrsForDataSource,
+									},
+									Required: true,
 								},
 							},
 						},
 						"resource": schema.SingleNestedAttribute{
 							MarkdownDescription: "Specifies the duration for each extension. Defaults to the value of access_duration_seconds if not provided.",
 							Optional:            true,
-
 							Attributes: map[string]schema.Attribute{
-								"expression": schema.StringAttribute{
-									MarkdownDescription: "The Cedar policy to define permissions as policies in your Common Fate instance.",
-									Required:            true,
-								},
-								"resource": schema.SingleNestedAttribute{
+								"eid": schema.SingleNestedAttribute{
 									Attributes: eid.EIDAttrsForDataSource,
 									Required:   true,
 								},
 							},
 						},
+						"resource_is": schema.SingleNestedAttribute{
+							MarkdownDescription: "Specifies the duration for each extension. Defaults to the value of access_duration_seconds if not provided.",
+							Optional:            true,
+							Attributes: map[string]schema.Attribute{
+								"eid": schema.SingleNestedAttribute{
+									Attributes: eid.EIDAttrsForDataSource,
+									Required:   true,
+								},
+							},
+						},
+						"resource_in": schema.SingleNestedAttribute{
+							MarkdownDescription: "Specifies the duration for each extension. Defaults to the value of access_duration_seconds if not provided.",
+							Optional:            true,
+							Attributes: map[string]schema.Attribute{
+								"eid": schema.ListNestedAttribute{
+									NestedObject: schema.NestedAttributeObject{
+										Attributes: eid.EIDAttrsForDataSource,
+									},
+									Required: true,
+								},
+							},
+						},
+
 						"when": schema.SingleNestedAttribute{
 							MarkdownDescription: "Specifies the duration for each extension. Defaults to the value of access_duration_seconds if not provided.",
 							Optional:            true,
@@ -147,7 +200,7 @@ func (d *PolicyDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
 
 	var policyText string
-	for _, policy := range *data.Policies {
+	for _, policy := range data.Policies {
 		currentPolicy, err := PolicyToString(policy)
 		if err != nil {
 			resp.Diagnostics.AddError(

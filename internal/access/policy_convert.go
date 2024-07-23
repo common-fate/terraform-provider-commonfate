@@ -22,8 +22,8 @@ type CedarConditionEntity struct {
 }
 
 type Policy struct {
-	Effect types.String  `tfsdk:"effect"`
-	Advice *types.String `tfsdk:"advice"`
+	Effect types.String `tfsdk:"effect"`
+	Advice types.String `tfsdk:"advice"`
 
 	Principal   *eid.EID   `tfsdk:"principal"`
 	PrincipalIn *[]eid.EID `tfsdk:"principal_in"`
@@ -55,7 +55,7 @@ func buildCedarScopeField(scopeType string, includeTrailingComma bool) string {
 	return out
 }
 
-const cedarAdviceTemplate = `{{if .Advice}}@advice({{.Advice}}){{end}}`
+const cedarAdviceTemplate = `{{if .Advice }}@advice({{.Advice}}){{end}}`
 const cedarEffectTemplate = `{{.Effect.ValueString}}`
 
 var cedarPrincipalTemplate = buildCedarScopeField("Principal", true)
