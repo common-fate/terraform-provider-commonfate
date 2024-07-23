@@ -41,12 +41,12 @@ type Policy struct {
 	Unless *CedarConditionEntity `tfsdk:"unless"`
 }
 
-const cedarAdviceTemplate = `{{if .Advice}}@advice({{.Advice}}){{end}}`
-
-const cedarEffectTemplate = `{{.Effect.ValueString}}`
-
+// builds the scope fields (principal, action, resource) since they will all follow the same patterns for being built
 func buildCedarScopeField(scopeType string, includeTrailingComma bool) string {
 	toLowerName := strings.ToLower(scopeType)
+	//We make some variables in the template to work out if for a given number of scopeIn fields if we need to add the delimiting comma eg.
+	//{{$len := len .%sIn }}{{$actLen := minus $len 1}} this is making a variable $len = length(principalIn) then $actLen = $len - 1 which is the actual length of the list
+
 	out := fmt.Sprintf(`%s{{if .%s}} == {{.%s.Type.ValueString}}::{{.%s.ID}}{{end}}{{if .%sIs}} is {{.%sIs.Type.ValueString}}::{{.%sIs.ID}}{{end}}{{if .%sIn}}{{$len := len .%sIn }}{{$actLen := minus $len 1}} in [{{range $i, $val := .%sIn}}{{$val.Type.ValueString}}::{{$val.ID}}{{if (ne $i $actLen )}}, {{end}}{{end}}]{{end}}`, toLowerName, scopeType, scopeType, scopeType, scopeType, scopeType, scopeType, scopeType, scopeType, scopeType)
 
 	if includeTrailingComma {
@@ -54,6 +54,9 @@ func buildCedarScopeField(scopeType string, includeTrailingComma bool) string {
 	}
 	return out
 }
+
+const cedarAdviceTemplate = `{{if .Advice}}@advice({{.Advice}}){{end}}`
+const cedarEffectTemplate = `{{.Effect.ValueString}}`
 
 var cedarPrincipalTemplate = buildCedarScopeField("Principal", true)
 var cedarActionTemplate = buildCedarScopeField("Action", true)
@@ -72,11 +75,8 @@ unless {
 var cedarPolicyTemplateTest = cedarAdviceTemplate + cedarEffectTemplate + " ( " + cedarPrincipalTemplate + cedarActionTemplate + cedarResourceTemplate + " )" + cedarWhenTemplate + cedarUnlessTemplate + ";"
 
 func PolicyToString(policy Policy) (string, error) {
-	// tmpl, err := template.New("cedarPolicy").Parse(cedarPolicyTemplateTest)
-	// if err != nil {
-	// 	return "", err
-	// }
 
+	//adds minus function to template to allow checking length of the resources
 	funcMap := template.FuncMap{
 		"minus": func(i, k int) int {
 			return i - k

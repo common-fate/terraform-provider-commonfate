@@ -17,6 +17,19 @@ func TestReviewer_Approve(t *testing.T) {
 		policy     Policy
 		wantPolicy string
 	}{
+
+		{
+			name: "simple allow all with advice correctly converts",
+			policy: Policy{
+				Effect: types.StringValue("permit"),
+				Advice: grab.Ptr(types.StringValue("test")),
+			},
+			wantPolicy: `@advice("test")
+permit (
+ principal,
+ action,
+ resource );`,
+		},
 		{
 			name: "simple allow all cedar policy converts correctly",
 			policy: Policy{
