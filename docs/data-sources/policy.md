@@ -34,6 +34,7 @@ Required:
 Optional:
 
 - `action` (Attributes) Specifies the duration for each extension. Defaults to the value of access_duration_seconds if not provided. (see [below for nested schema](#nestedatt--policies--action))
+- `advice` (String) The effect on the cedar policy that you want to make. Either 'permit' or 'forbid'
 - `principal` (Attributes) Specifies the duration for each extension. Defaults to the value of access_duration_seconds if not provided. (see [below for nested schema](#nestedatt--policies--principal))
 - `resource` (Attributes) Specifies the duration for each extension. Defaults to the value of access_duration_seconds if not provided. (see [below for nested schema](#nestedatt--policies--resource))
 - `unless` (Attributes) Specifies the duration for each extension. Defaults to the value of access_duration_seconds if not provided. (see [below for nested schema](#nestedatt--policies--unless))
