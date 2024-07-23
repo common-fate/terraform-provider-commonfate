@@ -22,11 +22,19 @@ func TestReviewer_Approve(t *testing.T) {
 			policy: Policy{
 				Effect: types.StringValue("permit"),
 			},
-			wantPolicy: `permit (
-    principal,
-    action,
-    resource
-);`,
+			wantPolicy: `permit ( principal, action, resource );`,
+		},
+		{
+			name: "simple allow all with advice correctly converts",
+			policy: Policy{
+				Effect: types.StringValue("permit"),
+				Advice: grab.Ptr(types.StringValue("test")),
+			},
+			wantPolicy: `@advice("test")
+permit (
+ principal,
+ action,
+ resource );`,
 		},
 		{
 			name: "simple cedar policy converts correctly",
@@ -46,9 +54,9 @@ func TestReviewer_Approve(t *testing.T) {
 				},
 			},
 			wantPolicy: `permit (
-    principal == CF::User::"user1",
-    action == Action::Access::"Request",
-    resource == Test::Vault::"test1"
+ principal == CF::User::"user1",
+ action == Action::Access::"Request",
+ resource == Test::Vault::"test1" 
 );`,
 		},
 		{
@@ -72,9 +80,9 @@ func TestReviewer_Approve(t *testing.T) {
 				},
 			},
 			wantPolicy: `permit (
-    principal == CF::User::"user1",
-    action == Action::Access::"Request",
-    resource == Test::Vault::"test1"
+ principal == CF::User::"user1",
+ action == Action::Access::"Request",
+ resource == Test::Vault::"test1" 
 )
 when { true };`,
 		},
@@ -104,9 +112,9 @@ when { true };`,
 				},
 			},
 			wantPolicy: `permit (
-    principal == CF::User::"user1",
-    action == Action::Access::"Request",
-    resource == Test::Vault::"test1"
+ principal == CF::User::"user1",
+ action == Action::Access::"Request",
+ resource == Test::Vault::"test1" 
 )
 when { resource.test == test };`,
 		},
@@ -134,9 +142,9 @@ when { resource.test == test };`,
 				},
 			},
 			wantPolicy: `permit (
-    principal == CF::User::"user1",
-    action == Action::Access::"Request",
-    resource == Test::Vault::"test1"
+ principal == CF::User::"user1",
+ action == Action::Access::"Request",
+ resource == Test::Vault::"test1" 
 )
 unless { true };`,
 		},
@@ -167,9 +175,9 @@ unless { true };`,
 				},
 			},
 			wantPolicy: `permit (
-    principal == CF::User::"user1",
-    action == Action::Access::"Request",
-    resource == Test::Vault::"test1"
+ principal == CF::User::"user1",
+ action == Action::Access::"Request",
+ resource == Test::Vault::"test1" 
 )
 unless { resource.test == test };`,
 		},
@@ -207,9 +215,61 @@ unless { resource.test == test };`,
 				},
 			},
 			wantPolicy: `permit (
-principal in [CF::User::"user1"],
-action in [Action::Access::"Request"],
-resource in [Test::Vault::"test1"]
+ principal in [CF::User::"user1"],
+ action in [Action::Access::"Request"],
+ resource in [Test::Vault::"test1"] 
+)
+unless { resource.test == test };`,
+		},
+		{
+			name: "test in condition with multiple values",
+			policy: Policy{
+				Effect: types.StringValue("permit"),
+				PrincipalIn: &[]eid.EID{
+					eid.EID{
+						Type: types.StringValue("CF::User"),
+						ID:   types.StringValue("user1"),
+					},
+					eid.EID{
+						Type: types.StringValue("CF::User"),
+						ID:   types.StringValue("user2"),
+					},
+				},
+
+				ActionIn: &[]eid.EID{
+					eid.EID{
+						Type: types.StringValue("Action::Access"),
+						ID:   types.StringValue("Request"),
+					},
+					eid.EID{
+						Type: types.StringValue("Action::Access"),
+						ID:   types.StringValue("Close"),
+					},
+				},
+
+				ResourceIn: &[]eid.EID{
+					eid.EID{
+						Type: types.StringValue("Test::Vault"),
+						ID:   types.StringValue("test1"),
+					},
+					eid.EID{
+						Type: types.StringValue("Test::Vault"),
+						ID:   types.StringValue("test2"),
+					},
+				},
+
+				Unless: &CedarConditionEntity{
+					EmbeddedExpression: &StructuredEmbeddedExpression{
+						Resource:   types.StringValue("resource.test"),
+						Expression: types.StringValue("=="),
+						Value:      types.StringValue("test"),
+					},
+				},
+			},
+			wantPolicy: `permit (
+ principal in [CF::User::"user1", CF::User::"user2"],
+ action in [Action::Access::"Request", Action::Access::"Close"],
+ resource in [Test::Vault::"test1", Test::Vault::"test2"] 
 )
 unless { resource.test == test };`,
 		},

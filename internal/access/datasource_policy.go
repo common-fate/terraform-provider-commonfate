@@ -46,6 +46,10 @@ func (d *PolicyDataSource) Schema(ctx context.Context, req datasource.SchemaRequ
 							MarkdownDescription: "The effect on the cedar policy that you want to make. Either 'permit' or 'forbid'",
 							Required:            true,
 						},
+						"advice": schema.StringAttribute{
+							MarkdownDescription: "The effect on the cedar policy that you want to make. Either 'permit' or 'forbid'",
+							Optional:            true,
+						},
 						"principal": schema.SingleNestedAttribute{
 							MarkdownDescription: "Specifies the duration for each extension. Defaults to the value of access_duration_seconds if not provided.",
 							Optional:            true,

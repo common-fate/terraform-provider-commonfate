@@ -2,6 +2,8 @@ package access
 
 import (
 	"bytes"
+	"fmt"
+	"strings"
 	"text/template"
 
 	"github.com/common-fate/terraform-provider-commonfate/pkg/eid"
@@ -20,7 +22,8 @@ type CedarConditionEntity struct {
 }
 
 type Policy struct {
-	Effect types.String `tfsdk:"effect"`
+	Effect types.String  `tfsdk:"effect"`
+	Advice *types.String `tfsdk:"advice"`
 
 	Principal   *eid.EID   `tfsdk:"principal"`
 	PrincipalIn *[]eid.EID `tfsdk:"principal_in"`
@@ -38,21 +41,53 @@ type Policy struct {
 	Unless *CedarConditionEntity `tfsdk:"unless"`
 }
 
-const cedarPolicyTemplate = `{{.Effect.ValueString}} (
-    principal{{if .Principal}} == {{.Principal.Type.ValueString}}::{{.Principal.ID}}{{end}}{{if .PrincipalIs}} is {{.PrincipalIs.Type.ValueString}}::{{.PrincipalIs.ID}}{{end}}{{if .PrincipalIn}}{{$len := len .PrincipalIn }} in [{{range $i, $val := .PrincipalIn}}{{$val.Type.ValueString}}::{{$val.ID}} {{if (ne $i $len)}}, {{end}}{{end}}] {{end}},
-    action{{if .Action}} == {{.Action.Type.ValueString}}::{{.Action.ID}}{{end}}{{if .ActionIs}} is {{.ActionIs.Type.ValueString}}::{{.ActionIs.ID}}{{end}}{{if .ActionIn}} in  [{{range $i, $val := .ActionIn}}{{$val.Type.ValueString}}::{{$val.ID}}{{if (gt $i 1)}}, {{end}}{{end}}] {{end}},
-    resource{{if .Resource}} == {{.Resource.Type.ValueString}}::{{.Resource.ID}}{{end}}{{if .ResourceIs}} is {{.ResourceIs.Type.ValueString}}::{{.ResourceIs.ID}}{{end}}{{if .ResourceIn}} in [{{range $i, $val := .ResourceIn}}{{$val.Type.ValueString}}::{{$val.ID}}{{if (gt $i 1)}}, {{end}}{{end}}] {{end}},
-){{if .When}}
+const cedarAdviceTemplate = `{{if .Advice}}@advice({{.Advice}}){{end}}`
+
+const cedarEffectTemplate = `{{.Effect.ValueString}}`
+
+func buildCedarScopeField(scopeType string, includeTrailingComma bool) string {
+	toLowerName := strings.ToLower(scopeType)
+	out := fmt.Sprintf(`%s{{if .%s}} == {{.%s.Type.ValueString}}::{{.%s.ID}}{{end}}{{if .%sIs}} is {{.%sIs.Type.ValueString}}::{{.%sIs.ID}}{{end}}{{if .%sIn}}{{$len := len .%sIn }}{{$actLen := minus $len 1}} in [{{range $i, $val := .%sIn}}{{$val.Type.ValueString}}::{{$val.ID}}{{if (ne $i $actLen )}}, {{end}}{{end}}]{{end}}`, toLowerName, scopeType, scopeType, scopeType, scopeType, scopeType, scopeType, scopeType, scopeType, scopeType)
+
+	if includeTrailingComma {
+		out = out + ", "
+	}
+	return out
+}
+
+var cedarPrincipalTemplate = buildCedarScopeField("Principal", true)
+var cedarActionTemplate = buildCedarScopeField("Action", true)
+var cedarResourceTemplate = buildCedarScopeField("Resource", false)
+
+const cedarWhenTemplate = `{{if .When}}
 when {
-{{if .When.Text}} {{.When.Text.ValueString}} {{else if .When.EmbeddedExpression}} {{.When.EmbeddedExpression.Resource.ValueString}} {{.When.EmbeddedExpression.Expression.ValueString}} {{.When.EmbeddedExpression.Value.ValueString}}{{end}}
-}{{end}}{{if .Unless}}
+{{if .When.Text}} {{.When.Text.ValueString}} {{else if .When.EmbeddedExpression}} {{.When.EmbeddedExpression.Resource.ValueString}} {{.When.EmbeddedExpression.Expression.ValueString}} {{.When.EmbeddedExpression.Value.ValueString}} {{end}}
+}{{end}}`
+
+const cedarUnlessTemplate = `{{if .Unless}}
 unless {
-{{if .Unless.Text}} {{.Unless.Text.ValueString}} {{else if .Unless.EmbeddedExpression}} {{.Unless.EmbeddedExpression.Resource.ValueString}} {{.Unless.EmbeddedExpression.Expression.ValueString}} {{.Unless.EmbeddedExpression.Value.ValueString}}{{end}}}{{end}};`
+{{if .Unless.Text}} {{.Unless.Text.ValueString}} {{else if .Unless.EmbeddedExpression}} {{.Unless.EmbeddedExpression.Resource.ValueString}} {{.Unless.EmbeddedExpression.Expression.ValueString}} {{.Unless.EmbeddedExpression.Value.ValueString}} {{end}}
+}{{end}}`
+
+var cedarPolicyTemplateTest = cedarAdviceTemplate + cedarEffectTemplate + " ( " + cedarPrincipalTemplate + cedarActionTemplate + cedarResourceTemplate + " )" + cedarWhenTemplate + cedarUnlessTemplate + ";"
 
 func PolicyToString(policy Policy) (string, error) {
-	tmpl, err := template.New("cedarPolicy").Parse(cedarPolicyTemplate)
+	// tmpl, err := template.New("cedarPolicy").Parse(cedarPolicyTemplateTest)
+	// if err != nil {
+	// 	return "", err
+	// }
+
+	funcMap := template.FuncMap{
+		"minus": func(i, k int) int {
+			return i - k
+		},
+	}
+
+	tmpl, err := template.New("cedarPolicy").Funcs(funcMap).Parse(cedarPolicyTemplateTest)
 	if err != nil {
-		return "", err
+		if err != nil {
+			return "", err
+		}
 	}
 
 	var result bytes.Buffer
