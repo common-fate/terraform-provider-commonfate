@@ -161,6 +161,34 @@ func (d *PolicyDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 
 	var policyText string
 	for _, policy := range data.Policies {
+
+		if (policy.Action != nil && policy.ActionIn != nil) || (policy.ActionIn != nil && policy.Action != nil || policy.ActionIs != nil) || (policy.ActionIs != nil && policy.Action != nil || policy.ActionIn != nil) {
+			resp.Diagnostics.AddError(
+				"Unable to Create DataSource: Access Policy",
+				"Cannot have mulitple values for action condition",
+			)
+
+			return
+		}
+
+		if (policy.Principal != nil && policy.PrincipalIn != nil) || (policy.PrincipalIn != nil && policy.Principal != nil || policy.PrincipalIs != nil) || (policy.PrincipalIs != nil && policy.Principal != nil || policy.PrincipalIn != nil) {
+			resp.Diagnostics.AddError(
+				"Unable to Create DataSource: Access Policy",
+				"Cannot have mulitple values for Principal condition",
+			)
+
+			return
+		}
+
+		if (policy.Resource != nil && policy.ResourceIn != nil) || (policy.ResourceIn != nil && policy.Resource != nil || policy.ResourceIs != nil) || (policy.ResourceIs != nil && policy.Resource != nil || policy.ResourceIn != nil) {
+			resp.Diagnostics.AddError(
+				"Unable to Create DataSource: Access Policy",
+				"Cannot have mulitple values for Resource condition",
+			)
+
+			return
+		}
+
 		currentPolicy, err := PolicyToString(policy)
 		if err != nil {
 			resp.Diagnostics.AddError(
