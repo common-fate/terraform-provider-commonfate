@@ -162,6 +162,32 @@ func (d *PolicyDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 	var policyText string
 	for _, policy := range data.Policies {
 
+		if policy.Action == nil && policy.ActionIn == nil && policy.ActionIs == nil {
+			resp.Diagnostics.AddError(
+				"Unable to Create DataSource: Access Policy",
+				"must include at least one of: action, action_in, action_is",
+			)
+
+			return
+		}
+
+		if policy.Principal == nil && policy.PrincipalIn == nil && policy.PrincipalIs == nil {
+			resp.Diagnostics.AddError(
+				"Unable to Create DataSource: Access Policy",
+				"must include at least one of: principal, principal_in, principal_is",
+			)
+
+			return
+		}
+		if policy.Resource == nil && policy.ResourceIn == nil && policy.ResourceIs == nil {
+			resp.Diagnostics.AddError(
+				"Unable to Create DataSource: Access Policy",
+				"must include at least one of: resource, resource_in, resource_is",
+			)
+
+			return
+		}
+
 		if (policy.Action != nil && policy.ActionIn != nil) || (policy.ActionIn != nil && policy.Action != nil || policy.ActionIs != nil) || (policy.ActionIs != nil && policy.Action != nil || policy.ActionIn != nil) {
 			resp.Diagnostics.AddError(
 				"Unable to Create DataSource: Access Policy",

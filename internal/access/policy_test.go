@@ -285,6 +285,40 @@ unless { resource.test == test };`,
 )
 unless { resource.test == test };`,
 		},
+		{
+			name: "test is condition",
+			policy: Policy{
+				Effect: types.StringValue("permit"),
+				PrincipalIs: &eid.EID{
+					Type: types.StringValue("CF::User"),
+					ID:   types.StringValue("user1"),
+				},
+
+				ActionIs: &eid.EID{
+					Type: types.StringValue("Action::Access"),
+					ID:   types.StringValue("Request"),
+				},
+
+				ResourceIs: &eid.EID{
+					Type: types.StringValue("Test::Vault"),
+					ID:   types.StringValue("test1"),
+				},
+
+				Unless: &CedarConditionEntity{
+					EmbeddedExpression: &StructuredEmbeddedExpression{
+						Resource:   types.StringValue("resource.test"),
+						Expression: types.StringValue("=="),
+						Value:      types.StringValue("test"),
+					},
+				},
+			},
+			wantPolicy: `permit (
+ principal is CF::User::"user1",
+ action is Action::Access::"Request",
+ resource is Test::Vault::"test1" 
+)
+unless { resource.test == test };`,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
