@@ -108,8 +108,8 @@ permit (
 						ID:   types.StringValue("test1"),
 					},
 				},
-				When: &CedarConditionEntity{
-					Text: types.StringValue("true"),
+				When: &[]CedarConditionEntity{
+					{Text: types.StringValue("true")},
 				},
 			},
 			wantPolicy: `permit (
@@ -142,11 +142,13 @@ when { true };`,
 					},
 				},
 
-				When: &CedarConditionEntity{
-					EmbeddedExpression: &StructuredEmbeddedExpression{
-						Resource:   types.StringValue("resource.test"),
-						Expression: types.StringValue("=="),
-						Value:      types.StringValue("test"),
+				When: &[]CedarConditionEntity{
+					{
+						EmbeddedExpression: &StructuredEmbeddedExpression{
+							Resource:   types.StringValue("resource.test"),
+							Expression: types.StringValue("=="),
+							Value:      types.StringValue("test"),
+						},
 					},
 				},
 			},
@@ -180,8 +182,8 @@ when { resource.test == test };`,
 					},
 				},
 
-				Unless: &CedarConditionEntity{
-					Text: types.StringValue("true"),
+				Unless: &[]CedarConditionEntity{
+					{Text: types.StringValue("true")},
 				},
 			},
 			wantPolicy: `permit (
@@ -213,12 +215,12 @@ unless { true };`,
 						ID:   types.StringValue("test1"),
 					},
 				},
-				Unless: &CedarConditionEntity{
-					EmbeddedExpression: &StructuredEmbeddedExpression{
+				Unless: &[]CedarConditionEntity{
+					{EmbeddedExpression: &StructuredEmbeddedExpression{
 						Resource:   types.StringValue("resource.test"),
 						Expression: types.StringValue("=="),
 						Value:      types.StringValue("test"),
-					},
+					}},
 				},
 			},
 			wantPolicy: `permit (
@@ -253,12 +255,12 @@ unless { resource.test == test };`,
 					},
 				},
 
-				Unless: &CedarConditionEntity{
-					EmbeddedExpression: &StructuredEmbeddedExpression{
+				Unless: &[]CedarConditionEntity{
+					{EmbeddedExpression: &StructuredEmbeddedExpression{
 						Resource:   types.StringValue("resource.test"),
 						Expression: types.StringValue("=="),
 						Value:      types.StringValue("test"),
-					},
+					}},
 				},
 			},
 			wantPolicy: `permit (
@@ -305,12 +307,12 @@ unless { resource.test == test };`,
 					},
 				},
 
-				Unless: &CedarConditionEntity{
-					EmbeddedExpression: &StructuredEmbeddedExpression{
+				Unless: &[]CedarConditionEntity{
+					{EmbeddedExpression: &StructuredEmbeddedExpression{
 						Resource:   types.StringValue("resource.test"),
 						Expression: types.StringValue("=="),
 						Value:      types.StringValue("test"),
-					},
+					}},
 				},
 			},
 			wantPolicy: `permit (
@@ -339,12 +341,12 @@ unless { resource.test == test };`,
 					ID:   types.StringValue("test1"),
 				},
 
-				Unless: &CedarConditionEntity{
-					EmbeddedExpression: &StructuredEmbeddedExpression{
+				Unless: &[]CedarConditionEntity{
+					{EmbeddedExpression: &StructuredEmbeddedExpression{
 						Resource:   types.StringValue("resource.test"),
 						Expression: types.StringValue("=="),
 						Value:      types.StringValue("test"),
-					},
+					}},
 				},
 			},
 			wantPolicy: `permit (
@@ -353,6 +355,48 @@ unless { resource.test == test };`,
  resource is Test::Vault::"test1" 
 )
 unless { resource.test == test };`,
+		},
+		{
+			name: "test having multiple when conditions",
+			policy: Policy{
+				Effect: types.StringValue("permit"),
+				Principal: &ScopeConditionType{
+					EID: &eid.EID{
+						Type: types.StringValue("CF::User"),
+						ID:   types.StringValue("user1"),
+					},
+				},
+				Action: &ScopeConditionType{
+					EID: &eid.EID{
+						Type: types.StringValue("Action::Access"),
+						ID:   types.StringValue("Request"),
+					},
+				},
+				Resource: &ScopeConditionType{
+					EID: &eid.EID{
+						Type: types.StringValue("Test::Vault"),
+						ID:   types.StringValue("test1"),
+					},
+				},
+				When: &[]CedarConditionEntity{
+					{
+						Text: types.StringValue("true"),
+					},
+					{
+						EmbeddedExpression: &StructuredEmbeddedExpression{
+							Resource:   types.StringValue("resource.test"),
+							Expression: types.StringValue("=="),
+							Value:      types.StringValue("test"),
+						},
+					},
+				},
+			},
+			wantPolicy: `permit (
+ principal == CF::User::"user1",
+ action == Action::Access::"Request",
+ resource == Test::Vault::"test1" 
+)
+when { true && resource.test == test };`,
 		},
 	}
 	for _, tt := range tests {

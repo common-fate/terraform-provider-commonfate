@@ -21,6 +21,11 @@ type CedarConditionEntity struct {
 	EmbeddedExpression *StructuredEmbeddedExpression `tfsdk:"structured_embedded_expression"`
 }
 
+type Conditions struct {
+	Delimiter         types.String `tfsdk:"delimiter"`
+	ConditionEntities []CedarConditionEntity
+}
+
 // same as the eid type but allows to specify an allow all flag
 type ScopeConditionType struct {
 	*eid.EID `tfsdk:"entity"`
@@ -48,8 +53,8 @@ type Policy struct {
 	ResourceIn *[]eid.EID          `tfsdk:"resource_in"`
 	ResourceIs *eid.EID            `tfsdk:"resource_is"`
 
-	When   *CedarConditionEntity `tfsdk:"when"`
-	Unless *CedarConditionEntity `tfsdk:"unless"`
+	When   *[]CedarConditionEntity `tfsdk:"when"`
+	Unless *[]CedarConditionEntity `tfsdk:"unless"`
 }
 
 // builds the scope fields (principal, action, resource) since they will all follow the same patterns for being built
@@ -57,13 +62,13 @@ func buildCedarScopeField(scopeType string, includeTrailingComma bool) string {
 	toLowerName := strings.ToLower(scopeType)
 	//We make some variables in the template to work out if for a given number of scopeIn fields if we need to add the delimiting comma eg.
 	//{{$len := len .%sIn }}{{$actLen := minus $len 1}} this is making a variable $len = length(principalIn) then $actLen = $len - 1 which is the actual length of the list
-	part1 := fmt.Sprintf(`{{if and .%s .%s.AllowAll.ValueBool}}{{else if  and .%s .%s.EID}} == {{.%s.EID.Type.ValueString}}::{{.%s.EID.ID}}{{end}}`, scopeType, scopeType, scopeType, scopeType, scopeType, scopeType)
+	basicScope := fmt.Sprintf(`{{if and .%s .%s.AllowAll.ValueBool}}{{else if  and .%s .%s.EID}} == {{.%s.EID.Type.ValueString}}::{{.%s.EID.ID}}{{end}}`, scopeType, scopeType, scopeType, scopeType, scopeType, scopeType)
 
-	part2 := fmt.Sprintf(`{{if .%sIs}} is {{.%sIs.Type.ValueString}}::{{.%sIs.ID}}{{end}}`, scopeType, scopeType, scopeType)
+	isScope := fmt.Sprintf(`{{if .%sIs}} is {{.%sIs.Type.ValueString}}::{{.%sIs.ID}}{{end}}`, scopeType, scopeType, scopeType)
 
-	part3 := fmt.Sprintf(`{{if .%sIn}}{{$len := len .%sIn }}{{$actLen := minus $len 1}} in [{{range $i, $val := .%sIn}}{{$val.Type.ValueString}}::{{$val.ID}}{{if (ne $i $actLen )}}, {{end}}{{end}}]{{end}}`, scopeType, scopeType, scopeType)
+	inScope := fmt.Sprintf(`{{if .%sIn}}{{$len := len .%sIn }}{{$actLen := minus $len 1}} in [{{range $i, $val := .%sIn}}{{$val.Type.ValueString}}::{{$val.ID}}{{if (ne $i $actLen )}}, {{end}}{{end}}]{{end}}`, scopeType, scopeType, scopeType)
 
-	out := fmt.Sprintf(`%s%s%s%s`, toLowerName, part1, part2, part3)
+	out := fmt.Sprintf(`%s%s%s%s`, toLowerName, basicScope, isScope, inScope)
 
 	if includeTrailingComma {
 		out = out + ", "
@@ -80,12 +85,12 @@ var cedarResourceTemplate = buildCedarScopeField("Resource", false)
 
 const cedarWhenTemplate = `{{if .When}}
 when {
-{{if not .When.Text.IsNull}} {{.When.Text.ValueString}} {{else if .When.EmbeddedExpression}} {{.When.EmbeddedExpression.Resource.ValueString}} {{.When.EmbeddedExpression.Expression.ValueString}} {{.When.EmbeddedExpression.Value.ValueString}} {{end}}
+{{$len := len .When }}{{$actLen := minus $len 1}}{{range $i, $val := .When}}{{if not $val.Text.IsNull}} {{$val.Text.ValueString}} {{else if $val.EmbeddedExpression}} {{$val.EmbeddedExpression.Resource.ValueString}} {{$val.EmbeddedExpression.Expression.ValueString}} {{$val.EmbeddedExpression.Value.ValueString}} {{end}}{{if (ne $i $actLen )}}&&{{end}}{{end}}
 }{{end}}`
 
 const cedarUnlessTemplate = `{{if .Unless}}
 unless {
-{{if not .Unless.Text.IsNull}} {{.Unless.Text.ValueString}} {{else if .Unless.EmbeddedExpression}} {{.Unless.EmbeddedExpression.Resource.ValueString}} {{.Unless.EmbeddedExpression.Expression.ValueString}} {{.Unless.EmbeddedExpression.Value.ValueString}} {{end}}
+{{$len := len .Unless }}{{$actLen := minus $len 1}}{{range $i, $val := .Unless}}{{if not $val.Text.IsNull}} {{$val.Text.ValueString}} {{else if $val.EmbeddedExpression}} {{$val.EmbeddedExpression.Resource.ValueString}} {{$val.EmbeddedExpression.Expression.ValueString}} {{$val.EmbeddedExpression.Value.ValueString}} {{end}}{{if (ne $i $actLen )}}&&{{end}}{{end}}
 }{{end}}`
 
 var cedarPolicyTemplateTest = cedarAdviceTemplate + cedarEffectTemplate + " ( " + cedarPrincipalTemplate + cedarActionTemplate + cedarResourceTemplate + " )" + cedarWhenTemplate + cedarUnlessTemplate + ";"

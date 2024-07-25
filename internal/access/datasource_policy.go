@@ -16,7 +16,7 @@ type PolicyDataSource struct{}
 
 type PolicyDataSourceModel struct {
 	ID           types.String `tfsdk:"id"`
-	Policies     []Policy     `tfsdk:"policies"`
+	Policies     []Policy     `tfsdk:"policy"`
 	PolicyAsText types.String `tfsdk:"policy_as_text"`
 }
 
@@ -27,7 +27,6 @@ func (d *PolicyDataSource) Metadata(ctx context.Context, req datasource.Metadata
 func (d *PolicyDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
-
 			"id": schema.StringAttribute{
 				MarkdownDescription: "The internal Common Fate policy ID",
 				Required:            true,
@@ -37,11 +36,14 @@ func (d *PolicyDataSource) Schema(ctx context.Context, req datasource.SchemaRequ
 				MarkdownDescription: "The converted policy into text for to be used with the policyset resource",
 				Computed:            true,
 			},
+		},
+		Blocks: map[string]schema.Block{
 
-			"policies": schema.SetNestedAttribute{
+			"policy": schema.ListNestedBlock{
 				MarkdownDescription: "a list of policies to be used in Common Fate",
-				Required:            true,
-				NestedObject: schema.NestedAttributeObject{
+
+				NestedObject: schema.NestedBlockObject{
+
 					Attributes: map[string]schema.Attribute{
 						"effect": schema.StringAttribute{
 							MarkdownDescription: "The effect specifies the intent of the policy, to either permit` or forbid any request that matches the scope and conditions specified in the policy",
@@ -146,46 +148,52 @@ func (d *PolicyDataSource) Schema(ctx context.Context, req datasource.SchemaRequ
 								AttrTypes: eid.EIDAttrsForDataSource,
 							},
 						},
-
-						"when": schema.SingleNestedAttribute{
+					},
+					Blocks: map[string]schema.Block{
+						"when": schema.ListNestedBlock{
 							MarkdownDescription: "The when and unless components define additional conditions under which the action is allowed.",
-							Optional:            true,
+							// Optional:            true,
 
-							Attributes: map[string]schema.Attribute{
-								"text": schema.StringAttribute{
-									MarkdownDescription: "when can be used with the text attribute to define the when clause in plain-text.",
-									Required:            true,
-								},
-								"structured_embedded_expression": schema.SingleNestedAttribute{
-									MarkdownDescription: "when can be used with `structured_embedded_expression` to define a more structured when clause.",
-
-									Attributes: map[string]schema.Attribute{
-										"resource":   schema.StringAttribute{Required: true},
-										"expression": schema.StringAttribute{Required: true},
-										"value":      schema.StringAttribute{Required: true},
+							NestedObject: schema.NestedBlockObject{
+								Attributes: map[string]schema.Attribute{
+									"text": schema.StringAttribute{
+										MarkdownDescription: "when can be used with the text attribute to define the when clause in plain-text.",
+										Required:            true,
 									},
-									Optional: true,
+									"structured_embedded_expression": schema.SingleNestedAttribute{
+										MarkdownDescription: "when can be used with `structured_embedded_expression` to define a more structured when clause.",
+
+										Attributes: map[string]schema.Attribute{
+											"resource":   schema.StringAttribute{Required: true},
+											"expression": schema.StringAttribute{Required: true},
+											"value":      schema.StringAttribute{Required: true},
+										},
+										Optional: true,
+									},
 								},
 							},
 						},
-						"unless": schema.SingleNestedAttribute{
-							MarkdownDescription: "Specifies the duration for each extension. Defaults to the value of access_duration_seconds if not provided.",
-							Optional:            true,
 
-							Attributes: map[string]schema.Attribute{
-								"text": schema.StringAttribute{
-									MarkdownDescription: "unless can be used with the text attribute to define the when clause in plain-text.",
-									Required:            true,
-								},
-								"structured_embedded_expression": schema.SingleNestedAttribute{
-									MarkdownDescription: "unless can be used with `structured_embedded_expression` to define a more structured when clause.",
+						"unless": schema.ListNestedBlock{
+							MarkdownDescription: "The when and unless components define additional conditions under which the action is allowed.",
+							// Optional:            true,
 
-									Attributes: map[string]schema.Attribute{
-										"resource":   schema.StringAttribute{Required: true},
-										"expression": schema.StringAttribute{Required: true},
-										"value":      schema.StringAttribute{Required: true},
+							NestedObject: schema.NestedBlockObject{
+								Attributes: map[string]schema.Attribute{
+									"text": schema.StringAttribute{
+										MarkdownDescription: "unless can be used with the text attribute to define the when clause in plain-text.",
+										Required:            true,
 									},
-									Optional: true,
+									"structured_embedded_expression": schema.SingleNestedAttribute{
+										MarkdownDescription: "when can be used with `structured_embedded_expression` to define a more structured when clause.",
+
+										Attributes: map[string]schema.Attribute{
+											"resource":   schema.StringAttribute{Required: true},
+											"expression": schema.StringAttribute{Required: true},
+											"value":      schema.StringAttribute{Required: true},
+										},
+										Optional: true,
+									},
 								},
 							},
 						},
