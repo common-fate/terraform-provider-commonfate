@@ -195,6 +195,7 @@ func (d *PolicyDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 	var policyText string
 	for _, policy := range data.Policies {
 
+		//check that we have at least one of each action set
 		if policy.Action == nil && policy.ActionIn == nil && policy.ActionIs == nil {
 			resp.Diagnostics.AddError(
 				"Unable to Create DataSource: Access Policy",
@@ -203,7 +204,6 @@ func (d *PolicyDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 
 			return
 		}
-
 		if policy.Principal == nil && policy.PrincipalIn == nil && policy.PrincipalIs == nil {
 			resp.Diagnostics.AddError(
 				"Unable to Create DataSource: Access Policy",
@@ -221,6 +221,7 @@ func (d *PolicyDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 			return
 		}
 
+		//check that we do not have any duplicate conditions set
 		if !((policy.Action != nil && policy.ActionIn == nil && policy.ActionIs == nil) ||
 			(policy.Action == nil && policy.ActionIn != nil && policy.ActionIs == nil) ||
 			(policy.Action == nil && policy.ActionIn == nil && policy.ActionIs != nil)) {
@@ -231,7 +232,6 @@ func (d *PolicyDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 
 			return
 		}
-
 		if !((policy.Principal != nil && policy.PrincipalIn == nil && policy.PrincipalIs == nil) ||
 			(policy.Principal == nil && policy.PrincipalIn != nil && policy.PrincipalIs == nil) ||
 			(policy.Principal == nil && policy.PrincipalIn == nil && policy.PrincipalIs != nil)) {
@@ -242,7 +242,6 @@ func (d *PolicyDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 
 			return
 		}
-
 		if !((policy.Resource != nil && policy.ResourceIn == nil && policy.ResourceIs == nil) ||
 			(policy.Resource == nil && policy.ResourceIn != nil && policy.ResourceIs == nil) ||
 			(policy.Resource == nil && policy.ResourceIn == nil && policy.ResourceIs != nil)) {
