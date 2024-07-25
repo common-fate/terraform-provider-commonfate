@@ -21,7 +21,7 @@ type PolicyDataSourceModel struct {
 }
 
 func (d *PolicyDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_policy"
+	resp.TypeName = req.ProviderTypeName + "_policyset"
 }
 
 func (d *PolicyDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
