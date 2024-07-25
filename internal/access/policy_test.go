@@ -18,21 +18,18 @@ func TestReviewer_Approve(t *testing.T) {
 	}{
 
 		{
-			name: "simple allow all with advice correctly converts",
-			policy: Policy{
-				Effect: types.StringValue("permit"),
-				Advice: types.StringValue("test"),
-			},
-			wantPolicy: `@advice("test")
-permit (
- principal,
- action,
- resource );`,
-		},
-		{
 			name: "simple allow all cedar policy converts correctly",
 			policy: Policy{
 				Effect: types.StringValue("permit"),
+				Principal: &ScopeConditionType{
+					AllowAll: types.BoolValue(true),
+				},
+				Action: &ScopeConditionType{
+					AllowAll: types.BoolValue(true),
+				},
+				Resource: &ScopeConditionType{
+					AllowAll: types.BoolValue(true),
+				},
 			},
 			wantPolicy: `permit ( principal, action, resource );`,
 		},
@@ -41,6 +38,15 @@ permit (
 			policy: Policy{
 				Effect: types.StringValue("permit"),
 				Advice: types.StringValue("test"),
+				Principal: &ScopeConditionType{
+					AllowAll: types.BoolValue(true),
+				},
+				Action: &ScopeConditionType{
+					AllowAll: types.BoolValue(true),
+				},
+				Resource: &ScopeConditionType{
+					AllowAll: types.BoolValue(true),
+				},
 			},
 			wantPolicy: `@advice("test")
 permit (
@@ -52,17 +58,23 @@ permit (
 			name: "simple cedar policy converts correctly",
 			policy: Policy{
 				Effect: types.StringValue("permit"),
-				Principal: &eid.EID{
-					Type: types.StringValue("CF::User"),
-					ID:   types.StringValue("user1"),
+				Principal: &ScopeConditionType{
+					EID: &eid.EID{
+						Type: types.StringValue("CF::User"),
+						ID:   types.StringValue("user1"),
+					},
 				},
-				Action: &eid.EID{
-					Type: types.StringValue("Action::Access"),
-					ID:   types.StringValue("Request"),
+				Action: &ScopeConditionType{
+					EID: &eid.EID{
+						Type: types.StringValue("Action::Access"),
+						ID:   types.StringValue("Request"),
+					},
 				},
-				Resource: &eid.EID{
-					Type: types.StringValue("Test::Vault"),
-					ID:   types.StringValue("test1"),
+				Resource: &ScopeConditionType{
+					EID: &eid.EID{
+						Type: types.StringValue("Test::Vault"),
+						ID:   types.StringValue("test1"),
+					},
 				},
 			},
 			wantPolicy: `permit (
@@ -75,17 +87,23 @@ permit (
 			name: "simple cedar policy with text when converts correctly",
 			policy: Policy{
 				Effect: types.StringValue("permit"),
-				Principal: &eid.EID{
-					Type: types.StringValue("CF::User"),
-					ID:   types.StringValue("user1"),
+				Principal: &ScopeConditionType{
+					EID: &eid.EID{
+						Type: types.StringValue("CF::User"),
+						ID:   types.StringValue("user1"),
+					},
 				},
-				Action: &eid.EID{
-					Type: types.StringValue("Action::Access"),
-					ID:   types.StringValue("Request"),
+				Action: &ScopeConditionType{
+					EID: &eid.EID{
+						Type: types.StringValue("Action::Access"),
+						ID:   types.StringValue("Request"),
+					},
 				},
-				Resource: &eid.EID{
-					Type: types.StringValue("Test::Vault"),
-					ID:   types.StringValue("test1"),
+				Resource: &ScopeConditionType{
+					EID: &eid.EID{
+						Type: types.StringValue("Test::Vault"),
+						ID:   types.StringValue("test1"),
+					},
 				},
 				When: &CedarConditionEntity{
 					Text: types.StringValue("true"),
@@ -102,17 +120,23 @@ when { true };`,
 			name: "simple cedar policy with embedded expression when converts correctly",
 			policy: Policy{
 				Effect: types.StringValue("permit"),
-				Principal: &eid.EID{
-					Type: types.StringValue("CF::User"),
-					ID:   types.StringValue("user1"),
+				Principal: &ScopeConditionType{
+					EID: &eid.EID{
+						Type: types.StringValue("CF::User"),
+						ID:   types.StringValue("user1"),
+					},
 				},
-				Action: &eid.EID{
-					Type: types.StringValue("Action::Access"),
-					ID:   types.StringValue("Request"),
+				Action: &ScopeConditionType{
+					EID: &eid.EID{
+						Type: types.StringValue("Action::Access"),
+						ID:   types.StringValue("Request"),
+					},
 				},
-				Resource: &eid.EID{
-					Type: types.StringValue("Test::Vault"),
-					ID:   types.StringValue("test1"),
+				Resource: &ScopeConditionType{
+					EID: &eid.EID{
+						Type: types.StringValue("Test::Vault"),
+						ID:   types.StringValue("test1"),
+					},
 				},
 
 				When: &CedarConditionEntity{
@@ -134,19 +158,23 @@ when { resource.test == test };`,
 			name: "simple cedar policy with text unless converts correctly",
 			policy: Policy{
 				Effect: types.StringValue("permit"),
-				Principal: &eid.EID{
-					Type: types.StringValue("CF::User"),
-					ID:   types.StringValue("user1"),
+				Principal: &ScopeConditionType{
+					EID: &eid.EID{
+						Type: types.StringValue("CF::User"),
+						ID:   types.StringValue("user1"),
+					},
 				},
-
-				Action: &eid.EID{
-					Type: types.StringValue("Action::Access"),
-					ID:   types.StringValue("Request"),
+				Action: &ScopeConditionType{
+					EID: &eid.EID{
+						Type: types.StringValue("Action::Access"),
+						ID:   types.StringValue("Request"),
+					},
 				},
-
-				Resource: &eid.EID{
-					Type: types.StringValue("Test::Vault"),
-					ID:   types.StringValue("test1"),
+				Resource: &ScopeConditionType{
+					EID: &eid.EID{
+						Type: types.StringValue("Test::Vault"),
+						ID:   types.StringValue("test1"),
+					},
 				},
 
 				Unless: &CedarConditionEntity{
@@ -164,19 +192,23 @@ unless { true };`,
 			name: "simple cedar policy with embedded expression unless converts correctly",
 			policy: Policy{
 				Effect: types.StringValue("permit"),
-				Principal: &eid.EID{
-					Type: types.StringValue("CF::User"),
-					ID:   types.StringValue("user1"),
+				Principal: &ScopeConditionType{
+					EID: &eid.EID{
+						Type: types.StringValue("CF::User"),
+						ID:   types.StringValue("user1"),
+					},
 				},
-
-				Action: &eid.EID{
-					Type: types.StringValue("Action::Access"),
-					ID:   types.StringValue("Request"),
+				Action: &ScopeConditionType{
+					EID: &eid.EID{
+						Type: types.StringValue("Action::Access"),
+						ID:   types.StringValue("Request"),
+					},
 				},
-
-				Resource: &eid.EID{
-					Type: types.StringValue("Test::Vault"),
-					ID:   types.StringValue("test1"),
+				Resource: &ScopeConditionType{
+					EID: &eid.EID{
+						Type: types.StringValue("Test::Vault"),
+						ID:   types.StringValue("test1"),
+					},
 				},
 				Unless: &CedarConditionEntity{
 					EmbeddedExpression: &StructuredEmbeddedExpression{

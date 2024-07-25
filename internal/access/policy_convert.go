@@ -21,21 +21,27 @@ type CedarConditionEntity struct {
 	EmbeddedExpression *StructuredEmbeddedExpression `tfsdk:"structured_embedded_expression"`
 }
 
+// same as the eid type but allows to specify an allow all flag
+type ScopeConditionType struct {
+	*eid.EID `tfsdk:"entity"`
+	AllowAll types.Bool `tfsdk:"allow_all"`
+}
+
 type Policy struct {
 	Effect types.String `tfsdk:"effect"`
 	Advice types.String `tfsdk:"advice"`
 
-	Principal   *eid.EID   `tfsdk:"principal"`
-	PrincipalIn *[]eid.EID `tfsdk:"principal_in"`
-	PrincipalIs *eid.EID   `tfsdk:"principal_is"`
+	Principal   *ScopeConditionType `tfsdk:"principal"`
+	PrincipalIn *[]eid.EID          `tfsdk:"principal_in"`
+	PrincipalIs *eid.EID            `tfsdk:"principal_is"`
 
-	Action   *eid.EID   `tfsdk:"action"`
-	ActionIn *[]eid.EID `tfsdk:"action_in"`
-	ActionIs *eid.EID   `tfsdk:"action_is"`
+	Action   *ScopeConditionType `tfsdk:"action"`
+	ActionIn *[]eid.EID          `tfsdk:"action_in"`
+	ActionIs *eid.EID            `tfsdk:"action_is"`
 
-	Resource   *eid.EID   `tfsdk:"resource"`
-	ResourceIn *[]eid.EID `tfsdk:"resource_in"`
-	ResourceIs *eid.EID   `tfsdk:"resource_is"`
+	Resource   *ScopeConditionType `tfsdk:"resource"`
+	ResourceIn *[]eid.EID          `tfsdk:"resource_in"`
+	ResourceIs *eid.EID            `tfsdk:"resource_is"`
 
 	When   *CedarConditionEntity `tfsdk:"when"`
 	Unless *CedarConditionEntity `tfsdk:"unless"`
@@ -46,8 +52,13 @@ func buildCedarScopeField(scopeType string, includeTrailingComma bool) string {
 	toLowerName := strings.ToLower(scopeType)
 	//We make some variables in the template to work out if for a given number of scopeIn fields if we need to add the delimiting comma eg.
 	//{{$len := len .%sIn }}{{$actLen := minus $len 1}} this is making a variable $len = length(principalIn) then $actLen = $len - 1 which is the actual length of the list
+	part1 := fmt.Sprintf(`{{if and .%s .%s.AllowAll.ValueBool}}{{else if  and .%s .%s.EID}} == {{.%s.EID.Type.ValueString}}::{{.%s.EID.ID}}{{end}}`, scopeType, scopeType, scopeType, scopeType, scopeType, scopeType)
 
-	out := fmt.Sprintf(`%s{{if .%s}} == {{.%s.Type.ValueString}}::{{.%s.ID}}{{end}}{{if .%sIs}} is {{.%sIs.Type.ValueString}}::{{.%sIs.ID}}{{end}}{{if .%sIn}}{{$len := len .%sIn }}{{$actLen := minus $len 1}} in [{{range $i, $val := .%sIn}}{{$val.Type.ValueString}}::{{$val.ID}}{{if (ne $i $actLen )}}, {{end}}{{end}}]{{end}}`, toLowerName, scopeType, scopeType, scopeType, scopeType, scopeType, scopeType, scopeType, scopeType, scopeType)
+	part2 := fmt.Sprintf(`{{if .%sIs}} is {{.%sIs.Type.ValueString}}::{{.%sIs.ID}}{{end}}`, scopeType, scopeType, scopeType)
+
+	part3 := fmt.Sprintf(`{{if .%sIn}}{{$len := len .%sIn }}{{$actLen := minus $len 1}} in [{{range $i, $val := .%sIn}}{{$val.Type.ValueString}}::{{$val.ID}}{{if (ne $i $actLen )}}, {{end}}{{end}}]{{end}}`, scopeType, scopeType, scopeType)
+
+	out := fmt.Sprintf(`%s%s%s%s`, toLowerName, part1, part2, part3)
 
 	if includeTrailingComma {
 		out = out + ", "

@@ -51,10 +51,21 @@ func (d *PolicyDataSource) Schema(ctx context.Context, req datasource.SchemaRequ
 							MarkdownDescription: "Decorators are annotations added to Cedar policies to provide additional instructions or messages to end users",
 							Optional:            true,
 						},
-						"principal": schema.ObjectAttribute{
-							MarkdownDescription: "The principal component specifies the entity seeking access.",
-							Optional:            true,
-							AttributeTypes:      eid.EIDAttrsForDataSource,
+						"principal": schema.SingleNestedAttribute{
+							Description: "The principal component specifies the entity seeking access.",
+							Optional:    true,
+
+							Attributes: map[string]schema.Attribute{
+								"entity": schema.ObjectAttribute{
+									Description:    "The id of the principal from Common Fate",
+									Optional:       true,
+									AttributeTypes: eid.EIDAttrsForDataSource,
+								},
+								"allow_all": schema.BoolAttribute{
+									Description: "When set to true will use the allow all policy for this scope.",
+									Optional:    true,
+								},
+							},
 						},
 						"principal_is": schema.ObjectAttribute{
 							MarkdownDescription: "The principal component specifies the entity seeking access.",
@@ -69,10 +80,21 @@ func (d *PolicyDataSource) Schema(ctx context.Context, req datasource.SchemaRequ
 							},
 						},
 
-						"action": schema.ObjectAttribute{
-							MarkdownDescription: "Actions define the operations that can be performed within Common Fate.",
-							Optional:            true,
-							AttributeTypes:      eid.EIDAttrsForDataSource,
+						"action": schema.SingleNestedAttribute{
+							Description: "Actions define the operations that can be performed within Common Fate.",
+							Optional:    true,
+
+							Attributes: map[string]schema.Attribute{
+								"entity": schema.ObjectAttribute{
+									Description:    "The id of the action from Common Fate",
+									Optional:       true,
+									AttributeTypes: eid.EIDAttrsForDataSource,
+								},
+								"allow_all": schema.BoolAttribute{
+									Description: "When set to true will use the allow all policy for this scope.",
+									Optional:    true,
+								},
+							},
 						},
 						"action_is": schema.ObjectAttribute{
 							MarkdownDescription: "Actions define the operations that can be performed within Common Fate.",
@@ -86,10 +108,21 @@ func (d *PolicyDataSource) Schema(ctx context.Context, req datasource.SchemaRequ
 								AttrTypes: eid.EIDAttrsForDataSource,
 							},
 						},
-						"resource": schema.ObjectAttribute{
-							MarkdownDescription: "The resource component specifies the target or subject of the action. It identifies the entity upon which actions are taken.",
-							Optional:            true,
-							AttributeTypes:      eid.EIDAttrsForDataSource,
+						"resource": schema.SingleNestedAttribute{
+							Description: "The resource component specifies the target or subject of the action. It identifies the entity upon which actions are taken.",
+
+							Optional: true,
+							Attributes: map[string]schema.Attribute{
+								"entity": schema.ObjectAttribute{
+									Description:    "The id of the resource from Common Fate",
+									Optional:       true,
+									AttributeTypes: eid.EIDAttrsForDataSource,
+								},
+								"allow_all": schema.BoolAttribute{
+									Description: "When set to true will use the allow all policy for this scope.",
+									Optional:    true,
+								},
+							},
 						},
 						"resource_is": schema.ObjectAttribute{
 							MarkdownDescription: "The resource component specifies the target or subject of the action. It identifies the entity upon which actions are taken.",
@@ -188,7 +221,9 @@ func (d *PolicyDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 			return
 		}
 
-		if (policy.Action != nil && policy.ActionIn != nil) || (policy.ActionIn != nil && policy.Action != nil || policy.ActionIs != nil) || (policy.ActionIs != nil && policy.Action != nil || policy.ActionIn != nil) {
+		if !((policy.Action != nil && policy.ActionIn == nil && policy.ActionIs == nil) ||
+			(policy.Action == nil && policy.ActionIn != nil && policy.ActionIs == nil) ||
+			(policy.Action == nil && policy.ActionIn == nil && policy.ActionIs != nil)) {
 			resp.Diagnostics.AddError(
 				"Unable to Create DataSource: Access Policy",
 				"Cannot have mulitple values for action condition",
@@ -197,7 +232,9 @@ func (d *PolicyDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 			return
 		}
 
-		if (policy.Principal != nil && policy.PrincipalIn != nil) || (policy.PrincipalIn != nil && policy.Principal != nil || policy.PrincipalIs != nil) || (policy.PrincipalIs != nil && policy.Principal != nil || policy.PrincipalIn != nil) {
+		if !((policy.Principal != nil && policy.PrincipalIn == nil && policy.PrincipalIs == nil) ||
+			(policy.Principal == nil && policy.PrincipalIn != nil && policy.PrincipalIs == nil) ||
+			(policy.Principal == nil && policy.PrincipalIn == nil && policy.PrincipalIs != nil)) {
 			resp.Diagnostics.AddError(
 				"Unable to Create DataSource: Access Policy",
 				"Cannot have mulitple values for Principal condition",
@@ -206,7 +243,9 @@ func (d *PolicyDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 			return
 		}
 
-		if (policy.Resource != nil && policy.ResourceIn != nil) || (policy.ResourceIn != nil && policy.Resource != nil || policy.ResourceIs != nil) || (policy.ResourceIs != nil && policy.Resource != nil || policy.ResourceIn != nil) {
+		if !((policy.Resource != nil && policy.ResourceIn == nil && policy.ResourceIs == nil) ||
+			(policy.Resource == nil && policy.ResourceIn != nil && policy.ResourceIs == nil) ||
+			(policy.Resource == nil && policy.ResourceIn == nil && policy.ResourceIs != nil)) {
 			resp.Diagnostics.AddError(
 				"Unable to Create DataSource: Access Policy",
 				"Cannot have mulitple values for Resource condition",
