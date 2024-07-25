@@ -20,16 +20,10 @@ func TestReviewer_Approve(t *testing.T) {
 		{
 			name: "simple allow all cedar policy converts correctly",
 			policy: Policy{
-				Effect: types.StringValue("permit"),
-				Principal: &ScopeConditionType{
-					AllowAll: types.BoolValue(true),
-				},
-				Action: &ScopeConditionType{
-					AllowAll: types.BoolValue(true),
-				},
-				Resource: &ScopeConditionType{
-					AllowAll: types.BoolValue(true),
-				},
+				Effect:       types.StringValue("permit"),
+				AnyPrincipal: types.BoolValue(true),
+				AnyAction:    types.BoolValue(true),
+				AnyResource:  types.BoolValue(true),
 			},
 			wantPolicy: `permit ( principal, action, resource );`,
 		},
@@ -41,15 +35,9 @@ func TestReviewer_Approve(t *testing.T) {
 					Name:  types.StringValue("advice"),
 					Value: types.StringValue("test"),
 				},
-				Principal: &ScopeConditionType{
-					AllowAll: types.BoolValue(true),
-				},
-				Action: &ScopeConditionType{
-					AllowAll: types.BoolValue(true),
-				},
-				Resource: &ScopeConditionType{
-					AllowAll: types.BoolValue(true),
-				},
+				AnyPrincipal: types.BoolValue(true),
+				AnyAction:    types.BoolValue(true),
+				AnyResource:  types.BoolValue(true),
 			},
 			wantPolicy: `@advice("test")
 permit (

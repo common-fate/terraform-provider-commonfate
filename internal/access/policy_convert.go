@@ -31,7 +31,6 @@ type Conditions struct {
 // same as the eid type but allows to specify an allow all flag
 type ScopeConditionType struct {
 	*eid.EID `tfsdk:"entity"`
-	AllowAll types.Bool `tfsdk:"allow_all"`
 }
 
 type CedarAnnotation struct {
@@ -43,17 +42,20 @@ type Policy struct {
 	Effect     types.String     `tfsdk:"effect"`
 	Annotation *CedarAnnotation `tfsdk:"annotation"`
 
-	Principal   *ScopeConditionType `tfsdk:"principal"`
-	PrincipalIn *[]eid.EID          `tfsdk:"principal_in"`
-	PrincipalIs *eid.EID            `tfsdk:"principal_is"`
+	AnyPrincipal types.Bool          `tfsdk:"any_principal"`
+	Principal    *ScopeConditionType `tfsdk:"principal"`
+	PrincipalIn  *[]eid.EID          `tfsdk:"principal_in"`
+	PrincipalIs  *eid.EID            `tfsdk:"principal_is"`
 
-	Action   *ScopeConditionType `tfsdk:"action"`
-	ActionIn *[]eid.EID          `tfsdk:"action_in"`
-	ActionIs *eid.EID            `tfsdk:"action_is"`
+	AnyAction types.Bool          `tfsdk:"any_action"`
+	Action    *ScopeConditionType `tfsdk:"action"`
+	ActionIn  *[]eid.EID          `tfsdk:"action_in"`
+	ActionIs  *eid.EID            `tfsdk:"action_is"`
 
-	Resource   *ScopeConditionType `tfsdk:"resource"`
-	ResourceIn *[]eid.EID          `tfsdk:"resource_in"`
-	ResourceIs *eid.EID            `tfsdk:"resource_is"`
+	AnyResource types.Bool          `tfsdk:"any_resource"`
+	Resource    *ScopeConditionType `tfsdk:"resource"`
+	ResourceIn  *[]eid.EID          `tfsdk:"resource_in"`
+	ResourceIs  *eid.EID            `tfsdk:"resource_is"`
 
 	When   *[]CedarConditionEntity `tfsdk:"when"`
 	Unless *[]CedarConditionEntity `tfsdk:"unless"`
@@ -62,15 +64,19 @@ type Policy struct {
 // builds the scope fields (principal, action, resource) since they will all follow the same patterns for being built
 func buildCedarScopeField(scopeType string, includeTrailingComma bool) string {
 	toLowerName := strings.ToLower(scopeType)
+
+	anyScope := fmt.Sprintf(`Any%s`, scopeType)
+	allowAll := fmt.Sprintf(`{{if .%s.ValueBool}}{{end}}`, anyScope)
+
 	//We make some variables in the template to work out if for a given number of scopeIn fields if we need to add the delimiting comma eg.
 	//{{$len := len .%sIn }}{{$actLen := minus $len 1}} this is making a variable $len = length(principalIn) then $actLen = $len - 1 which is the actual length of the list
-	basicScope := fmt.Sprintf(`{{if and .%s .%s.AllowAll.ValueBool}}{{else if  and .%s .%s.EID}} == {{.%s.EID.Type.ValueString}}::{{.%s.EID.ID}}{{end}}`, scopeType, scopeType, scopeType, scopeType, scopeType, scopeType)
+	basicScope := fmt.Sprintf(`{{if  and .%s .%s.EID}} == {{.%s.EID.Type.ValueString}}::{{.%s.EID.ID}}{{end}}`, scopeType, scopeType, scopeType, scopeType)
 
 	isScope := fmt.Sprintf(`{{if .%sIs}} is {{.%sIs.Type.ValueString}}::{{.%sIs.ID}}{{end}}`, scopeType, scopeType, scopeType)
 
 	inScope := fmt.Sprintf(`{{if .%sIn}}{{$len := len .%sIn }}{{$actLen := minus $len 1}} in [{{range $i, $val := .%sIn}}{{$val.Type.ValueString}}::{{$val.ID}}{{if (ne $i $actLen )}}, {{end}}{{end}}]{{end}}`, scopeType, scopeType, scopeType)
 
-	out := fmt.Sprintf(`%s%s%s%s`, toLowerName, basicScope, isScope, inScope)
+	out := fmt.Sprintf(`%s%s%s%s%s`, toLowerName, allowAll, basicScope, isScope, inScope)
 
 	if includeTrailingComma {
 		out = out + ", "
