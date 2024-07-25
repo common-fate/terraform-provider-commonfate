@@ -18,14 +18,17 @@ description: |-
 ### Required
 
 - `id` (String) The internal Common Fate policy ID
-- `policies` (Attributes Set) a list of policies to be used in Common Fate (see [below for nested schema](#nestedatt--policies))
+
+### Optional
+
+- `policy` (Block List) a list of policies to be used in Common Fate (see [below for nested schema](#nestedblock--policy))
 
 ### Read-Only
 
 - `policy_as_text` (String) The converted policy into text for to be used with the policyset resource
 
-<a id="nestedatt--policies"></a>
-### Nested Schema for `policies`
+<a id="nestedblock--policy"></a>
+### Nested Schema for `policy`
 
 Required:
 
@@ -33,129 +36,138 @@ Required:
 
 Optional:
 
-- `action` (Attributes) Actions define the operations that can be performed within Common Fate. (see [below for nested schema](#nestedatt--policies--action))
-- `action_in` (List of Object) actions_in define a set of operations that can be performed within Common Fate (see [below for nested schema](#nestedatt--policies--action_in))
-- `action_is` (Object) Actions define the operations that can be performed within Common Fate. (see [below for nested schema](#nestedatt--policies--action_is))
-- `advice` (String) Decorators are annotations added to Cedar policies to provide additional instructions or messages to end users
-- `principal` (Attributes) The principal component specifies the entity seeking access. (see [below for nested schema](#nestedatt--policies--principal))
-- `principal_in` (List of Object) a list of principal component's specifying the entities seeking access (see [below for nested schema](#nestedatt--policies--principal_in))
-- `principal_is` (Object) The principal component specifies the entity seeking access. (see [below for nested schema](#nestedatt--policies--principal_is))
-- `resource` (Attributes) The resource component specifies the target or subject of the action. It identifies the entity upon which actions are taken. (see [below for nested schema](#nestedatt--policies--resource))
-- `resource_in` (List of Object) resource_in component specifies a set of the target or subject of the action. It identifies the entity upon which actions are taken. (see [below for nested schema](#nestedatt--policies--resource_in))
-- `resource_is` (Object) The resource component specifies the target or subject of the action. It identifies the entity upon which actions are taken. (see [below for nested schema](#nestedatt--policies--resource_is))
-- `unless` (Attributes) Specifies the duration for each extension. Defaults to the value of access_duration_seconds if not provided. (see [below for nested schema](#nestedatt--policies--unless))
-- `when` (Attributes) The when and unless components define additional conditions under which the action is allowed. (see [below for nested schema](#nestedatt--policies--when))
+- `action` (Attributes) Actions define the operations that can be performed within Common Fate. (see [below for nested schema](#nestedatt--policy--action))
+- `action_in` (List of Object) actions_in define a set of operations that can be performed within Common Fate (see [below for nested schema](#nestedatt--policy--action_in))
+- `action_is` (Object) Actions define the operations that can be performed within Common Fate. (see [below for nested schema](#nestedatt--policy--action_is))
+- `annotation` (Attributes) Decorators are annotations added to Cedar policies to provide additional instructions or messages to end users (see [below for nested schema](#nestedatt--policy--annotation))
+- `principal` (Attributes) The principal component specifies the entity seeking access. (see [below for nested schema](#nestedatt--policy--principal))
+- `principal_in` (List of Object) a list of principal component's specifying the entities seeking access (see [below for nested schema](#nestedatt--policy--principal_in))
+- `principal_is` (Object) The principal component specifies the entity seeking access. (see [below for nested schema](#nestedatt--policy--principal_is))
+- `resource` (Attributes) The resource component specifies the target or subject of the action. It identifies the entity upon which actions are taken. (see [below for nested schema](#nestedatt--policy--resource))
+- `resource_in` (List of Object) resource_in component specifies a set of the target or subject of the action. It identifies the entity upon which actions are taken. (see [below for nested schema](#nestedatt--policy--resource_in))
+- `resource_is` (Object) The resource component specifies the target or subject of the action. It identifies the entity upon which actions are taken. (see [below for nested schema](#nestedatt--policy--resource_is))
+- `unless` (Block List) The when and unless components define additional conditions under which the action is allowed. (see [below for nested schema](#nestedblock--policy--unless))
+- `when` (Block List) The when and unless components define additional conditions under which the action is allowed. (see [below for nested schema](#nestedblock--policy--when))
 
-<a id="nestedatt--policies--action"></a>
-### Nested Schema for `policies.action`
-
-Optional:
-
-- `allow_all` (Boolean) When set to true will use the allow all policy for this scope.
-- `entity` (Object) The id of the action from Common Fate (see [below for nested schema](#nestedatt--policies--action--entity))
-
-<a id="nestedatt--policies--action--entity"></a>
-### Nested Schema for `policies.action.entity`
-
-Required:
-
-- `id` (String)
-- `type` (String)
-
-
-
-<a id="nestedatt--policies--action_in"></a>
-### Nested Schema for `policies.action_in`
-
-Required:
-
-- `id` (String)
-- `type` (String)
-
-
-<a id="nestedatt--policies--action_is"></a>
-### Nested Schema for `policies.action_is`
-
-Required:
-
-- `id` (String)
-- `type` (String)
-
-
-<a id="nestedatt--policies--principal"></a>
-### Nested Schema for `policies.principal`
+<a id="nestedatt--policy--action"></a>
+### Nested Schema for `policy.action`
 
 Optional:
 
 - `allow_all` (Boolean) When set to true will use the allow all policy for this scope.
-- `entity` (Object) The id of the principal from Common Fate (see [below for nested schema](#nestedatt--policies--principal--entity))
+- `entity` (Object) The id of the action from Common Fate (see [below for nested schema](#nestedatt--policy--action--entity))
 
-<a id="nestedatt--policies--principal--entity"></a>
-### Nested Schema for `policies.principal.entity`
+<a id="nestedatt--policy--action--entity"></a>
+### Nested Schema for `policy.action.entity`
 
-Required:
-
-- `id` (String)
-- `type` (String)
-
-
-
-<a id="nestedatt--policies--principal_in"></a>
-### Nested Schema for `policies.principal_in`
-
-Required:
+Optional:
 
 - `id` (String)
 - `type` (String)
 
 
-<a id="nestedatt--policies--principal_is"></a>
-### Nested Schema for `policies.principal_is`
 
-Required:
+<a id="nestedatt--policy--action_in"></a>
+### Nested Schema for `policy.action_in`
+
+Optional:
 
 - `id` (String)
 - `type` (String)
 
 
-<a id="nestedatt--policies--resource"></a>
-### Nested Schema for `policies.resource`
+<a id="nestedatt--policy--action_is"></a>
+### Nested Schema for `policy.action_is`
+
+Optional:
+
+- `id` (String)
+- `type` (String)
+
+
+<a id="nestedatt--policy--annotation"></a>
+### Nested Schema for `policy.annotation`
+
+Required:
+
+- `name` (String) The name of the @decorator, eg. @advice()
+- `value` (String) The value of the @decorator, eg. @advice(value)
+
+
+<a id="nestedatt--policy--principal"></a>
+### Nested Schema for `policy.principal`
 
 Optional:
 
 - `allow_all` (Boolean) When set to true will use the allow all policy for this scope.
-- `entity` (Object) The id of the resource from Common Fate (see [below for nested schema](#nestedatt--policies--resource--entity))
+- `entity` (Object) The id of the principal from Common Fate (see [below for nested schema](#nestedatt--policy--principal--entity))
 
-<a id="nestedatt--policies--resource--entity"></a>
-### Nested Schema for `policies.resource.entity`
+<a id="nestedatt--policy--principal--entity"></a>
+### Nested Schema for `policy.principal.entity`
 
-Required:
+Optional:
+
+- `id` (String)
+- `type` (String)
+
+
+
+<a id="nestedatt--policy--principal_in"></a>
+### Nested Schema for `policy.principal_in`
+
+Optional:
+
+- `id` (String)
+- `type` (String)
+
+
+<a id="nestedatt--policy--principal_is"></a>
+### Nested Schema for `policy.principal_is`
+
+Optional:
+
+- `id` (String)
+- `type` (String)
+
+
+<a id="nestedatt--policy--resource"></a>
+### Nested Schema for `policy.resource`
+
+Optional:
+
+- `allow_all` (Boolean) When set to true will use the allow all policy for this scope.
+- `entity` (Object) The id of the resource from Common Fate (see [below for nested schema](#nestedatt--policy--resource--entity))
+
+<a id="nestedatt--policy--resource--entity"></a>
+### Nested Schema for `policy.resource.entity`
+
+Optional:
 
 - `id` (String)
 - `type` (String)
 
 
 
-<a id="nestedatt--policies--resource_in"></a>
-### Nested Schema for `policies.resource_in`
+<a id="nestedatt--policy--resource_in"></a>
+### Nested Schema for `policy.resource_in`
 
-Required:
-
-- `id` (String)
-- `type` (String)
-
-
-<a id="nestedatt--policies--resource_is"></a>
-### Nested Schema for `policies.resource_is`
-
-Required:
+Optional:
 
 - `id` (String)
 - `type` (String)
 
 
-<a id="nestedatt--policies--unless"></a>
-### Nested Schema for `policies.unless`
+<a id="nestedatt--policy--resource_is"></a>
+### Nested Schema for `policy.resource_is`
+
+Optional:
+
+- `id` (String)
+- `type` (String)
+
+
+<a id="nestedblock--policy--unless"></a>
+### Nested Schema for `policy.unless`
 
 Required:
 
@@ -163,10 +175,10 @@ Required:
 
 Optional:
 
-- `structured_embedded_expression` (Attributes) unless can be used with `structured_embedded_expression` to define a more structured when clause. (see [below for nested schema](#nestedatt--policies--unless--structured_embedded_expression))
+- `structured_embedded_expression` (Attributes) when can be used with `structured_embedded_expression` to define a more structured when clause. (see [below for nested schema](#nestedatt--policy--unless--structured_embedded_expression))
 
-<a id="nestedatt--policies--unless--structured_embedded_expression"></a>
-### Nested Schema for `policies.unless.structured_embedded_expression`
+<a id="nestedatt--policy--unless--structured_embedded_expression"></a>
+### Nested Schema for `policy.unless.structured_embedded_expression`
 
 Required:
 
@@ -176,8 +188,8 @@ Required:
 
 
 
-<a id="nestedatt--policies--when"></a>
-### Nested Schema for `policies.when`
+<a id="nestedblock--policy--when"></a>
+### Nested Schema for `policy.when`
 
 Required:
 
@@ -185,10 +197,10 @@ Required:
 
 Optional:
 
-- `structured_embedded_expression` (Attributes) when can be used with `structured_embedded_expression` to define a more structured when clause. (see [below for nested schema](#nestedatt--policies--when--structured_embedded_expression))
+- `structured_embedded_expression` (Attributes) when can be used with `structured_embedded_expression` to define a more structured when clause. (see [below for nested schema](#nestedatt--policy--when--structured_embedded_expression))
 
-<a id="nestedatt--policies--when--structured_embedded_expression"></a>
-### Nested Schema for `policies.when.structured_embedded_expression`
+<a id="nestedatt--policy--when--structured_embedded_expression"></a>
+### Nested Schema for `policy.when.structured_embedded_expression`
 
 Required:
 
