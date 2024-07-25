@@ -33,14 +33,14 @@ Required:
 
 Optional:
 
-- `action` (Object) Actions define the operations that can be performed within Common Fate. (see [below for nested schema](#nestedatt--policies--action))
+- `action` (Attributes) Actions define the operations that can be performed within Common Fate. (see [below for nested schema](#nestedatt--policies--action))
 - `action_in` (List of Object) actions_in define a set of operations that can be performed within Common Fate (see [below for nested schema](#nestedatt--policies--action_in))
 - `action_is` (Object) Actions define the operations that can be performed within Common Fate. (see [below for nested schema](#nestedatt--policies--action_is))
 - `advice` (String) Decorators are annotations added to Cedar policies to provide additional instructions or messages to end users
-- `principal` (Object) The principal component specifies the entity seeking access. (see [below for nested schema](#nestedatt--policies--principal))
+- `principal` (Attributes) The principal component specifies the entity seeking access. (see [below for nested schema](#nestedatt--policies--principal))
 - `principal_in` (List of Object) a list of principal component's specifying the entities seeking access (see [below for nested schema](#nestedatt--policies--principal_in))
 - `principal_is` (Object) The principal component specifies the entity seeking access. (see [below for nested schema](#nestedatt--policies--principal_is))
-- `resource` (Object) The resource component specifies the target or subject of the action. It identifies the entity upon which actions are taken. (see [below for nested schema](#nestedatt--policies--resource))
+- `resource` (Attributes) The resource component specifies the target or subject of the action. It identifies the entity upon which actions are taken. (see [below for nested schema](#nestedatt--policies--resource))
 - `resource_in` (List of Object) resource_in component specifies a set of the target or subject of the action. It identifies the entity upon which actions are taken. (see [below for nested schema](#nestedatt--policies--resource_in))
 - `resource_is` (Object) The resource component specifies the target or subject of the action. It identifies the entity upon which actions are taken. (see [below for nested schema](#nestedatt--policies--resource_is))
 - `unless` (Attributes) Specifies the duration for each extension. Defaults to the value of access_duration_seconds if not provided. (see [below for nested schema](#nestedatt--policies--unless))
@@ -49,10 +49,19 @@ Optional:
 <a id="nestedatt--policies--action"></a>
 ### Nested Schema for `policies.action`
 
+Optional:
+
+- `allow_all` (Boolean) When set to true will use the allow all policy for this scope.
+- `entity` (Object) The id of the action from Common Fate (see [below for nested schema](#nestedatt--policies--action--entity))
+
+<a id="nestedatt--policies--action--entity"></a>
+### Nested Schema for `policies.action.entity`
+
 Required:
 
 - `id` (String)
 - `type` (String)
+
 
 
 <a id="nestedatt--policies--action_in"></a>
@@ -76,10 +85,19 @@ Required:
 <a id="nestedatt--policies--principal"></a>
 ### Nested Schema for `policies.principal`
 
+Optional:
+
+- `allow_all` (Boolean) When set to true will use the allow all policy for this scope.
+- `entity` (Object) The id of the principal from Common Fate (see [below for nested schema](#nestedatt--policies--principal--entity))
+
+<a id="nestedatt--policies--principal--entity"></a>
+### Nested Schema for `policies.principal.entity`
+
 Required:
 
 - `id` (String)
 - `type` (String)
+
 
 
 <a id="nestedatt--policies--principal_in"></a>
@@ -103,10 +121,19 @@ Required:
 <a id="nestedatt--policies--resource"></a>
 ### Nested Schema for `policies.resource`
 
+Optional:
+
+- `allow_all` (Boolean) When set to true will use the allow all policy for this scope.
+- `entity` (Object) The id of the resource from Common Fate (see [below for nested schema](#nestedatt--policies--resource--entity))
+
+<a id="nestedatt--policies--resource--entity"></a>
+### Nested Schema for `policies.resource.entity`
+
 Required:
 
 - `id` (String)
 - `type` (String)
+
 
 
 <a id="nestedatt--policies--resource_in"></a>
