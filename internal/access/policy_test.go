@@ -37,7 +37,10 @@ func TestReviewer_Approve(t *testing.T) {
 			name: "simple allow all with advice correctly converts",
 			policy: Policy{
 				Effect: types.StringValue("permit"),
-				Advice: types.StringValue("test"),
+				Annotation: &CedarAnnotation{
+					Name:  types.StringValue("advice"),
+					Value: types.StringValue("test"),
+				},
 				Principal: &ScopeConditionType{
 					AllowAll: types.BoolValue(true),
 				},

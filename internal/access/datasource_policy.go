@@ -47,9 +47,19 @@ func (d *PolicyDataSource) Schema(ctx context.Context, req datasource.SchemaRequ
 							MarkdownDescription: "The effect specifies the intent of the policy, to either permit` or forbid any request that matches the scope and conditions specified in the policy",
 							Required:            true,
 						},
-						"advice": schema.StringAttribute{
+						"annotation": schema.SingleNestedAttribute{
 							MarkdownDescription: "Decorators are annotations added to Cedar policies to provide additional instructions or messages to end users",
 							Optional:            true,
+							Attributes: map[string]schema.Attribute{
+								"name": schema.StringAttribute{
+									Description: "The name of the @decorator, eg. @advice()",
+									Required:    true,
+								},
+								"value": schema.StringAttribute{
+									Description: "The value of the @decorator, eg. @advice(value)",
+									Required:    true,
+								},
+							},
 						},
 						"principal": schema.SingleNestedAttribute{
 							Description: "The principal component specifies the entity seeking access.",

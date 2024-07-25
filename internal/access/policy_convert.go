@@ -27,9 +27,14 @@ type ScopeConditionType struct {
 	AllowAll types.Bool `tfsdk:"allow_all"`
 }
 
+type CedarAnnotation struct {
+	Name  types.String `tfsdk:"name"`
+	Value types.String `tfsdk:"value"`
+}
+
 type Policy struct {
-	Effect types.String `tfsdk:"effect"`
-	Advice types.String `tfsdk:"advice"`
+	Effect     types.String     `tfsdk:"effect"`
+	Annotation *CedarAnnotation `tfsdk:"annotation"`
 
 	Principal   *ScopeConditionType `tfsdk:"principal"`
 	PrincipalIn *[]eid.EID          `tfsdk:"principal_in"`
@@ -66,7 +71,7 @@ func buildCedarScopeField(scopeType string, includeTrailingComma bool) string {
 	return out
 }
 
-const cedarAdviceTemplate = `{{if not .Advice.IsNull }}@advice({{.Advice}}){{end}}`
+const cedarAdviceTemplate = `{{if .Annotation }}@{{.Annotation.Name.ValueString}}({{.Annotation.Value}}){{end}}`
 const cedarEffectTemplate = `{{.Effect.ValueString}}`
 
 var cedarPrincipalTemplate = buildCedarScopeField("Principal", true)
