@@ -96,7 +96,7 @@ func (r *S3LogDestinationResource) Schema(ctx context.Context, req resource.Sche
 				Required:            true,
 			},
 			"key_template": schema.StringAttribute{
-				MarkdownDescription: "The template to use when writing events to the bucket. If not provided, will default to '{{ .Year }}/{{ .Month }}/{{ .Day }}/{{ .Hour }}_{{ .Minute }}_{{ .Second }}_{{ .ID }}",
+				MarkdownDescription: "The template to use when writing events to the bucket. If not provided, will default to '{{ .Year }}/{{ .Month }}/{{ .Day }}/{{ .Hour }}_{{ .Minute }}_{{ .Second }}_{{ .ID }}'",
 				Optional:            true,
 			},
 			"compression": schema.StringAttribute{
