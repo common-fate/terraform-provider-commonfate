@@ -268,13 +268,19 @@ unless { true };`,
 					{
 						Text: types.StringValue("true"),
 					},
+					{
+						Text: types.StringValue("test2"),
+					},
+					{
+						Text: types.StringValue("test3"),
+					},
 				},
 			},
 			wantPolicy: `permit (
  principal == CF::User::"user1",
  action == Action::Access::"Request",
  resource == Test::Vault::"test1" 
-)when { true };`,
+)when { true }when { test2 }when { test3 };`,
 		},
 	}
 	for _, tt := range tests {
