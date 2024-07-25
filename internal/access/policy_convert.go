@@ -10,15 +10,17 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-type StructuredEmbeddedExpression struct {
-	Resource   types.String `tfsdk:"resource"`
-	Expression types.String `tfsdk:"expression"`
-	Value      types.String `tfsdk:"value"`
-}
+//unused in the conditions at the moment. Opting for just a text field to specify conditions
+//In the future we may want to expand this out to allow for a more robust system for building cedar conditions
+// type StructuredEmbeddedExpression struct {
+// 	Resource   types.String `tfsdk:"resource"`
+// 	Expression types.String `tfsdk:"expression"`
+// 	Value      types.String `tfsdk:"value"`
+// }
 
 type CedarConditionEntity struct {
-	Text               types.String                  `tfsdk:"text"`
-	EmbeddedExpression *StructuredEmbeddedExpression `tfsdk:"structured_embedded_expression"`
+	Text types.String `tfsdk:"text"`
+	// EmbeddedExpression *StructuredEmbeddedExpression `tfsdk:"structured_embedded_expression"`
 }
 
 type Conditions struct {
@@ -76,6 +78,16 @@ func buildCedarScopeField(scopeType string, includeTrailingComma bool) string {
 	return out
 }
 
+func buildCedarConditionFields(conditionType string) string {
+	toLowerName := strings.ToLower(conditionType)
+
+	cedarTemplate := fmt.Sprintf(`{{if .%s}}{{range $i, $val := .%s}}%s {
+{{if not $val.Text.IsNull}} {{$val.Text.ValueString}} {{end}}
+}{{end}}{{end}}`, conditionType, conditionType, toLowerName)
+
+	return cedarTemplate
+}
+
 const cedarAdviceTemplate = `{{if .Annotation }}@{{.Annotation.Name.ValueString}}({{.Annotation.Value}}){{end}}`
 const cedarEffectTemplate = `{{.Effect.ValueString}}`
 
@@ -83,15 +95,8 @@ var cedarPrincipalTemplate = buildCedarScopeField("Principal", true)
 var cedarActionTemplate = buildCedarScopeField("Action", true)
 var cedarResourceTemplate = buildCedarScopeField("Resource", false)
 
-const cedarWhenTemplate = `{{if .When}}
-when {
-{{$len := len .When }}{{$actLen := minus $len 1}}{{range $i, $val := .When}}{{if not $val.Text.IsNull}} {{$val.Text.ValueString}} {{else if $val.EmbeddedExpression}} {{$val.EmbeddedExpression.Resource.ValueString}} {{$val.EmbeddedExpression.Expression.ValueString}} {{$val.EmbeddedExpression.Value.ValueString}} {{end}}{{if (ne $i $actLen )}}&&{{end}}{{end}}
-}{{end}}`
-
-const cedarUnlessTemplate = `{{if .Unless}}
-unless {
-{{$len := len .Unless }}{{$actLen := minus $len 1}}{{range $i, $val := .Unless}}{{if not $val.Text.IsNull}} {{$val.Text.ValueString}} {{else if $val.EmbeddedExpression}} {{$val.EmbeddedExpression.Resource.ValueString}} {{$val.EmbeddedExpression.Expression.ValueString}} {{$val.EmbeddedExpression.Value.ValueString}} {{end}}{{if (ne $i $actLen )}}&&{{end}}{{end}}
-}{{end}}`
+var cedarWhenTemplate = buildCedarConditionFields("When")
+var cedarUnlessTemplate = buildCedarConditionFields("Unless")
 
 var cedarPolicyTemplateTest = cedarAdviceTemplate + cedarEffectTemplate + " ( " + cedarPrincipalTemplate + cedarActionTemplate + cedarResourceTemplate + " )" + cedarWhenTemplate + cedarUnlessTemplate + ";"
 
