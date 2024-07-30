@@ -252,7 +252,18 @@ func (r *AWSRDSDatabaseAvailabilitiesResource) Update(ctx context.Context, req r
 	res, err := r.client.AvailabilitySpec().UpdateAvailabilitySpec(ctx, connect.NewRequest(&configv1alpha1.UpdateAvailabilitySpecRequest{
 		AvailabilitySpec: input,
 	}))
-	if err != nil {
+	if connectErr, ok := err.(*connect.Error); ok {
+		if connectErr.Code() == connect.CodeNotFound {
+			resp.Diagnostics.AddError(
+				"AWS RDS Availability Not Found",
+				"The requested AWS RDS Availability no longer exists. "+
+					"It may have been deleted or otherwise removed.\n"+
+					"Please create a new Availability.",
+			)
+
+			return
+		}
+	} else if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to update AWS RDS Availabilities",
 			"An unexpected error occurred while communicating with Common Fate API. "+

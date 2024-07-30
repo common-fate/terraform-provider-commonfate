@@ -246,7 +246,18 @@ func (r *EntraGroupAvailabilitiesResource) Update(ctx context.Context, req resou
 	res, err := r.client.AvailabilitySpec().UpdateAvailabilitySpec(ctx, connect.NewRequest(&configv1alpha1.UpdateAvailabilitySpecRequest{
 		AvailabilitySpec: input,
 	}))
-	if err != nil {
+	if connectErr, ok := err.(*connect.Error); ok {
+		if connectErr.Code() == connect.CodeNotFound {
+			resp.Diagnostics.AddError(
+				"Entra Group Availability Not Found",
+				"The requested Entra Group Availability no longer exists. "+
+					"It may have been deleted or otherwise removed.\n"+
+					"Please create a new Availability.",
+			)
+
+			return
+		}
+	} else if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to update Entra Group Availabilities",
 			"An unexpected error occurred while communicating with Common Fate API. "+
