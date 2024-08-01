@@ -22,15 +22,25 @@ import (
 )
 
 type SlackAlertModel struct {
-	ID                             types.String `tfsdk:"id"`
-	WorkflowID                     types.String `tfsdk:"workflow_id"`
-	SlackIntegrationID             types.String `tfsdk:"integration_id"`
-	SlackChannelID                 types.String `tfsdk:"slack_channel_id"`
-	SlackWorkspaceID               types.String `tfsdk:"slack_workspace_id"`
-	UseWebConsoleForApprovalAction types.Bool   `tfsdk:"use_web_console_for_approval_action"`
-	SendDirectMessagesToApprovers  types.Bool   `tfsdk:"send_direct_message_to_approvers"`
-	DisableInteractivityHandlers   types.Bool   `tfsdk:"disable_interactivity_handlers"`
-	NotifyExpiryInSeconds          types.Int64  `tfsdk:"notify_expiry_in_seconds"`
+	ID                             types.String              `tfsdk:"id"`
+	WorkflowID                     types.String              `tfsdk:"workflow_id"`
+	SlackIntegrationID             types.String              `tfsdk:"integration_id"`
+	SlackChannelID                 types.String              `tfsdk:"slack_channel_id"`
+	SlackWorkspaceID               types.String              `tfsdk:"slack_workspace_id"`
+	UseWebConsoleForApprovalAction types.Bool                `tfsdk:"use_web_console_for_approval_action"`
+	SendDirectMessagesToApprovers  types.Bool                `tfsdk:"send_direct_message_to_approvers"`
+	DisableInteractivityHandlers   types.Bool                `tfsdk:"disable_interactivity_handlers"`
+	NotifyExpiryInSeconds          types.Int64               `tfsdk:"notify_expiry_in_seconds"`
+	UserNotificationSettings       *UserNotificationSettings `tfsdk:"user_notification_settings"`
+}
+
+type UserNotificationSettings struct {
+	InitialRequest types.Bool `tfsdk:"initial_request"`
+	Approve        types.Bool `tfsdk:"approve"`
+	Activate       types.Bool `tfsdk:"activate"`
+	Extend         types.Bool `tfsdk:"extend"`
+	Revoke         types.Bool `tfsdk:"revoke"`
+	Deprovision    types.Bool `tfsdk:"deprovision"`
 }
 
 // AccessRuleResource is the data source implementation.
@@ -121,6 +131,48 @@ func (r *SlackAlertResource) Schema(ctx context.Context, req resource.SchemaRequ
 				MarkdownDescription: "The duration before access expiration at which Slack will notify the user about the upcoming expiration.",
 				Optional:            true,
 			},
+			"user_notification_settings": schema.SingleNestedAttribute{
+				MarkdownDescription: "Configuration for user notifications, allowing opt-in and opt-out for specific DMs",
+				Optional:            true,
+				Attributes: map[string]schema.Attribute{
+					"initial_request": schema.BoolAttribute{
+						MarkdownDescription: "Opt-in for initial request DM notifications",
+						Optional:            true,
+						Computed:            true,
+						Default:             booldefault.StaticBool(true),
+					},
+					"approve": schema.BoolAttribute{
+						MarkdownDescription: "Opt-in for Approve DM notifications",
+						Optional:            true,
+						Computed:            true,
+						Default:             booldefault.StaticBool(true),
+					},
+					"activate": schema.BoolAttribute{
+						MarkdownDescription: "Opt-in for Activate DM notifications",
+						Optional:            true,
+						Computed:            true,
+						Default:             booldefault.StaticBool(true),
+					},
+					"extend": schema.BoolAttribute{
+						MarkdownDescription: "Opt-in for Extend DM notifications",
+						Optional:            true,
+						Computed:            true,
+						Default:             booldefault.StaticBool(true),
+					},
+					"revoke": schema.BoolAttribute{
+						MarkdownDescription: "Opt-in for Revoke DM notifications",
+						Optional:            true,
+						Computed:            true,
+						Default:             booldefault.StaticBool(true),
+					},
+					"deprovision": schema.BoolAttribute{
+						MarkdownDescription: "Opt-in for Deprovision DM notifications",
+						Optional:            true,
+						Computed:            true,
+						Default:             booldefault.StaticBool(true),
+					},
+				},
+			},
 		},
 		MarkdownDescription: `Links a Slack message being send to a particular channel or workspace based on actions made against a workflow.`,
 	}
@@ -174,6 +226,17 @@ func (r *SlackAlertResource) Create(ctx context.Context, req resource.CreateRequ
 		UseWebConsoleForApproveAction: data.UseWebConsoleForApprovalAction.ValueBool(),
 		SendDirectMessagesToApprovers: data.SendDirectMessagesToApprovers.ValueBool(),
 		DisableInteractivityHandlers:  data.DisableInteractivityHandlers.ValueBool(),
+	}
+
+	if data.UserNotificationSettings != nil {
+		createSlackAlert.UserNotificationSettings = &configv1alpha1.UserNotificationSettings{
+			InitialRequest: data.UserNotificationSettings.InitialRequest.ValueBool(),
+			Approve:        data.UserNotificationSettings.Approve.ValueBool(),
+			Activate:       data.UserNotificationSettings.Activate.ValueBool(),
+			Extend:         data.UserNotificationSettings.Extend.ValueBool(),
+			Revoke:         data.UserNotificationSettings.Revoke.ValueBool(),
+			Deprovision:    data.UserNotificationSettings.Deprovision.ValueBool(),
+		}
 	}
 
 	if !data.SlackChannelID.IsNull() {
@@ -252,6 +315,19 @@ func (r *SlackAlertResource) Read(ctx context.Context, req resource.ReadRequest,
 		DisableInteractivityHandlers:   types.BoolPointerValue(&res.Msg.Alert.DisableInteractivityHandlers),
 	}
 
+	if res.Msg.Alert.UserNotificationSettings != nil {
+
+		state.UserNotificationSettings = &UserNotificationSettings{
+			InitialRequest: types.BoolValue(res.Msg.Alert.UserNotificationSettings.InitialRequest),
+			Approve:        types.BoolValue(res.Msg.Alert.UserNotificationSettings.Approve),
+			Activate:       types.BoolValue(res.Msg.Alert.UserNotificationSettings.Activate),
+			Extend:         types.BoolValue(res.Msg.Alert.UserNotificationSettings.Extend),
+			Revoke:         types.BoolValue(res.Msg.Alert.UserNotificationSettings.Revoke),
+			Deprovision:    types.BoolValue(res.Msg.Alert.UserNotificationSettings.Deprovision),
+		}
+
+	}
+
 	if res.Msg.Alert.NotifyExpiryInSeconds != nil {
 		state.NotifyExpiryInSeconds = types.Int64Value(res.Msg.Alert.NotifyExpiryInSeconds.Seconds)
 	}
@@ -306,6 +382,17 @@ func (r *SlackAlertResource) Update(ctx context.Context, req resource.UpdateRequ
 			SendDirectMessagesToApprovers: data.SendDirectMessagesToApprovers.ValueBool(),
 			DisableInteractivityHandlers:  data.DisableInteractivityHandlers.ValueBool(),
 		},
+	}
+
+	if data.UserNotificationSettings != nil {
+		updateSlackAlert.Alert.UserNotificationSettings = &configv1alpha1.UserNotificationSettings{
+			InitialRequest: data.UserNotificationSettings.InitialRequest.ValueBool(),
+			Approve:        data.UserNotificationSettings.Approve.ValueBool(),
+			Activate:       data.UserNotificationSettings.Activate.ValueBool(),
+			Extend:         data.UserNotificationSettings.Extend.ValueBool(),
+			Revoke:         data.UserNotificationSettings.Revoke.ValueBool(),
+			Deprovision:    data.UserNotificationSettings.Deprovision.ValueBool(),
+		}
 	}
 
 	if !data.SlackChannelID.IsNull() {
