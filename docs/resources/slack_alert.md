@@ -41,8 +41,21 @@ resource "commonfate-slack_alert" "demo" {
 - `slack_channel_id` (String) If Slack is connected, it will send notifications to this slack channel. Must be the ID of the channel and not the name. See below on how to find this ID.
 - `slack_workspace_id` (String) The Slack Workspace ID. In Slack URLs, such as `https://app.slack.com/client/TXXXXXXX/CXXXXXXX` it is the string beginning with T.
 - `use_web_console_for_approval_action` (Boolean) Optionally, configure the access request review buttons to be links to the web console, rather than performing the action in Slack.
+- `user_notification_settings` (Attributes) Configuration for user notifications, allowing opt-in and opt-out for specific DMs (see [below for nested schema](#nestedatt--user_notification_settings))
 
 ### Read-Only
 
 - `id` (String) The internal approval workflow ID
+
+<a id="nestedatt--user_notification_settings"></a>
+### Nested Schema for `user_notification_settings`
+
+Optional:
+
+- `activate` (Boolean) Opt-in for Activate DM notifications
+- `approve` (Boolean) Opt-in for Approve DM notifications
+- `deprovision` (Boolean) Opt-in for Deprovision DM notifications
+- `extend` (Boolean) Opt-in for Extend DM notifications
+- `initial_request` (Boolean) Opt-in for initial request DM notifications
+- `revoke` (Boolean) Opt-in for Revoke DM notifications
 
