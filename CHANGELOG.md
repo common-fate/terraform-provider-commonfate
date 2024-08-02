@@ -1,5 +1,15 @@
 # @common-fate/terraform-provider-commonfate
 
+## 2.23.0
+
+### Minor Changes
+
+- 39262e3: Adds 'commonfate_aws_resource_scanner' resource
+
+### Patch Changes
+
+- 1cec17c: Terraform provider now displays an error message indicating that the availability may have been deleted when attempting to update a non-existent availability.
+
 ## 2.22.0
 
 ### Minor Changes
