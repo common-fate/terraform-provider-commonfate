@@ -1,5 +1,11 @@
 # @common-fate/terraform-provider-commonfate
 
+## 2.23.1
+
+### Patch Changes
+
+- 5d72d75: Fix an issue where commonfate_policyset resources could not be imported.
+
 ## 2.23.0
 
 ### Minor Changes
