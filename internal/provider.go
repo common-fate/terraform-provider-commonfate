@@ -16,6 +16,7 @@ import (
 	"github.com/common-fate/terraform-provider-commonfate/internal/okta"
 	"github.com/common-fate/terraform-provider-commonfate/internal/opsgenie"
 	"github.com/common-fate/terraform-provider-commonfate/internal/pagerduty"
+	"github.com/common-fate/terraform-provider-commonfate/internal/proxy"
 	"github.com/common-fate/terraform-provider-commonfate/internal/slack"
 	"github.com/common-fate/terraform-provider-commonfate/internal/webhook"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
@@ -120,7 +121,9 @@ func (p *CommonFateProvider) Configure(ctx context.Context, req provider.Configu
 
 // DataSources defines the data sources implemented in the provider.
 func (p *CommonFateProvider) DataSources(_ context.Context) []func() datasource.DataSource {
-	return []func() datasource.DataSource{}
+	return []func() datasource.DataSource{
+		NewEcsProxyDatasource,
+	}
 }
 
 func (p *CommonFateProvider) Resources(_ context.Context) []func() resource.Resource {
@@ -171,6 +174,8 @@ func (p *CommonFateProvider) Resources(_ context.Context) []func() resource.Reso
 		NewAuth0OrganizationAvailabilitiesResource,
 		logs.NewS3LogDestinationResource,
 		aws.NewAWSResourceScannerResource,
+		NewEcsProxyResource,
+		NewRDSDatabaseResourceResource,
 	}
 }
 
@@ -336,4 +341,18 @@ func NewAuth0OrganizationSelectorResource() resource.Resource {
 
 func NewAuth0IntegrationResource() resource.Resource {
 	return &auth0.Auth0IntegrationResource{}
+}
+
+
+func NewEcsProxyResource() resource.Resource {
+	return &proxy.ECSProxyResource{}
+}
+
+func NewEcsProxyDatasource() datasource.DataSource {
+	return &proxy.ECSProxyDatasource{}
+}
+
+
+func NewRDSDatabaseResourceResource() resource.Resource {
+	return &proxy.RDSDatabaseResource{}
 }
