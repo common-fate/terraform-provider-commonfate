@@ -22,8 +22,7 @@ import (
 type RDSDatabaseModel struct {
 	ID               types.String `tfsdk:"id"`
 	InstanceID       types.String `tfsdk:"instance_id"`
-	ProxyRoleARN     types.String `tfsdk:"proxy_role_arn"`
-	SecurityGroupARN types.String `tfsdk:"proxy_security_group_arn"`
+
 	ReadSecretRole 	 types.String 	`tfsdk:"proxy_read_secret_role"`
 
 	DatabaseName     types.String `tfsdk:"name"`
@@ -147,14 +146,7 @@ func (r *RDSDatabaseResource) Schema(ctx context.Context, req resource.SchemaReq
 				},
 			},
 
-			"proxy_role_arn": schema.StringAttribute{
-				MarkdownDescription: "The proxy role arn of the proxy in the same account and vpc as the database resource",
-				Computed:            true,
-			},
-			"proxy_security_group_arn": schema.StringAttribute{
-				MarkdownDescription: "The proxy security group ARN",
-				Computed:            true,
-			},
+
 			"proxy_read_secret_role": schema.StringAttribute{
 				MarkdownDescription: "read role that allows the proxy to read the database secret",
 				Required:            true,
@@ -231,8 +223,6 @@ func (r *RDSDatabaseResource) Create(ctx context.Context, req resource.CreateReq
 	// // Convert from the API data model to the Terraform data model
 	// // and set any unknown attribute values.
 	data.ID = types.StringValue(res.Msg.Id)
-	data.ProxyRoleARN = types.StringValue(res.Msg.ProxyRoleArn)
-	data.SecurityGroupARN = types.StringValue(res.Msg.ProxySecurityGroupArn)
 
 	// Save data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -272,8 +262,7 @@ func (r *RDSDatabaseResource) Read(ctx context.Context, req resource.ReadRequest
 	// refresh state
 
 	state.ID = types.StringValue(res.Msg.Id)
-	state.ProxyRoleARN = types.StringValue(res.Msg.ProxyRoleArn)
-	state.SecurityGroupARN = types.StringValue(res.Msg.ProxySecurityGroupArn)
+
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }
 
@@ -348,8 +337,7 @@ func (r *RDSDatabaseResource) Update(ctx context.Context, req resource.UpdateReq
 	// // Convert from the API data model to the Terraform data model
 	// // and set any unknown attribute values.
 	data.ID = types.StringValue(res.Msg.Id)
-	data.ProxyRoleARN = types.StringValue(res.Msg.ProxyRoleArn)
-	data.SecurityGroupARN = types.StringValue(res.Msg.ProxySecurityGroupArn)
+
 
 	// Save data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
