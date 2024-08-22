@@ -14,8 +14,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
@@ -28,6 +26,8 @@ type ECSProxyModel struct {
 	ECSTaskDefinitionFamily   types.String `tfsdk:"ecs_task_definition_family"`
 	ECSClusterReaderRoleARN   types.String `tfsdk:"ecs_cluster_reader_role_arn"`
 	ECSClusterSecurityGroupId types.String `tfsdk:"ecs_cluster_security_group_id"`
+	ECSClusterTaskRoleName types.String `tfsdk:"ecs_cluster_task_role_name"`
+
 }
 
 // AccessRuleResource is the data source implementation.
@@ -74,10 +74,8 @@ func (r *ECSProxyResource) Schema(ctx context.Context, req resource.SchemaReques
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				MarkdownDescription: "The ID of the proxy. Eg: prod-us-west-2",
-				Computed:            true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
+				Required:            true,
+
 			},
 
 			"aws_region": schema.StringAttribute{
@@ -105,6 +103,11 @@ func (r *ECSProxyResource) Schema(ctx context.Context, req resource.SchemaReques
 				MarkdownDescription: "The ECS cluster name of the proxy",
 				Required:            true,
 			},
+			"ecs_cluster_task_role_name": schema.StringAttribute{
+				MarkdownDescription: "The ECS cluster task role name",
+				Required:            true,
+			},
+
 		},
 		MarkdownDescription: `.`,
 	}
@@ -135,7 +138,7 @@ func (r *ECSProxyResource) Create(ctx context.Context, req resource.CreateReques
 	}
 
 	createReq := integrationv1alpha1.RegisterProxyRequest{
-		IntegrationId: data.ID.ValueString(),
+		Id: data.ID.ValueString(),
 		InstanceConfig: &integrationv1alpha1.RegisterProxyRequest_AwsEcsProxyInstanceConfig{
 			AwsEcsProxyInstanceConfig: &integrationv1alpha1.AWSECSProxyInstanceConfig{
 				EcsClusterName:          data.ECSClusterName.ValueString(),
@@ -143,7 +146,10 @@ func (r *ECSProxyResource) Create(ctx context.Context, req resource.CreateReques
 				Region:                  data.AwsRegion.ValueString(),
 				EcsTaskDefinitionFamily: data.ECSTaskDefinitionFamily.ValueString(),
 				EcsContainerName:        data.ECSClusterName.ValueString(),
-				EcsClusterReaderRoleArn: data.ECSClusterName.ValueString(),
+				EcsClusterReaderRoleArn: data.ECSClusterReaderRoleARN.ValueString(),
+				EcsClusterSecurityGroupId: data.ECSClusterSecurityGroupId.ValueString(),
+				EcsClusterTaskRoleName: data.ECSTaskDefinitionFamily.ValueString(),
+
 			},
 		},
 	}
@@ -163,7 +169,7 @@ func (r *ECSProxyResource) Create(ctx context.Context, req resource.CreateReques
 
 	// // Convert from the API data model to the Terraform data model
 	// // and set any unknown attribute values.
-	data.ID = types.StringValue(res.Msg.IntegrationId)
+	data.ID = types.StringValue(res.Msg.Id)
 
 	// Save data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -236,9 +242,10 @@ func (r *ECSProxyResource) Update(ctx context.Context, req resource.UpdateReques
 				EcsClusterName:          data.ECSClusterName.ValueString(),
 				Account:                 data.AwsAccountId.ValueString(),
 				Region:                  data.AwsRegion.ValueString(),
-				EcsTaskDefinitionFamily: data.ECSTaskDefinitionFamily.ValueString(),
 				EcsContainerName:        data.ECSClusterName.ValueString(),
-				EcsClusterReaderRoleArn: data.ECSClusterName.ValueString(),
+				EcsClusterReaderRoleArn: data.ECSClusterReaderRoleARN.ValueString(),
+				EcsClusterSecurityGroupId: data.ECSClusterSecurityGroupId.ValueString(),
+				EcsClusterTaskRoleName: data.ECSTaskDefinitionFamily.ValueString(),
 			},
 		},
 	}

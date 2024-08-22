@@ -22,9 +22,6 @@ import (
 type RDSDatabaseModel struct {
 	ID               types.String `tfsdk:"id"`
 	InstanceID       types.String `tfsdk:"instance_id"`
-
-	ReadSecretRole 	 types.String 	`tfsdk:"proxy_read_secret_role"`
-
 	DatabaseName     types.String `tfsdk:"name"`
 	DatabaseEngine   types.String `tfsdk:"engine"`
 	DatabaseEndpoint types.String `tfsdk:"endpoint"`
@@ -57,7 +54,7 @@ var (
 
 // Metadata returns the data source type name.
 func (r *RDSDatabaseResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_rds_database"
+	resp.TypeName = req.ProviderTypeName + "_proxy_rds_database"
 }
 
 // Configure adds the provider configured client to the data source.
@@ -145,12 +142,6 @@ func (r *RDSDatabaseResource) Schema(ctx context.Context, req resource.SchemaReq
 					},
 				},
 			},
-
-
-			"proxy_read_secret_role": schema.StringAttribute{
-				MarkdownDescription: "read role that allows the proxy to read the database secret",
-				Required:            true,
-			},
 		},
 		MarkdownDescription: `.`,
 	}
@@ -187,7 +178,7 @@ func (r *RDSDatabaseResource) Create(ctx context.Context, req resource.CreateReq
 			InstanceId: data.InstanceID.ValueString(),
 			Region:     data.DatabaseRegion.ValueString(),
 			Database:   data.Database.ValueString(),
-			SecretReadRole: data.ReadSecretRole.ValueString(),
+
 		},
 	}
 
@@ -299,7 +290,7 @@ func (r *RDSDatabaseResource) Update(ctx context.Context, req resource.UpdateReq
 			Region:     data.DatabaseRegion.ValueString(),
 			Account:    data.DatabaseRegion.ValueString(),
 			Database:   data.Database.ValueString(),
-			SecretReadRole: data.ReadSecretRole.ValueString(),
+
 
 		},
 	}
