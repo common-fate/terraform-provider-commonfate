@@ -148,7 +148,7 @@ func (r *ECSProxyResource) Create(ctx context.Context, req resource.CreateReques
 				EcsContainerName:        data.ECSClusterName.ValueString(),
 				EcsClusterReaderRoleArn: data.ECSClusterReaderRoleARN.ValueString(),
 				EcsClusterSecurityGroupId: data.ECSClusterSecurityGroupId.ValueString(),
-				EcsClusterTaskRoleName: data.ECSTaskDefinitionFamily.ValueString(),
+				EcsClusterTaskRoleName: data.ECSClusterTaskRoleName.ValueString(),
 
 			},
 		},
@@ -245,7 +245,7 @@ func (r *ECSProxyResource) Update(ctx context.Context, req resource.UpdateReques
 				EcsContainerName:        data.ECSClusterName.ValueString(),
 				EcsClusterReaderRoleArn: data.ECSClusterReaderRoleARN.ValueString(),
 				EcsClusterSecurityGroupId: data.ECSClusterSecurityGroupId.ValueString(),
-				EcsClusterTaskRoleName: data.ECSTaskDefinitionFamily.ValueString(),
+				EcsClusterTaskRoleName: data.ECSClusterTaskRoleName.ValueString(),
 			},
 		},
 	}

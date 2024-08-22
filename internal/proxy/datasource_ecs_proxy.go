@@ -87,6 +87,10 @@ func (r *ECSProxyDatasource) Schema(ctx context.Context, req datasource.SchemaRe
 				MarkdownDescription: "The ECS cluster name of the proxy",
 				Computed:            true,
 			},
+			"ecs_cluster_task_role_name": schema.StringAttribute{
+				MarkdownDescription: "The ECS cluster task role name",
+				Required:            true,
+			},
 		},
 		MarkdownDescription: `.`,
 	}
@@ -133,6 +137,7 @@ func (r *ECSProxyDatasource) Read(ctx context.Context, req datasource.ReadReques
 		ECSTaskDefinitionFamily: types.StringValue(res.Msg.GetAwsEcsProxyInstanceConfig().EcsTaskDefinitionFamily),
 		ECSClusterReaderRoleARN: types.StringValue(res.Msg.GetAwsEcsProxyInstanceConfig().EcsClusterReaderRoleArn),
 		ECSClusterSecurityGroupId: types.StringValue(res.Msg.GetAwsEcsProxyInstanceConfig().EcsClusterSecurityGroupId),
+		ECSClusterTaskRoleName: types.StringValue(res.Msg.GetAwsEcsProxyInstanceConfig().EcsClusterTaskRoleName),
 	}
 
 
