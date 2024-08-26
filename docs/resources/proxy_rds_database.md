@@ -3,12 +3,12 @@
 page_title: "commonfate_proxy_rds_database Resource - commonfate"
 subcategory: ""
 description: |-
-  .
+  Registers a RDS database with a Common Fate Proxy.
 ---
 
 # commonfate_proxy_rds_database (Resource)
 
-.
+Registers a RDS database with a Common Fate Proxy.
 
 
 
@@ -19,7 +19,7 @@ description: |-
 
 - `database` (String) The name of the database
 - `endpoint` (String) The endpoint of the database
-- `engine` (String) A unique name for the resource
+- `engine` (String) A SQL engine of the RDS database
 - `instance_id` (String) The name of the parent instance id that the database will be connected to
 - `name` (String) A unique name for the resource
 - `proxy_id` (String) The ID of the proxy in the same account as the database.
