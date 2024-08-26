@@ -88,7 +88,7 @@ func (r *ECSProxyDatasource) Schema(ctx context.Context, req datasource.SchemaRe
 				Computed:            true,
 			},
 			"ecs_cluster_task_role_name": schema.StringAttribute{
-				MarkdownDescription: "The ECS cluster task role ARN ",
+				MarkdownDescription: "The ECS cluster task role ARN.",
 				Computed:            true,
 			},
 		},
