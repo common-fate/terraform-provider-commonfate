@@ -137,9 +137,9 @@ func (r *ECSProxyResource) Create(ctx context.Context, req resource.CreateReques
 		return
 	}
 
-	createReq := integrationv1alpha1.RegisterProxyRequest{
+	createReq := integrationv1alpha1.CreateProxyRequest{
 		Id: data.ID.ValueString(),
-		InstanceConfig: &integrationv1alpha1.RegisterProxyRequest_AwsEcsProxyInstanceConfig{
+		InstanceConfig: &integrationv1alpha1.CreateProxyRequest_AwsEcsProxyInstanceConfig{
 			AwsEcsProxyInstanceConfig: &integrationv1alpha1.AWSECSProxyInstanceConfig{
 				EcsClusterName:          data.ECSClusterName.ValueString(),
 				Account:                 data.AwsAccountId.ValueString(),
@@ -154,7 +154,7 @@ func (r *ECSProxyResource) Create(ctx context.Context, req resource.CreateReques
 		},
 	}
 
-	res, err := r.client.RegisterProxy(ctx, connect.NewRequest(&createReq))
+	res, err := r.client.CreateProxy(ctx, connect.NewRequest(&createReq))
 
 	if err != nil {
 		resp.Diagnostics.AddError(

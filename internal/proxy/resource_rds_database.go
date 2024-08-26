@@ -191,14 +191,14 @@ func (r *RDSDatabaseResource) Create(ctx context.Context, req resource.CreateReq
 		})
 	}
 
-	createReq := integrationv1alpha1.RegisterProxyResourceRequest{
+	createReq := integrationv1alpha1.CreateProxyResourceRequest{
 		ProxyId: data.ProxyId.ValueString(),
 		Resource: &integrationv1alpha1.Resource{
 			Resource: resource,
 		},
 	}
 
-	res, err := r.client.RegisterProxyResource(ctx, connect.NewRequest(&createReq))
+	res, err := r.client.CreateProxyResource(ctx, connect.NewRequest(&createReq))
 
 	if err != nil {
 		resp.Diagnostics.AddError(
