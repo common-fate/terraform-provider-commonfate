@@ -63,7 +63,7 @@ func (r *ECSProxyDatasource) Schema(ctx context.Context, req datasource.SchemaRe
 			},
 
 			"aws_region": schema.StringAttribute{
-				MarkdownDescription: "The AWS region the proxy will be installed to.",
+				MarkdownDescription: "The AWS region the proxy is installed to.",
 				Computed:            true,
 			},
 
@@ -72,24 +72,24 @@ func (r *ECSProxyDatasource) Schema(ctx context.Context, req datasource.SchemaRe
 				Computed:            true,
 			},
 			"ecs_cluster_name": schema.StringAttribute{
-				MarkdownDescription: "The subnet IDs of the proxy.",
+				MarkdownDescription: "The ECS cluster name of the proxy.",
 				Computed:            true,
 			},
 			"ecs_task_definition_family": schema.StringAttribute{
-				MarkdownDescription: "The VPC ID of the proxy.",
+				MarkdownDescription: "The ECS task definition family of the proxy.",
 				Computed:            true,
 			},
 			"ecs_cluster_reader_role_arn": schema.StringAttribute{
-				MarkdownDescription: "The ECS cluster ID of the proxy",
+				MarkdownDescription: "The ECS cluster reader role ARN of the proxy.",
 				Computed:            true,
 			},
 			"ecs_cluster_security_group_id": schema.StringAttribute{
-				MarkdownDescription: "The ECS cluster name of the proxy",
+				MarkdownDescription: "The ECS cluster security group ID",
 				Computed:            true,
 			},
 			"ecs_cluster_task_role_name": schema.StringAttribute{
-				MarkdownDescription: "The ECS cluster task role name",
-				Required:            true,
+				MarkdownDescription: "The ECS cluster task role ARN ",
+				Computed:            true,
 			},
 		},
 		MarkdownDescription: `.`,

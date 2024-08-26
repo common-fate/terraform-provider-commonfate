@@ -102,7 +102,7 @@ func (r *RDSDatabaseResource) Schema(ctx context.Context, req resource.SchemaReq
 				Required:            true,
 			},
 			"engine": schema.StringAttribute{
-				MarkdownDescription: "A unique name for the resource",
+				MarkdownDescription: "A SQL engine of the RDS database",
 				Required:            true,
 			},
 			"region": schema.StringAttribute{
@@ -143,7 +143,7 @@ func (r *RDSDatabaseResource) Schema(ctx context.Context, req resource.SchemaReq
 				},
 			},
 		},
-		MarkdownDescription: `.`,
+		MarkdownDescription: `Registers a RDS database with a Common Fate Proxy.`,
 	}
 }
 

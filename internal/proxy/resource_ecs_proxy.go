@@ -88,28 +88,28 @@ func (r *ECSProxyResource) Schema(ctx context.Context, req resource.SchemaReques
 				Required:            true,
 			},
 			"ecs_cluster_name": schema.StringAttribute{
-				MarkdownDescription: "The subnet IDs of the proxy.",
+				MarkdownDescription: "The ECS cluster name of the proxy.",
 				Required:            true,
 			},
 			"ecs_task_definition_family": schema.StringAttribute{
-				MarkdownDescription: "The VPC ID of the proxy.",
+				MarkdownDescription: "The ECS task definition family of the proxy.",
 				Required:            true,
 			},
 			"ecs_cluster_reader_role_arn": schema.StringAttribute{
-				MarkdownDescription: "The ECS cluster ID of the proxy",
+				MarkdownDescription: "The ECS cluster reader role ARN of the proxy.",
 				Required:            true,
 			},
 			"ecs_cluster_security_group_id": schema.StringAttribute{
-				MarkdownDescription: "The ECS cluster name of the proxy",
+				MarkdownDescription: "The ECS cluster security group ID.",
 				Required:            true,
 			},
 			"ecs_cluster_task_role_name": schema.StringAttribute{
-				MarkdownDescription: "The ECS cluster task role name",
+				MarkdownDescription: "The ECS cluster task role ARN.",
 				Required:            true,
 			},
 
 		},
-		MarkdownDescription: `.`,
+		MarkdownDescription: `Registers a proxy with Common Fate..`,
 	}
 }
 
