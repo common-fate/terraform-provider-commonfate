@@ -158,7 +158,7 @@ func (r *ECSProxyResource) Create(ctx context.Context, req resource.CreateReques
 
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to Create Resource: RDS Proxy",
+			"Unable to Create Resource: Proxy",
 			"An unexpected error occurred while communicating with Common Fate API. "+
 				"Please report this issue to the provider developers.\n\n"+
 				"JSON Error: "+err.Error(),
@@ -199,7 +199,7 @@ func (r *ECSProxyResource) Read(ctx context.Context, req resource.ReadRequest, r
 		return
 	} else if err != nil {
 		resp.Diagnostics.AddError(
-			"Failed to read RDS resource",
+			"Failed to read resource",
 			err.Error(),
 		)
 		return
