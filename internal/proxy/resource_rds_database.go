@@ -171,34 +171,31 @@ func (r *RDSDatabaseResource) Create(ctx context.Context, req resource.CreateReq
 		return
 	}
 
-	resource := &integrationv1alpha1.Resource_AwsRdsDatabase{
-		AwsRdsDatabase: &integrationv1alpha1.AWSRDSDatabase{
+	resource := &integrationv1alpha1.AWSRDSDatabase{
 			Name:       data.DatabaseName.ValueString(),
 			Engine:     data.DatabaseEngine.ValueString(),
 			InstanceId: data.InstanceID.ValueString(),
 			Region:     data.DatabaseRegion.ValueString(),
 			Database:   data.Database.ValueString(),
 
-		},
-	}
+		}
 
 	for _, user := range data.Users {
 
-		resource.AwsRdsDatabase.Users = append(resource.AwsRdsDatabase.Users, &integrationv1alpha1.AWSRDSDatabaseUser{
+		resource.Users = append(resource.Users, &integrationv1alpha1.AWSRDSDatabaseUser{
 			Name:                      user.Name.ValueString(),
 			Username:                  user.UserName.ValueString(),
 			PasswordSecretsManagerArn: user.PasswordSecretsManagerARN.ValueString(),
 		})
 	}
 
-	createReq := integrationv1alpha1.CreateProxyResourceRequest{
+	createReq := integrationv1alpha1.CreateProxyRdsResourceRequest{
 		ProxyId: data.ProxyId.ValueString(),
-		Resource: &integrationv1alpha1.Resource{
-			Resource: resource,
-		},
+
+		RdsDatabase: resource,
 	}
 
-	res, err := r.client.CreateProxyResource(ctx, connect.NewRequest(&createReq))
+	res, err := r.client.CreateProxyRdsResource(ctx, connect.NewRequest(&createReq))
 
 	if err != nil {
 		resp.Diagnostics.AddError(
@@ -235,9 +232,9 @@ func (r *RDSDatabaseResource) Read(ctx context.Context, req resource.ReadRequest
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
 
 	// read the state from the client
-	res, err := r.client.GetProxyResource(ctx, connect.NewRequest(&integrationv1alpha1.GetProxyResourceRequest{
+	res, err := r.client.GetProxyRdsResource(ctx, connect.NewRequest(&integrationv1alpha1.GetProxyRdsResourceRequest{
 		Id:      state.ID.ValueString(),
-		ProxyId: state.ProxyId.ValueString(),
+
 	}))
 	if connect.CodeOf(err) == connect.CodeNotFound {
 		resp.State.RemoveResource(ctx)
@@ -280,9 +277,7 @@ func (r *RDSDatabaseResource) Update(ctx context.Context, req resource.UpdateReq
 		return
 	}
 
-	resource := &integrationv1alpha1.Resource_AwsRdsDatabase{
-
-		AwsRdsDatabase: &integrationv1alpha1.AWSRDSDatabase{
+	resource :=  &integrationv1alpha1.AWSRDSDatabase{
 
 			Name:       data.DatabaseName.ValueString(),
 			Engine:     data.DatabaseEngine.ValueString(),
@@ -292,27 +287,25 @@ func (r *RDSDatabaseResource) Update(ctx context.Context, req resource.UpdateReq
 			Database:   data.Database.ValueString(),
 
 
-		},
-	}
+		}
 
 	for _, user := range data.Users {
 
-		resource.AwsRdsDatabase.Users = append(resource.AwsRdsDatabase.Users, &integrationv1alpha1.AWSRDSDatabaseUser{
+		resource.Users = append(resource.Users, &integrationv1alpha1.AWSRDSDatabaseUser{
 			Name:                      user.Name.ValueString(),
 			Username:                  user.UserName.ValueString(),
 			PasswordSecretsManagerArn: user.PasswordSecretsManagerARN.ValueString(),
 		})
 	}
 
-	updateReq := integrationv1alpha1.UpdateProxyResourceRequest{
+	updateReq := integrationv1alpha1.UpdateProxyRdsResourceRequest{
 		Id:      data.ID.ValueString(),
 		ProxyId: data.ProxyId.ValueString(),
-		Resource: &integrationv1alpha1.Resource{
-			Resource: resource,
-		},
+		RdsDatabase: resource,
+
 	}
 
-	res, err := r.client.UpdateProxyResource(ctx, connect.NewRequest(&updateReq))
+	res, err := r.client.UpdateProxyRdsResource(ctx, connect.NewRequest(&updateReq))
 
 	if err != nil {
 		resp.Diagnostics.AddError(
@@ -354,7 +347,7 @@ func (r *RDSDatabaseResource) Delete(ctx context.Context, req resource.DeleteReq
 		return
 	}
 
-	_, err := r.client.DeleteProxyResource(ctx, connect.NewRequest(&integrationv1alpha1.DeleteProxyResourceRequest{
+	_, err := r.client.DeleteProxyRdsResource(ctx, connect.NewRequest(&integrationv1alpha1.DeleteProxyRdsResourceRequest{
 		Id: data.ID.ValueString(),
 	}))
 
