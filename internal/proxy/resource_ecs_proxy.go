@@ -20,12 +20,12 @@ import (
 type ECSProxyModel struct {
 	ID           types.String `tfsdk:"id"`
 	AwsRegion    types.String `tfsdk:"aws_region"`
-	AwsAccountId types.String `tfsdk:"aws_account_id"`
+	AwsAccountID types.String `tfsdk:"aws_account_id"`
 
 	ECSClusterName            types.String `tfsdk:"ecs_cluster_name"`
 	ECSTaskDefinitionFamily   types.String `tfsdk:"ecs_task_definition_family"`
 	ECSClusterReaderRoleARN   types.String `tfsdk:"ecs_cluster_reader_role_arn"`
-	ECSClusterSecurityGroupId types.String `tfsdk:"ecs_cluster_security_group_id"`
+	ECSClusterSecurityGroupID types.String `tfsdk:"ecs_cluster_security_group_id"`
 	ECSClusterTaskRoleName types.String `tfsdk:"ecs_cluster_task_role_name"`
 
 }
@@ -142,12 +142,12 @@ func (r *ECSProxyResource) Create(ctx context.Context, req resource.CreateReques
 		InstanceConfig: &integrationv1alpha1.CreateProxyRequest_AwsEcsProxyInstanceConfig{
 			AwsEcsProxyInstanceConfig: &integrationv1alpha1.AWSECSProxyInstanceConfig{
 				EcsClusterName:          data.ECSClusterName.ValueString(),
-				Account:                 data.AwsAccountId.ValueString(),
+				Account:                 data.AwsAccountID.ValueString(),
 				Region:                  data.AwsRegion.ValueString(),
 				EcsTaskDefinitionFamily: data.ECSTaskDefinitionFamily.ValueString(),
 				EcsContainerName:        data.ECSClusterName.ValueString(),
 				EcsClusterReaderRoleArn: data.ECSClusterReaderRoleARN.ValueString(),
-				EcsClusterSecurityGroupId: data.ECSClusterSecurityGroupId.ValueString(),
+				EcsClusterSecurityGroupId: data.ECSClusterSecurityGroupID.ValueString(),
 				EcsClusterTaskRoleName: data.ECSClusterTaskRoleName.ValueString(),
 
 			},
@@ -240,11 +240,11 @@ func (r *ECSProxyResource) Update(ctx context.Context, req resource.UpdateReques
 		InstanceConfig: &integrationv1alpha1.UpdateProxyRequest_AwsEcsProxyInstanceConfig{
 			AwsEcsProxyInstanceConfig: &integrationv1alpha1.AWSECSProxyInstanceConfig{
 				EcsClusterName:          data.ECSClusterName.ValueString(),
-				Account:                 data.AwsAccountId.ValueString(),
+				Account:                 data.AwsAccountID.ValueString(),
 				Region:                  data.AwsRegion.ValueString(),
 				EcsContainerName:        data.ECSClusterName.ValueString(),
 				EcsClusterReaderRoleArn: data.ECSClusterReaderRoleARN.ValueString(),
-				EcsClusterSecurityGroupId: data.ECSClusterSecurityGroupId.ValueString(),
+				EcsClusterSecurityGroupId: data.ECSClusterSecurityGroupID.ValueString(),
 				EcsClusterTaskRoleName: data.ECSClusterTaskRoleName.ValueString(),
 			},
 		},

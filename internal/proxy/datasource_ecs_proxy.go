@@ -132,11 +132,11 @@ func (r *ECSProxyDatasource) Read(ctx context.Context, req datasource.ReadReques
 	state = ECSProxyModel{
 		ID: types.StringValue(res.Msg.Id),
 		AwsRegion: types.StringValue(res.Msg.GetAwsEcsProxyInstanceConfig().Region),
-		AwsAccountId: types.StringValue(res.Msg.GetAwsEcsProxyInstanceConfig().Account),
+		AwsAccountID: types.StringValue(res.Msg.GetAwsEcsProxyInstanceConfig().Account),
 		ECSClusterName: types.StringValue(res.Msg.GetAwsEcsProxyInstanceConfig().EcsClusterName),
 		ECSTaskDefinitionFamily: types.StringValue(res.Msg.GetAwsEcsProxyInstanceConfig().EcsTaskDefinitionFamily),
 		ECSClusterReaderRoleARN: types.StringValue(res.Msg.GetAwsEcsProxyInstanceConfig().EcsClusterReaderRoleArn),
-		ECSClusterSecurityGroupId: types.StringValue(res.Msg.GetAwsEcsProxyInstanceConfig().EcsClusterSecurityGroupId),
+		ECSClusterSecurityGroupID: types.StringValue(res.Msg.GetAwsEcsProxyInstanceConfig().EcsClusterSecurityGroupId),
 		ECSClusterTaskRoleName: types.StringValue(res.Msg.GetAwsEcsProxyInstanceConfig().EcsClusterTaskRoleName),
 	}
 
