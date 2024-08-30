@@ -20,8 +20,8 @@ import (
 )
 
 type RDSDatabaseModel struct {
-	ID               types.String `tfsdk:"id"`
-	InstanceID       types.String `tfsdk:"instance_id"`
+	ID types.String `tfsdk:"id"`
+
 	DatabaseName     types.String `tfsdk:"name"`
 	DatabaseEngine   types.String `tfsdk:"engine"`
 	DatabaseEndpoint types.String `tfsdk:"endpoint"`
@@ -90,11 +90,6 @@ func (r *RDSDatabaseResource) Schema(ctx context.Context, req resource.SchemaReq
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
-			},
-
-			"instance_id": schema.StringAttribute{
-				MarkdownDescription: "The name of the parent instance id that the database will be connected to",
-				Required:            true,
 			},
 
 			"name": schema.StringAttribute{
@@ -172,13 +167,12 @@ func (r *RDSDatabaseResource) Create(ctx context.Context, req resource.CreateReq
 	}
 
 	resource := &integrationv1alpha1.AWSRDSDatabase{
-			Name:       data.DatabaseName.ValueString(),
-			Engine:     data.DatabaseEngine.ValueString(),
-			InstanceId: data.InstanceID.ValueString(),
-			Region:     data.DatabaseRegion.ValueString(),
-			Database:   data.Database.ValueString(),
+		Name:   data.DatabaseName.ValueString(),
+		Engine: data.DatabaseEngine.ValueString(),
 
-		}
+		Region:   data.DatabaseRegion.ValueString(),
+		Database: data.Database.ValueString(),
+	}
 
 	for _, user := range data.Users {
 
@@ -233,8 +227,7 @@ func (r *RDSDatabaseResource) Read(ctx context.Context, req resource.ReadRequest
 
 	// read the state from the client
 	res, err := r.client.GetProxyRdsResource(ctx, connect.NewRequest(&integrationv1alpha1.GetProxyRdsResourceRequest{
-		Id:      state.ID.ValueString(),
-
+		Id: state.ID.ValueString(),
 	}))
 	if connect.CodeOf(err) == connect.CodeNotFound {
 		resp.State.RemoveResource(ctx)
@@ -277,17 +270,15 @@ func (r *RDSDatabaseResource) Update(ctx context.Context, req resource.UpdateReq
 		return
 	}
 
-	resource :=  &integrationv1alpha1.AWSRDSDatabase{
+	resource := &integrationv1alpha1.AWSRDSDatabase{
 
-			Name:       data.DatabaseName.ValueString(),
-			Engine:     data.DatabaseEngine.ValueString(),
-			InstanceId: data.InstanceID.ValueString(),
-			Region:     data.DatabaseRegion.ValueString(),
-			Account:    data.DatabaseRegion.ValueString(),
-			Database:   data.Database.ValueString(),
+		Name:   data.DatabaseName.ValueString(),
+		Engine: data.DatabaseEngine.ValueString(),
 
-
-		}
+		Region:   data.DatabaseRegion.ValueString(),
+		Account:  data.DatabaseRegion.ValueString(),
+		Database: data.Database.ValueString(),
+	}
 
 	for _, user := range data.Users {
 
@@ -299,10 +290,9 @@ func (r *RDSDatabaseResource) Update(ctx context.Context, req resource.UpdateReq
 	}
 
 	updateReq := integrationv1alpha1.UpdateProxyRdsResourceRequest{
-		Id:      data.ID.ValueString(),
-		ProxyId: data.ProxyId.ValueString(),
+		Id:          data.ID.ValueString(),
+		ProxyId:     data.ProxyId.ValueString(),
 		RdsDatabase: resource,
-
 	}
 
 	res, err := r.client.UpdateProxyRdsResource(ctx, connect.NewRequest(&updateReq))
@@ -321,7 +311,6 @@ func (r *RDSDatabaseResource) Update(ctx context.Context, req resource.UpdateReq
 	// // Convert from the API data model to the Terraform data model
 	// // and set any unknown attribute values.
 	data.ID = types.StringValue(res.Msg.Id)
-
 
 	// Save data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
