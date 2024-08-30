@@ -20,7 +20,6 @@ Registers a RDS database with a Common Fate Proxy.
 - `database` (String) The name of the database
 - `endpoint` (String) The endpoint of the database
 - `engine` (String) A SQL engine of the RDS database
-- `instance_id` (String) The name of the parent instance id that the database will be connected to
 - `name` (String) A unique name for the resource
 - `proxy_id` (String) The ID of the proxy in the same account as the database.
 - `region` (String) The region the database is in
