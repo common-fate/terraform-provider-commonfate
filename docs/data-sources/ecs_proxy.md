@@ -24,7 +24,7 @@ description: |-
 - `aws_account_id` (String) The AWS account the proxy is installed in.
 - `aws_region` (String) The AWS region the proxy is installed to.
 - `ecs_cluster_name` (String) The ECS cluster name of the proxy.
-- `ecs_cluster_reader_role_name` (String) The ECS cluster reader role ARN of the proxy.
+- `ecs_cluster_reader_role_arn` (String) The ECS cluster reader role ARN of the proxy.
 - `ecs_cluster_security_group_id` (String) The ECS cluster security group ID
 - `ecs_cluster_task_role_name` (String) The ECS cluster task role ARN.
 - `ecs_task_definition_family` (String) The ECS task definition family of the proxy.
