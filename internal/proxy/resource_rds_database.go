@@ -8,7 +8,6 @@ import (
 
 	config_client "github.com/common-fate/sdk/config"
 	"github.com/common-fate/sdk/gen/commonfate/control/integration/v1alpha1/integrationv1alpha1connect"
-	"github.com/common-fate/sdk/service/control/integration"
 
 	"connectrpc.com/connect"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -43,7 +42,7 @@ type DatabaseUser struct {
 
 // AccessRuleResource is the data source implementation.
 type RDSDatabaseResource struct {
-	client integrationv1alpha1connect.IntegrationServiceClient
+	client integrationv1alpha1connect.ProxyServiceClient
 }
 
 var (
@@ -72,7 +71,7 @@ func (r *RDSDatabaseResource) Configure(_ context.Context, req resource.Configur
 
 		return
 	}
-	client := integration.NewFromConfig(cfg)
+	client := integrationv1alpha1connect.NewProxyServiceClient(cfg.HTTPClient, cfg.APIURL)
 
 	r.client = client
 }

@@ -8,7 +8,6 @@ import (
 
 	config_client "github.com/common-fate/sdk/config"
 	"github.com/common-fate/sdk/gen/commonfate/control/integration/v1alpha1/integrationv1alpha1connect"
-	"github.com/common-fate/sdk/service/control/integration"
 
 	"connectrpc.com/connect"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
@@ -19,7 +18,7 @@ import (
 
 // AccessRuleResource is the data source implementation.
 type ECSProxyDatasource struct {
-	client integrationv1alpha1connect.IntegrationServiceClient
+	client integrationv1alpha1connect.ProxyServiceClient
 }
 
 var _ datasource.DataSource = &ECSProxyDatasource{}
@@ -44,7 +43,8 @@ func (r *ECSProxyDatasource) Configure(_ context.Context, req datasource.Configu
 
 		return
 	}
-	client := integration.NewFromConfig(cfg)
+
+	client := integrationv1alpha1connect.NewProxyServiceClient(cfg.HTTPClient, cfg.APIURL)
 
 	r.client = client
 }

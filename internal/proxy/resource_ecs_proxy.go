@@ -8,7 +8,6 @@ import (
 
 	config_client "github.com/common-fate/sdk/config"
 	"github.com/common-fate/sdk/gen/commonfate/control/integration/v1alpha1/integrationv1alpha1connect"
-	"github.com/common-fate/sdk/service/control/integration"
 
 	"connectrpc.com/connect"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -26,13 +25,12 @@ type ECSProxyModel struct {
 	ECSTaskDefinitionFamily   types.String `tfsdk:"ecs_task_definition_family"`
 	ECSClusterReaderRoleARN   types.String `tfsdk:"ecs_cluster_reader_role_arn"`
 	ECSClusterSecurityGroupID types.String `tfsdk:"ecs_cluster_security_group_id"`
-	ECSClusterTaskRoleName types.String `tfsdk:"ecs_cluster_task_role_name"`
-
+	ECSClusterTaskRoleName    types.String `tfsdk:"ecs_cluster_task_role_name"`
 }
 
 // AccessRuleResource is the data source implementation.
 type ECSProxyResource struct {
-	client integrationv1alpha1connect.IntegrationServiceClient
+	client integrationv1alpha1connect.ProxyServiceClient
 }
 
 var (
@@ -61,7 +59,7 @@ func (r *ECSProxyResource) Configure(_ context.Context, req resource.ConfigureRe
 
 		return
 	}
-	client := integration.NewFromConfig(cfg)
+	client := integrationv1alpha1connect.NewProxyServiceClient(cfg.HTTPClient, cfg.APIURL)
 
 	r.client = client
 }
@@ -75,7 +73,6 @@ func (r *ECSProxyResource) Schema(ctx context.Context, req resource.SchemaReques
 			"id": schema.StringAttribute{
 				MarkdownDescription: "The ID of the proxy. Eg: prod-us-west-2",
 				Required:            true,
-
 			},
 
 			"aws_region": schema.StringAttribute{
@@ -107,7 +104,6 @@ func (r *ECSProxyResource) Schema(ctx context.Context, req resource.SchemaReques
 				MarkdownDescription: "The ECS cluster task role ARN.",
 				Required:            true,
 			},
-
 		},
 		MarkdownDescription: `Registers a proxy with Common Fate..`,
 	}
@@ -141,15 +137,14 @@ func (r *ECSProxyResource) Create(ctx context.Context, req resource.CreateReques
 		Id: data.ID.ValueString(),
 		InstanceConfig: &integrationv1alpha1.CreateProxyRequest_AwsEcsProxyInstanceConfig{
 			AwsEcsProxyInstanceConfig: &integrationv1alpha1.AWSECSProxyInstanceConfig{
-				EcsClusterName:          data.ECSClusterName.ValueString(),
-				Account:                 data.AwsAccountID.ValueString(),
-				Region:                  data.AwsRegion.ValueString(),
-				EcsTaskDefinitionFamily: data.ECSTaskDefinitionFamily.ValueString(),
-				EcsContainerName:        data.ECSClusterName.ValueString(),
-				EcsClusterReaderRoleArn: data.ECSClusterReaderRoleARN.ValueString(),
+				EcsClusterName:            data.ECSClusterName.ValueString(),
+				Account:                   data.AwsAccountID.ValueString(),
+				Region:                    data.AwsRegion.ValueString(),
+				EcsTaskDefinitionFamily:   data.ECSTaskDefinitionFamily.ValueString(),
+				EcsContainerName:          data.ECSClusterName.ValueString(),
+				EcsClusterReaderRoleArn:   data.ECSClusterReaderRoleARN.ValueString(),
 				EcsClusterSecurityGroupId: data.ECSClusterSecurityGroupID.ValueString(),
-				EcsClusterTaskRoleName: data.ECSClusterTaskRoleName.ValueString(),
-
+				EcsClusterTaskRoleName:    data.ECSClusterTaskRoleName.ValueString(),
 			},
 		},
 	}
@@ -239,13 +234,13 @@ func (r *ECSProxyResource) Update(ctx context.Context, req resource.UpdateReques
 		Id: data.ID.ValueString(),
 		InstanceConfig: &integrationv1alpha1.UpdateProxyRequest_AwsEcsProxyInstanceConfig{
 			AwsEcsProxyInstanceConfig: &integrationv1alpha1.AWSECSProxyInstanceConfig{
-				EcsClusterName:          data.ECSClusterName.ValueString(),
-				Account:                 data.AwsAccountID.ValueString(),
-				Region:                  data.AwsRegion.ValueString(),
-				EcsContainerName:        data.ECSClusterName.ValueString(),
-				EcsClusterReaderRoleArn: data.ECSClusterReaderRoleARN.ValueString(),
+				EcsClusterName:            data.ECSClusterName.ValueString(),
+				Account:                   data.AwsAccountID.ValueString(),
+				Region:                    data.AwsRegion.ValueString(),
+				EcsContainerName:          data.ECSClusterName.ValueString(),
+				EcsClusterReaderRoleArn:   data.ECSClusterReaderRoleARN.ValueString(),
 				EcsClusterSecurityGroupId: data.ECSClusterSecurityGroupID.ValueString(),
-				EcsClusterTaskRoleName: data.ECSClusterTaskRoleName.ValueString(),
+				EcsClusterTaskRoleName:    data.ECSClusterTaskRoleName.ValueString(),
 			},
 		},
 	}
