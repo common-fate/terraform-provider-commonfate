@@ -24,7 +24,6 @@ type ECSProxyDatasource struct {
 
 var _ datasource.DataSource = &ECSProxyDatasource{}
 
-
 // Metadata returns the data source type name.
 func (r *ECSProxyDatasource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_ecs_proxy"
@@ -58,8 +57,7 @@ func (r *ECSProxyDatasource) Schema(ctx context.Context, req datasource.SchemaRe
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				MarkdownDescription: "The ID of the proxy. Eg: prod-us-west-2",
-				Required: true,
-
+				Required:            true,
 			},
 
 			"aws_region": schema.StringAttribute{
@@ -79,7 +77,7 @@ func (r *ECSProxyDatasource) Schema(ctx context.Context, req datasource.SchemaRe
 				MarkdownDescription: "The ECS task definition family of the proxy.",
 				Computed:            true,
 			},
-			"ecs_cluster_reader_role_arn": schema.StringAttribute{
+			"ecs_cluster_reader_role_name": schema.StringAttribute{
 				MarkdownDescription: "The ECS cluster reader role ARN of the proxy.",
 				Computed:            true,
 			},
@@ -96,7 +94,6 @@ func (r *ECSProxyDatasource) Schema(ctx context.Context, req datasource.SchemaRe
 	}
 }
 
-
 // Read refreshes the Terraform state with the latest data.
 func (r *ECSProxyDatasource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	if r.client == nil {
@@ -107,7 +104,6 @@ func (r *ECSProxyDatasource) Read(ctx context.Context, req datasource.ReadReques
 
 		return
 	}
-
 
 	var state ECSProxyModel
 
@@ -130,16 +126,15 @@ func (r *ECSProxyDatasource) Read(ctx context.Context, req datasource.ReadReques
 	}
 
 	state = ECSProxyModel{
-		ID: types.StringValue(res.Msg.Id),
-		AwsRegion: types.StringValue(res.Msg.GetAwsEcsProxyInstanceConfig().Region),
-		AwsAccountID: types.StringValue(res.Msg.GetAwsEcsProxyInstanceConfig().Account),
-		ECSClusterName: types.StringValue(res.Msg.GetAwsEcsProxyInstanceConfig().EcsClusterName),
-		ECSTaskDefinitionFamily: types.StringValue(res.Msg.GetAwsEcsProxyInstanceConfig().EcsTaskDefinitionFamily),
-		ECSClusterReaderRoleARN: types.StringValue(res.Msg.GetAwsEcsProxyInstanceConfig().EcsClusterReaderRoleArn),
+		ID:                        types.StringValue(res.Msg.Id),
+		AwsRegion:                 types.StringValue(res.Msg.GetAwsEcsProxyInstanceConfig().Region),
+		AwsAccountID:              types.StringValue(res.Msg.GetAwsEcsProxyInstanceConfig().Account),
+		ECSClusterName:            types.StringValue(res.Msg.GetAwsEcsProxyInstanceConfig().EcsClusterName),
+		ECSTaskDefinitionFamily:   types.StringValue(res.Msg.GetAwsEcsProxyInstanceConfig().EcsTaskDefinitionFamily),
+		ECSClusterReaderRoleARN:   types.StringValue(res.Msg.GetAwsEcsProxyInstanceConfig().EcsClusterReaderRoleArn),
 		ECSClusterSecurityGroupID: types.StringValue(res.Msg.GetAwsEcsProxyInstanceConfig().EcsClusterSecurityGroupId),
-		ECSClusterTaskRoleName: types.StringValue(res.Msg.GetAwsEcsProxyInstanceConfig().EcsClusterTaskRoleName),
+		ECSClusterTaskRoleName:    types.StringValue(res.Msg.GetAwsEcsProxyInstanceConfig().EcsClusterTaskRoleName),
 	}
-
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }

@@ -20,8 +20,8 @@ import (
 )
 
 type RDSDatabaseModel struct {
-	ID types.String `tfsdk:"id"`
-
+	ID               types.String `tfsdk:"id"`
+	InstanceID       types.String `tfsdk:"instance_id"`
 	DatabaseName     types.String `tfsdk:"name"`
 	DatabaseEngine   types.String `tfsdk:"engine"`
 	DatabaseEndpoint types.String `tfsdk:"endpoint"`
@@ -90,6 +90,11 @@ func (r *RDSDatabaseResource) Schema(ctx context.Context, req resource.SchemaReq
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
+			},
+
+			"instance_id": schema.StringAttribute{
+				MarkdownDescription: "The name of the parent instance id that the database will be connected to",
+				Required:            true,
 			},
 
 			"name": schema.StringAttribute{
@@ -167,11 +172,11 @@ func (r *RDSDatabaseResource) Create(ctx context.Context, req resource.CreateReq
 	}
 
 	resource := &integrationv1alpha1.AWSRDSDatabase{
-		Name:   data.DatabaseName.ValueString(),
-		Engine: data.DatabaseEngine.ValueString(),
-
-		Region:   data.DatabaseRegion.ValueString(),
-		Database: data.Database.ValueString(),
+		Name:       data.DatabaseName.ValueString(),
+		Engine:     data.DatabaseEngine.ValueString(),
+		InstanceId: data.InstanceID.ValueString(),
+		Region:     data.DatabaseRegion.ValueString(),
+		Database:   data.Database.ValueString(),
 	}
 
 	for _, user := range data.Users {
@@ -272,12 +277,12 @@ func (r *RDSDatabaseResource) Update(ctx context.Context, req resource.UpdateReq
 
 	resource := &integrationv1alpha1.AWSRDSDatabase{
 
-		Name:   data.DatabaseName.ValueString(),
-		Engine: data.DatabaseEngine.ValueString(),
-
-		Region:   data.DatabaseRegion.ValueString(),
-		Account:  data.DatabaseRegion.ValueString(),
-		Database: data.Database.ValueString(),
+		Name:       data.DatabaseName.ValueString(),
+		Engine:     data.DatabaseEngine.ValueString(),
+		InstanceId: data.InstanceID.ValueString(),
+		Region:     data.DatabaseRegion.ValueString(),
+		Account:    data.DatabaseRegion.ValueString(),
+		Database:   data.Database.ValueString(),
 	}
 
 	for _, user := range data.Users {
