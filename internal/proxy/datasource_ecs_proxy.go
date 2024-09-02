@@ -77,7 +77,7 @@ func (r *ECSProxyDatasource) Schema(ctx context.Context, req datasource.SchemaRe
 				MarkdownDescription: "The ECS task definition family of the proxy.",
 				Computed:            true,
 			},
-			"ecs_cluster_reader_role_name": schema.StringAttribute{
+			"ecs_cluster_reader_role_arn": schema.StringAttribute{
 				MarkdownDescription: "The ECS cluster reader role ARN of the proxy.",
 				Computed:            true,
 			},
