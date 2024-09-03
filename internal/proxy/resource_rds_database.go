@@ -176,6 +176,7 @@ func (r *RDSDatabaseResource) Create(ctx context.Context, req resource.CreateReq
 		InstanceId: data.InstanceID.ValueString(),
 		Region:     data.DatabaseRegion.ValueString(),
 		Database:   data.Database.ValueString(),
+		Endpoint:   data.DatabaseEndpoint.ValueString(),
 	}
 
 	for _, user := range data.Users {
@@ -282,6 +283,7 @@ func (r *RDSDatabaseResource) Update(ctx context.Context, req resource.UpdateReq
 		Region:     data.DatabaseRegion.ValueString(),
 		Account:    data.DatabaseRegion.ValueString(),
 		Database:   data.Database.ValueString(),
+		Endpoint:   data.DatabaseEndpoint.ValueString(),
 	}
 
 	for _, user := range data.Users {
