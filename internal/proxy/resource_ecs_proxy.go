@@ -21,11 +21,12 @@ type ECSProxyModel struct {
 	AwsRegion    types.String `tfsdk:"aws_region"`
 	AwsAccountID types.String `tfsdk:"aws_account_id"`
 
-	ECSClusterName            types.String `tfsdk:"ecs_cluster_name"`
-	ECSTaskDefinitionFamily   types.String `tfsdk:"ecs_task_definition_family"`
-	ECSClusterReaderRoleARN   types.String `tfsdk:"ecs_cluster_reader_role_arn"`
-	ECSClusterSecurityGroupID types.String `tfsdk:"ecs_cluster_security_group_id"`
-	ECSClusterTaskRoleName    types.String `tfsdk:"ecs_cluster_task_role_name"`
+	ECSClusterName              types.String `tfsdk:"ecs_cluster_name"`
+	ECSTaskDefinitionFamily     types.String `tfsdk:"ecs_task_definition_family"`
+	ECSClusterReaderRoleARN     types.String `tfsdk:"ecs_cluster_reader_role_arn"`
+	ECSClusterSecurityGroupID   types.String `tfsdk:"ecs_cluster_security_group_id"`
+	ECSClusterTaskRoleName      types.String `tfsdk:"ecs_cluster_task_role_name"`
+	ECSClusterTaskContainerName types.String `tfsdk:"ecs_cluster_task_container_name"`
 }
 
 // AccessRuleResource is the data source implementation.
@@ -104,6 +105,10 @@ func (r *ECSProxyResource) Schema(ctx context.Context, req resource.SchemaReques
 				MarkdownDescription: "The ECS cluster task role ARN.",
 				Required:            true,
 			},
+			"ecs_cluster_task_container_name": schema.StringAttribute{
+				MarkdownDescription: "The name of the ECS cluster task container for the proxy.",
+				Required:            true,
+			},
 		},
 		MarkdownDescription: `Registers a proxy with Common Fate..`,
 	}
@@ -141,7 +146,7 @@ func (r *ECSProxyResource) Create(ctx context.Context, req resource.CreateReques
 				Account:                   data.AwsAccountID.ValueString(),
 				Region:                    data.AwsRegion.ValueString(),
 				EcsTaskDefinitionFamily:   data.ECSTaskDefinitionFamily.ValueString(),
-				EcsContainerName:          data.ECSClusterName.ValueString(),
+				EcsContainerName:          data.ECSClusterTaskContainerName.ValueString(),
 				EcsClusterReaderRoleArn:   data.ECSClusterReaderRoleARN.ValueString(),
 				EcsClusterSecurityGroupId: data.ECSClusterSecurityGroupID.ValueString(),
 				EcsClusterTaskRoleName:    data.ECSClusterTaskRoleName.ValueString(),
@@ -237,7 +242,7 @@ func (r *ECSProxyResource) Update(ctx context.Context, req resource.UpdateReques
 				EcsClusterName:            data.ECSClusterName.ValueString(),
 				Account:                   data.AwsAccountID.ValueString(),
 				Region:                    data.AwsRegion.ValueString(),
-				EcsContainerName:          data.ECSClusterName.ValueString(),
+				EcsContainerName:          data.ECSClusterTaskContainerName.ValueString(),
 				EcsClusterReaderRoleArn:   data.ECSClusterReaderRoleARN.ValueString(),
 				EcsClusterSecurityGroupId: data.ECSClusterSecurityGroupID.ValueString(),
 				EcsClusterTaskRoleName:    data.ECSClusterTaskRoleName.ValueString(),
