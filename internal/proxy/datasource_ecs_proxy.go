@@ -89,6 +89,10 @@ func (r *ECSProxyDatasource) Schema(ctx context.Context, req datasource.SchemaRe
 				MarkdownDescription: "The ECS cluster task role ARN.",
 				Computed:            true,
 			},
+			"ecs_cluster_task_container_name": schema.StringAttribute{
+				MarkdownDescription: "The name of the ECS cluster task container for the proxy.",
+				Required:            true,
+			},
 		},
 		MarkdownDescription: `.`,
 	}
@@ -126,14 +130,15 @@ func (r *ECSProxyDatasource) Read(ctx context.Context, req datasource.ReadReques
 	}
 
 	state = ECSProxyModel{
-		ID:                        types.StringValue(res.Msg.Id),
-		AwsRegion:                 types.StringValue(res.Msg.GetAwsEcsProxyInstanceConfig().Region),
-		AwsAccountID:              types.StringValue(res.Msg.GetAwsEcsProxyInstanceConfig().Account),
-		ECSClusterName:            types.StringValue(res.Msg.GetAwsEcsProxyInstanceConfig().EcsClusterName),
-		ECSTaskDefinitionFamily:   types.StringValue(res.Msg.GetAwsEcsProxyInstanceConfig().EcsTaskDefinitionFamily),
-		ECSClusterReaderRoleARN:   types.StringValue(res.Msg.GetAwsEcsProxyInstanceConfig().EcsClusterReaderRoleArn),
-		ECSClusterSecurityGroupID: types.StringValue(res.Msg.GetAwsEcsProxyInstanceConfig().EcsClusterSecurityGroupId),
-		ECSClusterTaskRoleName:    types.StringValue(res.Msg.GetAwsEcsProxyInstanceConfig().EcsClusterTaskRoleName),
+		ID:                          types.StringValue(res.Msg.Id),
+		AwsRegion:                   types.StringValue(res.Msg.GetAwsEcsProxyInstanceConfig().Region),
+		AwsAccountID:                types.StringValue(res.Msg.GetAwsEcsProxyInstanceConfig().Account),
+		ECSClusterName:              types.StringValue(res.Msg.GetAwsEcsProxyInstanceConfig().EcsClusterName),
+		ECSTaskDefinitionFamily:     types.StringValue(res.Msg.GetAwsEcsProxyInstanceConfig().EcsTaskDefinitionFamily),
+		ECSClusterReaderRoleARN:     types.StringValue(res.Msg.GetAwsEcsProxyInstanceConfig().EcsClusterReaderRoleArn),
+		ECSClusterSecurityGroupID:   types.StringValue(res.Msg.GetAwsEcsProxyInstanceConfig().EcsClusterSecurityGroupId),
+		ECSClusterTaskRoleName:      types.StringValue(res.Msg.GetAwsEcsProxyInstanceConfig().EcsClusterTaskRoleName),
+		ECSClusterTaskContainerName: types.StringValue(res.Msg.GetAwsEcsProxyInstanceConfig().EcsContainerName),
 	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
