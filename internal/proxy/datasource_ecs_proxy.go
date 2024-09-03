@@ -91,7 +91,7 @@ func (r *ECSProxyDatasource) Schema(ctx context.Context, req datasource.SchemaRe
 			},
 			"ecs_cluster_task_container_name": schema.StringAttribute{
 				MarkdownDescription: "The name of the ECS cluster task container for the proxy.",
-				Required:            true,
+				Computed:            true,
 			},
 		},
 		MarkdownDescription: `.`,
