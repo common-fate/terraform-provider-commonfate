@@ -17,7 +17,6 @@ description: |-
 
 ### Required
 
-- `ecs_cluster_task_container_name` (String) The name of the ECS cluster task container for the proxy.
 - `id` (String) The ID of the proxy. Eg: prod-us-west-2
 
 ### Read-Only
@@ -27,6 +26,7 @@ description: |-
 - `ecs_cluster_name` (String) The ECS cluster name of the proxy.
 - `ecs_cluster_reader_role_arn` (String) The ECS cluster reader role ARN of the proxy.
 - `ecs_cluster_security_group_id` (String) The ECS cluster security group ID
+- `ecs_cluster_task_container_name` (String) The name of the ECS cluster task container for the proxy.
 - `ecs_cluster_task_role_name` (String) The ECS cluster task role ARN.
 - `ecs_task_definition_family` (String) The ECS task definition family of the proxy.
 
