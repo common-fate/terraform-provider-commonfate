@@ -17,6 +17,7 @@ description: |-
 
 ### Required
 
+- `ecs_cluster_task_container_name` (String) The name of the ECS cluster task container for the proxy.
 - `id` (String) The ID of the proxy. Eg: prod-us-west-2
 
 ### Read-Only
