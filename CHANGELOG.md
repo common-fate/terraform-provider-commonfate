@@ -1,5 +1,11 @@
 # @common-fate/terraform-provider-commonfate
 
+## 2.25.0
+
+### Minor Changes
+
+- c66efff: Adds resources and a datasource for registering proxies and RDS databases for Common Fate
+
 ## 2.24.0
 
 ### Minor Changes
