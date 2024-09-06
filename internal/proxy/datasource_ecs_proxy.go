@@ -120,6 +120,10 @@ func (r *ECSProxyDatasource) Read(ctx context.Context, req datasource.ReadReques
 	}))
 	if connect.CodeOf(err) == connect.CodeNotFound {
 		resp.State.RemoveResource(ctx)
+		resp.Diagnostics.AddError(
+			"Proxy not found",
+			err.Error(),
+		)
 		return
 	} else if err != nil {
 		resp.Diagnostics.AddError(
