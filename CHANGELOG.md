@@ -1,5 +1,11 @@
 # @common-fate/terraform-provider-commonfate
 
+## 2.25.1
+
+### Patch Changes
+
+- fc8ef10: Adds the AWS Account to the rds database resource
+
 ## 2.25.0
 
 ### Minor Changes
