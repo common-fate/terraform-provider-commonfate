@@ -17,6 +17,7 @@ Registers a RDS database with a Common Fate Proxy.
 
 ### Required
 
+- `aws_account_id` (String) The AWS account id the database is in
 - `database` (String) The name of the database
 - `endpoint` (String) The endpoint of the database
 - `engine` (String) A SQL engine of the RDS database
