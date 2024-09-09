@@ -19,14 +19,15 @@ import (
 )
 
 type RDSDatabaseModel struct {
-	ID               types.String `tfsdk:"id"`
-	InstanceID       types.String `tfsdk:"instance_id"`
-	DatabaseName     types.String `tfsdk:"name"`
-	DatabaseEngine   types.String `tfsdk:"engine"`
-	DatabaseEndpoint types.String `tfsdk:"endpoint"`
-	DatabaseRegion   types.String `tfsdk:"region"`
-	Database         types.String `tfsdk:"database"`
-	ProxyId          types.String `tfsdk:"proxy_id"`
+	ID           types.String `tfsdk:"id"`
+	InstanceID   types.String `tfsdk:"instance_id"`
+	Name         types.String `tfsdk:"name"`
+	Engine       types.String `tfsdk:"engine"`
+	Endpoint     types.String `tfsdk:"endpoint"`
+	Region       types.String `tfsdk:"region"`
+	AWSAccountID types.String `tfsdk:"aws_account_id"`
+	Database     types.String `tfsdk:"database"`
+	ProxyId      types.String `tfsdk:"proxy_id"`
 
 	Users []DatabaseUser `tfsdk:"users"`
 }
@@ -108,6 +109,10 @@ func (r *RDSDatabaseResource) Schema(ctx context.Context, req resource.SchemaReq
 				MarkdownDescription: "The region the database is in",
 				Required:            true,
 			},
+			"aws_account_id": schema.StringAttribute{
+				MarkdownDescription: "The AWS account id the database is in",
+				Required:            true,
+			},
 			"endpoint": schema.StringAttribute{
 				MarkdownDescription: "The endpoint of the database",
 				Required:            true,
@@ -171,12 +176,13 @@ func (r *RDSDatabaseResource) Create(ctx context.Context, req resource.CreateReq
 	}
 
 	resource := &integrationv1alpha1.AWSRDSDatabase{
-		Name:       data.DatabaseName.ValueString(),
-		Engine:     data.DatabaseEngine.ValueString(),
+		Name:       data.Name.ValueString(),
+		Engine:     data.Engine.ValueString(),
 		InstanceId: data.InstanceID.ValueString(),
-		Region:     data.DatabaseRegion.ValueString(),
+		Region:     data.Region.ValueString(),
 		Database:   data.Database.ValueString(),
-		Endpoint:   data.DatabaseEndpoint.ValueString(),
+		Endpoint:   data.Endpoint.ValueString(),
+		Account:    data.AWSAccountID.ValueString(),
 	}
 
 	for _, user := range data.Users {
@@ -277,13 +283,13 @@ func (r *RDSDatabaseResource) Update(ctx context.Context, req resource.UpdateReq
 
 	resource := &integrationv1alpha1.AWSRDSDatabase{
 
-		Name:       data.DatabaseName.ValueString(),
-		Engine:     data.DatabaseEngine.ValueString(),
+		Name:       data.Name.ValueString(),
+		Engine:     data.Engine.ValueString(),
 		InstanceId: data.InstanceID.ValueString(),
-		Region:     data.DatabaseRegion.ValueString(),
-		Account:    data.DatabaseRegion.ValueString(),
+		Region:     data.Region.ValueString(),
+		Account:    data.AWSAccountID.ValueString(),
 		Database:   data.Database.ValueString(),
-		Endpoint:   data.DatabaseEndpoint.ValueString(),
+		Endpoint:   data.Endpoint.ValueString(),
 	}
 
 	for _, user := range data.Users {
