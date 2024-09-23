@@ -124,6 +124,15 @@ func (r *AWSRDSDatabaseAvailabilitiesResource) Create(ctx context.Context, req r
 		return
 	}
 
+	if data.AWSIdentityStoreID.ValueString() == "" {
+		resp.Diagnostics.AddError(
+			"aws_identity_store_id empty",
+			"aws_identity_store_id cannot be empty.",
+		)
+
+		return
+	}
+
 	input := &configv1alpha1.CreateAvailabilitySpecRequest{
 		Role: &entityv1alpha1.EID{
 			Type: "AWS::RDS::DatabaseUser",
@@ -223,6 +232,15 @@ func (r *AWSRDSDatabaseAvailabilitiesResource) Update(ctx context.Context, req r
 		resp.Diagnostics.AddError(
 			"Unable to read plan data into model",
 			"An unexpected error occurred while parsing the resource creation response.",
+		)
+
+		return
+	}
+
+	if data.AWSIdentityStoreID.ValueString() == "" {
+		resp.Diagnostics.AddError(
+			"aws_identity_store_id empty",
+			"aws_identity_store_id cannot be empty.",
 		)
 
 		return
