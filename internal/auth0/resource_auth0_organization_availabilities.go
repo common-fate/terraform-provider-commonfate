@@ -239,17 +239,17 @@ func (r *Auth0OrganizationAvailabilitiesResource) Update(ctx context.Context, re
 	res, err := r.client.AvailabilitySpec().UpdateAvailabilitySpec(ctx, connect.NewRequest(&configv1alpha1.UpdateAvailabilitySpecRequest{
 		AvailabilitySpec: input,
 	}))
-	if connectErr, ok := err.(*connect.Error); ok {
-		if connectErr.Code() == connect.CodeNotFound {
-			resp.Diagnostics.AddError(
-				"Auth0 Organization Availability Not Found",
-				"The requested Auth0 Organization Availability no longer exists. "+
-					"It may have been deleted or otherwise removed.\n"+
-					"Please create a new Availability.",
-			)
+	if connectErr, ok := err.(*connect.Error); ok && connectErr.Code() == connect.CodeNotFound {
 
-			return
-		}
+		resp.Diagnostics.AddError(
+			"Auth0 Organization Availability Not Found",
+			"The requested Auth0 Organization Availability no longer exists. "+
+				"It may have been deleted or otherwise removed.\n"+
+				"Please create a new Availability.",
+		)
+
+		return
+
 	} else if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to update Auth0 Organization Availabilities",
