@@ -1,5 +1,11 @@
 # @common-fate/terraform-provider-commonfate
 
+## 2.25.2
+
+### Patch Changes
+
+- 44a24e9: Fix issue causing typed connect errors to not be handled correctly in the update method of some resources
+
 ## 2.25.1
 
 ### Patch Changes
