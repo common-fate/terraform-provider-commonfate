@@ -51,7 +51,7 @@ resource "commonfate-access_workflow" "workflow-demo" {
 - `name` (String) A unique name for the workflow so you know how to identify it.
 - `priority` (Number) The priority that governs whether the policy will be used. If a different policy with a higher priority and the same role exists that one will be used over another.
 - `try_extend_after_seconds` (Number, Deprecated) The amount of time after access is activated that extending access can be attempted. As a starting point we recommend setting this to half of the `access_duration_seconds`.
-- `validation` (Object) Validation requirements to be set with this workflow (see [below for nested schema](#nestedatt--validation))
+- `validation` (Attributes) Validation requirements to be set with this workflow (see [below for nested schema](#nestedatt--validation))
 
 ### Read-Only
 
@@ -71,5 +71,14 @@ Required:
 
 Optional:
 
-- `has_reason` (Boolean)
+- `has_reason` (Boolean) Whether a reason is required for this workflow
+- `regex` (Attributes) Regex validation for the workflow (see [below for nested schema](#nestedatt--validation--regex))
+
+<a id="nestedatt--validation--regex"></a>
+### Nested Schema for `validation.regex`
+
+Required:
+
+- `error_message` (String) The error message to display if validation fails
+- `regex_pattern` (String) The regex pattern to validate against
 

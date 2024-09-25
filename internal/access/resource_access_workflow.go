@@ -12,7 +12,6 @@ import (
 	configv1alpha1 "github.com/common-fate/sdk/gen/commonfate/control/config/v1alpha1"
 	configv1alpha1connect "github.com/common-fate/sdk/gen/commonfate/control/config/v1alpha1/configv1alpha1connect"
 	accessworkflow_handler "github.com/common-fate/sdk/service/control/config/accessworkflow"
-	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -24,7 +23,13 @@ import (
 )
 
 type Validations struct {
-	HasReason types.Bool `tfsdk:"has_reason"`
+	HasReason types.Bool        `tfsdk:"has_reason"`
+	Regex     []RegexValidation `tfsdk:"regex"`
+}
+
+type RegexValidation struct {
+	regex_pattern types.String `tfsdk:"regex_pattern"`
+	error_message types.String `tfsdk:"error_message"`
 }
 
 type ExtensionConditions struct {
@@ -121,11 +126,28 @@ func (r *AccessWorkflowResource) Schema(ctx context.Context, req resource.Schema
 				MarkdownDescription: "The default duration of the access workflow",
 				Optional:            true,
 			},
-			"validation": schema.ObjectAttribute{
+			"validation": schema.SingleNestedAttribute{
 				MarkdownDescription: "Validation requirements to be set with this workflow",
 				Optional:            true,
-				AttributeTypes: map[string]attr.Type{
-					"has_reason": types.BoolType,
+				Attributes: map[string]schema.Attribute{
+					"has_reason": schema.BoolAttribute{
+						MarkdownDescription: "Whether a reason is required for this workflow",
+						Optional:            true,
+					},
+					"regex": schema.SingleNestedAttribute{
+						MarkdownDescription: "Regex validation for the workflow",
+						Optional:            true,
+						Attributes: map[string]schema.Attribute{
+							"regex_pattern": schema.StringAttribute{
+								MarkdownDescription: "The regex pattern to validate against",
+								Required:            true,
+							},
+							"error_message": schema.StringAttribute{
+								MarkdownDescription: "The error message to display if validation fails",
+								Required:            true,
+							},
+						},
+					},
 				},
 			},
 			"extension_conditions": schema.SingleNestedAttribute{
@@ -189,9 +211,21 @@ func (r *AccessWorkflowResource) Create(ctx context.Context, req resource.Create
 	}
 
 	if data.Validation != nil {
+		var regexValidations []*accessv1alpha1.RegexValidation
 
-		createReq.Validation = &configv1alpha1.ValidationConfig{HasReason: data.Validation.HasReason.ValueBool()}
+		for _, r := range data.Validation.Regex {
+			regexValidations = append(regexValidations, &accessv1alpha1.RegexValidation{
+				RegexPattern: r.regex_pattern.ValueString(),
+				ErrorMessage: r.error_message.ValueString(),
+			})
+		}
+
+		createReq.Validation = &configv1alpha1.ValidationConfig{
+			HasReason: data.Validation.HasReason.ValueBool(),
+			Regex:     regexValidations,
+		}
 	}
+
 	// set default duration to access duration by default
 	if !data.DefaultDuration.IsNull() {
 		defaultDuration := time.Second * time.Duration(data.DefaultDuration.ValueInt64())
@@ -291,8 +325,18 @@ func (r *AccessWorkflowResource) Read(ctx context.Context, req resource.ReadRequ
 	}
 
 	if res.Msg.Workflow.Validation != nil {
+		var regexValidations []RegexValidation
+
+		for _, r := range res.Msg.Workflow.Validation.Regex {
+			regexValidations = append(regexValidations, RegexValidation{
+				regex_pattern: types.StringValue(r.RegexPattern),
+				error_message: types.StringValue(r.ErrorMessage),
+			})
+		}
+
 		state.Validation = &Validations{
 			HasReason: types.BoolValue(res.Msg.Workflow.Validation.HasReason),
+			Regex:     regexValidations,
 		}
 	}
 
@@ -346,8 +390,19 @@ func (r *AccessWorkflowResource) Update(ctx context.Context, req resource.Update
 	}
 
 	if data.Validation != nil {
+		var regexValidations []*accessv1alpha1.RegexValidation
 
-		updateReq.Workflow.Validation = &configv1alpha1.ValidationConfig{HasReason: data.Validation.HasReason.ValueBool()}
+		for _, r := range data.Validation.Regex {
+			regexValidations = append(regexValidations, &accessv1alpha1.RegexValidation{
+				RegexPattern: r.regex_pattern.ValueString(),
+				ErrorMessage: r.error_message.ValueString(),
+			})
+		}
+
+		updateReq.Workflow.Validation = &configv1alpha1.ValidationConfig{
+			HasReason: data.Validation.HasReason.ValueBool(),
+			Regex:     regexValidations,
+		}
 	}
 
 	// set default duration to access duration by default
