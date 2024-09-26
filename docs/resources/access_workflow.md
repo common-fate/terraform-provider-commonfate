@@ -72,13 +72,13 @@ Required:
 Optional:
 
 - `has_reason` (Boolean) Whether a reason is required for this workflow
-- `regex` (Attributes) Regex validation for the workflow (see [below for nested schema](#nestedatt--validation--regex))
+- `regex` (Attributes List) Regex validation requirements for the reason (see [below for nested schema](#nestedatt--validation--regex))
 
 <a id="nestedatt--validation--regex"></a>
 ### Nested Schema for `validation.regex`
 
 Required:
 
-- `error_message` (String) The error message to display if validation fails
-- `regex_pattern` (String) The regex pattern to validate against
+- `error_message` (String) The custom error message to show if the reason doesn't match the regex pattern.
+- `regex_pattern` (String) The regex pattern to that the reason should match on.
 
