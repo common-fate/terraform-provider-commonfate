@@ -23,8 +23,8 @@ import (
 )
 
 type Validations struct {
-	HasReason types.Bool        `tfsdk:"has_reason"`
-	Regex     []RegexValidation `tfsdk:"regex"`
+	HasReason   types.Bool        `tfsdk:"has_reason"`
+	ReasonRegex []RegexValidation `tfsdk:"regex"`
 }
 
 type RegexValidation struct {
@@ -217,8 +217,8 @@ func (r *AccessWorkflowResource) Create(ctx context.Context, req resource.Create
 
 		var regexValidations []*accessv1alpha1.RegexValidation
 
-		if data.Validation.Regex != nil {
-			for _, r := range data.Validation.Regex {
+		if data.Validation.ReasonRegex != nil {
+			for _, r := range data.Validation.ReasonRegex {
 				regexValidations = append(regexValidations, &accessv1alpha1.RegexValidation{
 					RegexPattern: r.RegexPattern.ValueString(),
 					ErrorMessage: r.ErrorMessage.ValueString(),
@@ -227,8 +227,8 @@ func (r *AccessWorkflowResource) Create(ctx context.Context, req resource.Create
 		}
 
 		createReq.Validation = &configv1alpha1.ValidationConfig{
-			HasReason: data.Validation.HasReason.ValueBool(),
-			Regex:     regexValidations,
+			HasReason:   data.Validation.HasReason.ValueBool(),
+			ReasonRegex: regexValidations,
 		}
 	}
 
@@ -333,7 +333,7 @@ func (r *AccessWorkflowResource) Read(ctx context.Context, req resource.ReadRequ
 	if res.Msg.Workflow.Validation != nil {
 		var regexValidations []RegexValidation
 
-		for _, r := range res.Msg.Workflow.Validation.Regex {
+		for _, r := range res.Msg.Workflow.Validation.ReasonRegex {
 			regexValidations = append(regexValidations, RegexValidation{
 				RegexPattern: types.StringValue(r.RegexPattern),
 				ErrorMessage: types.StringValue(r.ErrorMessage),
@@ -341,8 +341,8 @@ func (r *AccessWorkflowResource) Read(ctx context.Context, req resource.ReadRequ
 		}
 
 		state.Validation = &Validations{
-			HasReason: types.BoolValue(res.Msg.Workflow.Validation.HasReason),
-			Regex:     regexValidations,
+			HasReason:   types.BoolValue(res.Msg.Workflow.Validation.HasReason),
+			ReasonRegex: regexValidations,
 		}
 	}
 
@@ -398,7 +398,7 @@ func (r *AccessWorkflowResource) Update(ctx context.Context, req resource.Update
 	if data.Validation != nil {
 		var regexValidations []*accessv1alpha1.RegexValidation
 
-		for _, r := range data.Validation.Regex {
+		for _, r := range data.Validation.ReasonRegex {
 			regexValidations = append(regexValidations, &accessv1alpha1.RegexValidation{
 				RegexPattern: r.RegexPattern.ValueString(),
 				ErrorMessage: r.ErrorMessage.ValueString(),
@@ -406,8 +406,8 @@ func (r *AccessWorkflowResource) Update(ctx context.Context, req resource.Update
 		}
 
 		updateReq.Workflow.Validation = &configv1alpha1.ValidationConfig{
-			HasReason: data.Validation.HasReason.ValueBool(),
-			Regex:     regexValidations,
+			HasReason:   data.Validation.HasReason.ValueBool(),
+			ReasonRegex: regexValidations,
 		}
 	}
 
