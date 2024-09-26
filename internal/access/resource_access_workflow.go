@@ -28,8 +28,8 @@ type Validations struct {
 }
 
 type RegexValidation struct {
-	regex_pattern types.String `tfsdk:"regex_pattern"`
-	error_message types.String `tfsdk:"error_message"`
+	RegexPattern types.String `tfsdk:"regex_pattern"`
+	ErrorMessage types.String `tfsdk:"error_message"`
 }
 
 type ExtensionConditions struct {
@@ -134,17 +134,20 @@ func (r *AccessWorkflowResource) Schema(ctx context.Context, req resource.Schema
 						MarkdownDescription: "Whether a reason is required for this workflow",
 						Optional:            true,
 					},
-					"regex": schema.SingleNestedAttribute{
-						MarkdownDescription: "Regex validation for the workflow",
+					"regex": schema.ListNestedAttribute{
+						MarkdownDescription: "Regex validation requirements for the reason",
 						Optional:            true,
-						Attributes: map[string]schema.Attribute{
-							"regex_pattern": schema.StringAttribute{
-								MarkdownDescription: "The regex pattern to validate against",
-								Required:            true,
-							},
-							"error_message": schema.StringAttribute{
-								MarkdownDescription: "The error message to display if validation fails",
-								Required:            true,
+
+						NestedObject: schema.NestedAttributeObject{
+							Attributes: map[string]schema.Attribute{
+								"regex_pattern": schema.StringAttribute{
+									MarkdownDescription: "The regex pattern to that the reason should match on.",
+									Required:            true,
+								},
+								"error_message": schema.StringAttribute{
+									MarkdownDescription: "The custom error message to show if the reason doesn't match the regex pattern.",
+									Required:            true,
+								},
 							},
 						},
 					},
@@ -211,13 +214,16 @@ func (r *AccessWorkflowResource) Create(ctx context.Context, req resource.Create
 	}
 
 	if data.Validation != nil {
+
 		var regexValidations []*accessv1alpha1.RegexValidation
 
-		for _, r := range data.Validation.Regex {
-			regexValidations = append(regexValidations, &accessv1alpha1.RegexValidation{
-				RegexPattern: r.regex_pattern.ValueString(),
-				ErrorMessage: r.error_message.ValueString(),
-			})
+		if data.Validation.Regex != nil {
+			for _, r := range data.Validation.Regex {
+				regexValidations = append(regexValidations, &accessv1alpha1.RegexValidation{
+					RegexPattern: r.RegexPattern.ValueString(),
+					ErrorMessage: r.ErrorMessage.ValueString(),
+				})
+			}
 		}
 
 		createReq.Validation = &configv1alpha1.ValidationConfig{
@@ -329,8 +335,8 @@ func (r *AccessWorkflowResource) Read(ctx context.Context, req resource.ReadRequ
 
 		for _, r := range res.Msg.Workflow.Validation.Regex {
 			regexValidations = append(regexValidations, RegexValidation{
-				regex_pattern: types.StringValue(r.RegexPattern),
-				error_message: types.StringValue(r.ErrorMessage),
+				RegexPattern: types.StringValue(r.RegexPattern),
+				ErrorMessage: types.StringValue(r.ErrorMessage),
 			})
 		}
 
@@ -394,8 +400,8 @@ func (r *AccessWorkflowResource) Update(ctx context.Context, req resource.Update
 
 		for _, r := range data.Validation.Regex {
 			regexValidations = append(regexValidations, &accessv1alpha1.RegexValidation{
-				RegexPattern: r.regex_pattern.ValueString(),
-				ErrorMessage: r.error_message.ValueString(),
+				RegexPattern: r.RegexPattern.ValueString(),
+				ErrorMessage: r.ErrorMessage.ValueString(),
 			})
 		}
 
