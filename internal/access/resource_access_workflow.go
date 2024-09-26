@@ -133,9 +133,9 @@ func (r *AccessWorkflowResource) Schema(ctx context.Context, req resource.Schema
 				Attributes: map[string]schema.Attribute{
 					"has_reason": schema.BoolAttribute{
 						MarkdownDescription: "Whether a reason is required for this workflow",
+						Optional:            true,
 						Computed:            true,
 						Default:             booldefault.StaticBool(false),
-						Optional:            true,
 					},
 					"regex": schema.ListNestedAttribute{
 						MarkdownDescription: "Regex validation requirements for the reason",
