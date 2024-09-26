@@ -15,6 +15,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
@@ -132,6 +133,7 @@ func (r *AccessWorkflowResource) Schema(ctx context.Context, req resource.Schema
 				Attributes: map[string]schema.Attribute{
 					"has_reason": schema.BoolAttribute{
 						MarkdownDescription: "Whether a reason is required for this workflow",
+						Default:             booldefault.StaticBool(false),
 						Optional:            true,
 					},
 					"regex": schema.ListNestedAttribute{
