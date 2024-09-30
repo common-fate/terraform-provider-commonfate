@@ -36,10 +36,10 @@ type Database struct {
 }
 
 type DatabaseUser struct {
-	Name                      types.String  `tfsdk:"name"`
-	UserName                  types.String  `tfsdk:"username"`
-	PasswordSecretsManagerARN types.String  `tfsdk:"password_secrets_manager_arn"`
-	Endpoint                  *types.String `tfsdk:"endpoint"`
+	Name                      types.String `tfsdk:"name"`
+	UserName                  types.String `tfsdk:"username"`
+	PasswordSecretsManagerARN types.String `tfsdk:"password_secrets_manager_arn"`
+	Endpoint                  types.String `tfsdk:"endpoint"`
 }
 
 // AccessRuleResource is the data source implementation.
@@ -197,7 +197,7 @@ func (r *RDSDatabaseResource) Create(ctx context.Context, req resource.CreateReq
 			PasswordSecretsManagerArn: user.PasswordSecretsManagerARN.ValueString(),
 		}
 
-		if user.Endpoint != nil {
+		if user.Endpoint.ValueString() != "" {
 			newUser.Endpoint = user.Endpoint.ValueStringPointer()
 		}
 		resource.Users = append(resource.Users, newUser)
@@ -310,7 +310,7 @@ func (r *RDSDatabaseResource) Update(ctx context.Context, req resource.UpdateReq
 			PasswordSecretsManagerArn: user.PasswordSecretsManagerARN.ValueString(),
 		}
 
-		if user.Endpoint != nil {
+		if user.Endpoint.ValueString() != "" {
 			newUser.Endpoint = user.Endpoint.ValueStringPointer()
 		}
 		resource.Users = append(resource.Users, newUser)
