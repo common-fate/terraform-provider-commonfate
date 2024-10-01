@@ -144,7 +144,7 @@ func (r *AccessWorkflowResource) Schema(ctx context.Context, req resource.Schema
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 								"regex_pattern": schema.StringAttribute{
-									MarkdownDescription: "The regex pattern to that the reason should match on.",
+									MarkdownDescription: "The regex pattern that the reason should match on.",
 									Required:            true,
 								},
 								"error_message": schema.StringAttribute{
