@@ -80,5 +80,5 @@ Optional:
 Required:
 
 - `error_message` (String) The custom error message to show if the reason doesn't match the regex pattern.
-- `regex_pattern` (String) The regex pattern to that the reason should match on.
+- `regex_pattern` (String) The regex pattern that the reason should match on.
 
