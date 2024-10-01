@@ -39,6 +39,7 @@ type DatabaseUser struct {
 	Name                      types.String `tfsdk:"name"`
 	UserName                  types.String `tfsdk:"username"`
 	PasswordSecretsManagerARN types.String `tfsdk:"password_secrets_manager_arn"`
+	Endpoint                  types.String `tfsdk:"endpoint"`
 }
 
 // AccessRuleResource is the data source implementation.
@@ -140,8 +141,12 @@ func (r *RDSDatabaseResource) Schema(ctx context.Context, req resource.SchemaReq
 							Required:            true,
 						},
 						"password_secrets_manager_arn": schema.StringAttribute{
-							MarkdownDescription: "The secrets manager arn for the RDS database passwrod",
+							MarkdownDescription: "The secrets manager arn for the RDS database password",
 							Required:            true,
+						},
+						"endpoint": schema.StringAttribute{
+							MarkdownDescription: "Override default endpoint behaviour by specifying a endpoint on a per user basis.",
+							Optional:            true,
 						},
 					},
 				},
@@ -186,12 +191,17 @@ func (r *RDSDatabaseResource) Create(ctx context.Context, req resource.CreateReq
 	}
 
 	for _, user := range data.Users {
-
-		resource.Users = append(resource.Users, &integrationv1alpha1.AWSRDSDatabaseUser{
+		newUser := &integrationv1alpha1.AWSRDSDatabaseUser{
 			Name:                      user.Name.ValueString(),
 			Username:                  user.UserName.ValueString(),
 			PasswordSecretsManagerArn: user.PasswordSecretsManagerARN.ValueString(),
-		})
+		}
+
+		if user.Endpoint.ValueString() != "" {
+			newUser.Endpoint = user.Endpoint.ValueStringPointer()
+		}
+		resource.Users = append(resource.Users, newUser)
+
 	}
 
 	createReq := integrationv1alpha1.CreateProxyRdsResourceRequest{
@@ -294,11 +304,17 @@ func (r *RDSDatabaseResource) Update(ctx context.Context, req resource.UpdateReq
 
 	for _, user := range data.Users {
 
-		resource.Users = append(resource.Users, &integrationv1alpha1.AWSRDSDatabaseUser{
+		newUser := &integrationv1alpha1.AWSRDSDatabaseUser{
 			Name:                      user.Name.ValueString(),
 			Username:                  user.UserName.ValueString(),
 			PasswordSecretsManagerArn: user.PasswordSecretsManagerARN.ValueString(),
-		})
+		}
+
+		if user.Endpoint.ValueString() != "" {
+			newUser.Endpoint = user.Endpoint.ValueStringPointer()
+		}
+		resource.Users = append(resource.Users, newUser)
+
 	}
 
 	updateReq := integrationv1alpha1.UpdateProxyRdsResourceRequest{
