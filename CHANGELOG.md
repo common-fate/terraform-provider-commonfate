@@ -1,5 +1,11 @@
 # @common-fate/terraform-provider-commonfate
 
+## 2.26.1
+
+### Patch Changes
+
+- 3843890: Fix typo in the `reason_regex` field.
+
 ## 2.26.0
 
 ### Minor Changes
