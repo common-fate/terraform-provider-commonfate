@@ -39,15 +39,17 @@ type ExtensionConditions struct {
 }
 
 type AccessWorkflowModel struct {
-	ID                  types.String         `tfsdk:"id"`
-	Name                types.String         `tfsdk:"name"`
-	AccessDuration      types.Int64          `tfsdk:"access_duration_seconds"`
-	TryExtendAfter      types.Int64          `tfsdk:"try_extend_after_seconds"`
-	Priority            types.Int64          `tfsdk:"priority"`
-	ActivationExpiry    types.Int64          `tfsdk:"activation_expiry"`
-	DefaultDuration     types.Int64          `tfsdk:"default_duration_seconds"`
-	Validation          *Validations         `tfsdk:"validation"`
-	ExtensionConditions *ExtensionConditions `tfsdk:"extension_conditions"`
+	ID                        types.String         `tfsdk:"id"`
+	Name                      types.String         `tfsdk:"name"`
+	AccessDuration            types.Int64          `tfsdk:"access_duration_seconds"`
+	TryExtendAfter            types.Int64          `tfsdk:"try_extend_after_seconds"`
+	Priority                  types.Int64          `tfsdk:"priority"`
+	ActivationExpiry          types.Int64          `tfsdk:"activation_expiry"`
+	RequestedToApprovedExpiry types.Int64          `tfsdk:"requested_to_approved_expiry"`
+	RequestedToActivateExpiry types.Int64          `tfsdk:"requested_to_activate_expiry"`
+	DefaultDuration           types.Int64          `tfsdk:"default_duration_seconds"`
+	Validation                *Validations         `tfsdk:"validation"`
+	ExtensionConditions       *ExtensionConditions `tfsdk:"extension_conditions"`
 }
 
 // AccessRuleResource is the data source implementation.
@@ -120,7 +122,15 @@ func (r *AccessWorkflowResource) Schema(ctx context.Context, req resource.Schema
 				Optional:            true,
 			},
 			"activation_expiry": schema.Int64Attribute{
-				MarkdownDescription: "The amount of time after access is activated before the request will be expired",
+				MarkdownDescription: "The amount of time after access is approved to be activated before the request will be expired",
+				Optional:            true,
+			},
+			"requested_to_approved_expiry": schema.Int64Attribute{
+				MarkdownDescription: "The amount of time after a request is made and approved before the request will be expired",
+				Optional:            true,
+			},
+			"requested_to_activate_expiry": schema.Int64Attribute{
+				MarkdownDescription: "The amount of time after a request is made and activated before the request will be expired",
 				Optional:            true,
 			},
 			"default_duration_seconds": schema.Int64Attribute{
@@ -214,6 +224,18 @@ func (r *AccessWorkflowResource) Create(ctx context.Context, req resource.Create
 		activationExpiry := time.Second * time.Duration(data.ActivationExpiry.ValueInt64())
 
 		createReq.ActivationExpiry = durationpb.New(activationExpiry)
+	}
+
+	if !data.RequestedToActivateExpiry.IsNull() {
+		RequestedToActivateExpiry := time.Second * time.Duration(data.RequestedToActivateExpiry.ValueInt64())
+
+		createReq.RequestToActiveExpiry = durationpb.New(RequestedToActivateExpiry)
+	}
+
+	if !data.RequestedToApprovedExpiry.IsNull() {
+		RequestedToApprovedExpiry := time.Second * time.Duration(data.RequestedToApprovedExpiry.ValueInt64())
+
+		createReq.RequestToApproveExpiry = durationpb.New(RequestedToApprovedExpiry)
 	}
 
 	if data.Validation != nil {
@@ -333,6 +355,15 @@ func (r *AccessWorkflowResource) Read(ctx context.Context, req resource.ReadRequ
 
 	}
 
+	if res.Msg.Workflow.RequestToActiveExpiry != nil {
+		state.RequestedToActivateExpiry = types.Int64Value(res.Msg.Workflow.RequestToActiveExpiry.Seconds)
+
+	}
+
+	if res.Msg.Workflow.RequestToApproveExpiry != nil {
+		state.RequestedToApprovedExpiry = types.Int64Value(res.Msg.Workflow.RequestToApproveExpiry.Seconds)
+
+	}
 	if res.Msg.Workflow.Validation != nil {
 		var regexValidations []RegexValidation
 
@@ -396,6 +427,18 @@ func (r *AccessWorkflowResource) Update(ctx context.Context, req resource.Update
 		activationExpiry := time.Second * time.Duration(data.ActivationExpiry.ValueInt64())
 
 		updateReq.Workflow.ActivationExpiry = durationpb.New(activationExpiry)
+	}
+
+	if !data.RequestedToActivateExpiry.IsNull() {
+		RequestedToActivateExpiry := time.Second * time.Duration(data.RequestedToActivateExpiry.ValueInt64())
+
+		updateReq.Workflow.RequestToActiveExpiry = durationpb.New(RequestedToActivateExpiry)
+	}
+
+	if !data.RequestedToApprovedExpiry.IsNull() {
+		RequestedToApprovedExpiry := time.Second * time.Duration(data.RequestedToApprovedExpiry.ValueInt64())
+
+		updateReq.Workflow.RequestToApproveExpiry = durationpb.New(RequestedToApprovedExpiry)
 	}
 
 	if data.Validation != nil {
