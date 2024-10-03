@@ -46,6 +46,7 @@ resource "commonfate-access_workflow" "workflow-demo" {
 ### Optional
 
 - `activation_expiry` (Number) The amount of time after access is activated before the request will be expired
+- `approval_steps` (Attributes List) Define the requirements for grant approval, each step must be completed by a distict principal, steps can be completed in any order. (see [below for nested schema](#nestedatt--approval_steps))
 - `default_duration_seconds` (Number) The default duration of the access workflow
 - `extension_conditions` (Attributes) Configuration for extending access (see [below for nested schema](#nestedatt--extension_conditions))
 - `name` (String) A unique name for the workflow so you know how to identify it.
@@ -56,6 +57,15 @@ resource "commonfate-access_workflow" "workflow-demo" {
 ### Read-Only
 
 - `id` (String) The internal approval workflow ID
+
+<a id="nestedatt--approval_steps"></a>
+### Nested Schema for `approval_steps`
+
+Required:
+
+- `name` (String) The name of the approval step.
+- `when` (String) The Cedar when expression to evaluate a review for a match.
+
 
 <a id="nestedatt--extension_conditions"></a>
 ### Nested Schema for `extension_conditions`
