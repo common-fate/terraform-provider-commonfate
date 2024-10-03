@@ -285,7 +285,7 @@ func (r *AccessWorkflowResource) Create(ctx context.Context, req resource.Create
 	for _, step := range data.ApprovalSteps {
 		createReq.ApprovalSteps = append(createReq.ApprovalSteps, &configv1alpha1.ApprovalStep{
 			Name: step.Name.ValueString(),
-			When: step.Name.ValueString(),
+			When: step.When.ValueString(),
 		})
 	}
 
@@ -480,7 +480,7 @@ func (r *AccessWorkflowResource) Update(ctx context.Context, req resource.Update
 	for _, step := range data.ApprovalSteps {
 		updateReq.Workflow.ApprovalSteps = append(updateReq.Workflow.ApprovalSteps, &configv1alpha1.ApprovalStep{
 			Name: step.Name.ValueString(),
-			When: step.Name.ValueString(),
+			When: step.When.ValueString(),
 		})
 	}
 
