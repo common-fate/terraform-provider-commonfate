@@ -72,10 +72,10 @@ Required:
 Optional:
 
 - `has_reason` (Boolean) Whether a reason is required for this workflow
-- `regex` (Attributes List) Regex validation requirements for the reason (see [below for nested schema](#nestedatt--validation--regex))
+- `reason_regex` (Attributes List) Regex validation requirements for the reason (see [below for nested schema](#nestedatt--validation--reason_regex))
 
-<a id="nestedatt--validation--regex"></a>
-### Nested Schema for `validation.regex`
+<a id="nestedatt--validation--reason_regex"></a>
+### Nested Schema for `validation.reason_regex`
 
 Required:
 

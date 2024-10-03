@@ -25,7 +25,7 @@ import (
 
 type Validations struct {
 	HasReason   types.Bool        `tfsdk:"has_reason"`
-	ReasonRegex []RegexValidation `tfsdk:"regex"`
+	ReasonRegex []RegexValidation `tfsdk:"reason_regex"`
 }
 
 type RegexValidation struct {
@@ -137,7 +137,7 @@ func (r *AccessWorkflowResource) Schema(ctx context.Context, req resource.Schema
 						Computed:            true,
 						Default:             booldefault.StaticBool(false),
 					},
-					"regex": schema.ListNestedAttribute{
+					"reason_regex": schema.ListNestedAttribute{
 						MarkdownDescription: "Regex validation requirements for the reason",
 						Optional:            true,
 
