@@ -37,7 +37,10 @@ type ExtensionConditions struct {
 	MaxExtensions     types.Int64 `tfsdk:"maximum_number_of_extensions"`
 	ExtensionDuration types.Int64 `tfsdk:"extension_duration_seconds"`
 }
-
+type ApprovalStep struct {
+	Name types.String `tfsdk:"name"`
+	When types.String `tfsdk:"when"`
+}
 type AccessWorkflowModel struct {
 	ID                  types.String         `tfsdk:"id"`
 	Name                types.String         `tfsdk:"name"`
@@ -48,6 +51,7 @@ type AccessWorkflowModel struct {
 	DefaultDuration     types.Int64          `tfsdk:"default_duration_seconds"`
 	Validation          *Validations         `tfsdk:"validation"`
 	ExtensionConditions *ExtensionConditions `tfsdk:"extension_conditions"`
+	ApprovalSteps       []ApprovalStep       `tfsdk:"approval_steps"`
 }
 
 // AccessRuleResource is the data source implementation.
@@ -171,6 +175,23 @@ func (r *AccessWorkflowResource) Schema(ctx context.Context, req resource.Schema
 					},
 				},
 			},
+			"approval_steps": schema.ListNestedAttribute{
+				MarkdownDescription: "Define the requirements for grant approval, each step must be completed by a distict principal, steps can be completed in any order.",
+				Optional:            true,
+
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+						"name": schema.StringAttribute{
+							MarkdownDescription: "The name of the approval step.",
+							Required:            true,
+						},
+						"when": schema.StringAttribute{
+							MarkdownDescription: "The Cedar when expression to evaluate a review for a match.",
+							Required:            true,
+						},
+					},
+				},
+			},
 		},
 		MarkdownDescription: `Access Workflows are used to describe how long access should be applied. Created Workflows can be referenced in other resources created.`,
 	}
@@ -259,6 +280,13 @@ func (r *AccessWorkflowResource) Create(ctx context.Context, req resource.Create
 			cond.MaximumNumberOfExtensions = int32(data.ExtensionConditions.MaxExtensions.ValueInt64())
 		}
 		createReq.ExtensionConditions = &cond
+	}
+
+	for _, step := range data.ApprovalSteps {
+		createReq.ApprovalSteps = append(createReq.ApprovalSteps, &configv1alpha1.ApprovalStep{
+			Name: step.Name.ValueString(),
+			When: step.Name.ValueString(),
+		})
 	}
 
 	res, err := r.client.CreateAccessWorkflow(ctx, connect.NewRequest(createReq))
@@ -356,6 +384,14 @@ func (r *AccessWorkflowResource) Read(ctx context.Context, req resource.ReadRequ
 		}
 	}
 
+	state.ApprovalSteps = []ApprovalStep{}
+	for _, step := range res.Msg.Workflow.ApprovalSteps {
+		state.ApprovalSteps = append(state.ApprovalSteps, ApprovalStep{
+			Name: types.StringValue(step.Name),
+			When: types.StringValue(step.When),
+		})
+	}
+
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }
 
@@ -439,6 +475,13 @@ func (r *AccessWorkflowResource) Update(ctx context.Context, req resource.Update
 			cond.MaximumNumberOfExtensions = int32(data.ExtensionConditions.MaxExtensions.ValueInt64())
 		}
 		updateReq.Workflow.ExtensionConditions = &cond
+	}
+
+	for _, step := range data.ApprovalSteps {
+		updateReq.Workflow.ApprovalSteps = append(updateReq.Workflow.ApprovalSteps, &configv1alpha1.ApprovalStep{
+			Name: step.Name.ValueString(),
+			When: step.Name.ValueString(),
+		})
 	}
 
 	res, err := r.client.UpdateAccessWorkflow(ctx, connect.NewRequest(updateReq))
