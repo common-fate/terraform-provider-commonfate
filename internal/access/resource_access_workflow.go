@@ -384,7 +384,7 @@ func (r *AccessWorkflowResource) Read(ctx context.Context, req resource.ReadRequ
 		}
 	}
 
-	state.ApprovalSteps = []ApprovalStep{}
+	state.ApprovalSteps = nil
 	for _, step := range res.Msg.Workflow.ApprovalSteps {
 		state.ApprovalSteps = append(state.ApprovalSteps, ApprovalStep{
 			Name: types.StringValue(step.Name),
