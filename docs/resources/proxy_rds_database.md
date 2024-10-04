@@ -37,7 +37,11 @@ Registers a RDS database with a Common Fate Proxy.
 Required:
 
 - `name` (String) The name for the user
-- `password_secrets_manager_arn` (String) The secrets manager arn for the RDS database passwrod
+- `password_secrets_manager_arn` (String) The secrets manager arn for the RDS database password
 - `username` (String) The user name for the user
+
+Optional:
+
+- `endpoint` (String) Override default endpoint behaviour by specifying a endpoint on a per user basis.
 
 

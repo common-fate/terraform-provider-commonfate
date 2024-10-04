@@ -1,5 +1,21 @@
 # @common-fate/terraform-provider-commonfate
 
+## 2.26.1
+
+### Patch Changes
+
+- 3843890: Fix typo in the `reason_regex` field.
+
+## 2.26.0
+
+### Minor Changes
+
+- 261fa75: Add reason pattern matching to validation in access workflows.
+
+### Patch Changes
+
+- c61cdc5: add optional rds endpoint for rds users
+
 ## 2.25.2
 
 ### Patch Changes

@@ -12,10 +12,10 @@ import (
 	configv1alpha1 "github.com/common-fate/sdk/gen/commonfate/control/config/v1alpha1"
 	configv1alpha1connect "github.com/common-fate/sdk/gen/commonfate/control/config/v1alpha1/configv1alpha1connect"
 	accessworkflow_handler "github.com/common-fate/sdk/service/control/config/accessworkflow"
-	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
@@ -24,14 +24,23 @@ import (
 )
 
 type Validations struct {
-	HasReason types.Bool `tfsdk:"has_reason"`
+	HasReason   types.Bool        `tfsdk:"has_reason"`
+	ReasonRegex []RegexValidation `tfsdk:"reason_regex"`
+}
+
+type RegexValidation struct {
+	RegexPattern types.String `tfsdk:"regex_pattern"`
+	ErrorMessage types.String `tfsdk:"error_message"`
 }
 
 type ExtensionConditions struct {
 	MaxExtensions     types.Int64 `tfsdk:"maximum_number_of_extensions"`
 	ExtensionDuration types.Int64 `tfsdk:"extension_duration_seconds"`
 }
-
+type ApprovalStep struct {
+	Name types.String `tfsdk:"name"`
+	When types.String `tfsdk:"when"`
+}
 type AccessWorkflowModel struct {
 	ID                  types.String         `tfsdk:"id"`
 	Name                types.String         `tfsdk:"name"`
@@ -42,6 +51,7 @@ type AccessWorkflowModel struct {
 	DefaultDuration     types.Int64          `tfsdk:"default_duration_seconds"`
 	Validation          *Validations         `tfsdk:"validation"`
 	ExtensionConditions *ExtensionConditions `tfsdk:"extension_conditions"`
+	ApprovalSteps       []ApprovalStep       `tfsdk:"approval_steps"`
 }
 
 // AccessRuleResource is the data source implementation.
@@ -121,11 +131,33 @@ func (r *AccessWorkflowResource) Schema(ctx context.Context, req resource.Schema
 				MarkdownDescription: "The default duration of the access workflow",
 				Optional:            true,
 			},
-			"validation": schema.ObjectAttribute{
+			"validation": schema.SingleNestedAttribute{
 				MarkdownDescription: "Validation requirements to be set with this workflow",
 				Optional:            true,
-				AttributeTypes: map[string]attr.Type{
-					"has_reason": types.BoolType,
+				Attributes: map[string]schema.Attribute{
+					"has_reason": schema.BoolAttribute{
+						MarkdownDescription: "Whether a reason is required for this workflow",
+						Optional:            true,
+						Computed:            true,
+						Default:             booldefault.StaticBool(false),
+					},
+					"reason_regex": schema.ListNestedAttribute{
+						MarkdownDescription: "Regex validation requirements for the reason",
+						Optional:            true,
+
+						NestedObject: schema.NestedAttributeObject{
+							Attributes: map[string]schema.Attribute{
+								"regex_pattern": schema.StringAttribute{
+									MarkdownDescription: "The regex pattern that the reason should match on.",
+									Required:            true,
+								},
+								"error_message": schema.StringAttribute{
+									MarkdownDescription: "The custom error message to show if the reason doesn't match the regex pattern.",
+									Required:            true,
+								},
+							},
+						},
+					},
 				},
 			},
 			"extension_conditions": schema.SingleNestedAttribute{
@@ -140,6 +172,23 @@ func (r *AccessWorkflowResource) Schema(ctx context.Context, req resource.Schema
 					"extension_duration_seconds": schema.Int64Attribute{
 						MarkdownDescription: "Specifies the duration for each extension. Defaults to the value of access_duration_seconds if not provided.",
 						Required:            true,
+					},
+				},
+			},
+			"approval_steps": schema.ListNestedAttribute{
+				MarkdownDescription: "Define the requirements for grant approval, each step must be completed by a distict principal, steps can be completed in any order.",
+				Optional:            true,
+
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+						"name": schema.StringAttribute{
+							MarkdownDescription: "The name of the approval step.",
+							Required:            true,
+						},
+						"when": schema.StringAttribute{
+							MarkdownDescription: "The Cedar when expression to evaluate a review for a match.",
+							Required:            true,
+						},
 					},
 				},
 			},
@@ -190,8 +239,23 @@ func (r *AccessWorkflowResource) Create(ctx context.Context, req resource.Create
 
 	if data.Validation != nil {
 
-		createReq.Validation = &configv1alpha1.ValidationConfig{HasReason: data.Validation.HasReason.ValueBool()}
+		var regexValidations []*accessv1alpha1.RegexValidation
+
+		if data.Validation.ReasonRegex != nil {
+			for _, r := range data.Validation.ReasonRegex {
+				regexValidations = append(regexValidations, &accessv1alpha1.RegexValidation{
+					RegexPattern: r.RegexPattern.ValueString(),
+					ErrorMessage: r.ErrorMessage.ValueString(),
+				})
+			}
+		}
+
+		createReq.Validation = &configv1alpha1.ValidationConfig{
+			HasReason:   data.Validation.HasReason.ValueBool(),
+			ReasonRegex: regexValidations,
+		}
 	}
+
 	// set default duration to access duration by default
 	if !data.DefaultDuration.IsNull() {
 		defaultDuration := time.Second * time.Duration(data.DefaultDuration.ValueInt64())
@@ -216,6 +280,13 @@ func (r *AccessWorkflowResource) Create(ctx context.Context, req resource.Create
 			cond.MaximumNumberOfExtensions = int32(data.ExtensionConditions.MaxExtensions.ValueInt64())
 		}
 		createReq.ExtensionConditions = &cond
+	}
+
+	for _, step := range data.ApprovalSteps {
+		createReq.ApprovalSteps = append(createReq.ApprovalSteps, &configv1alpha1.ApprovalStep{
+			Name: step.Name.ValueString(),
+			When: step.When.ValueString(),
+		})
 	}
 
 	res, err := r.client.CreateAccessWorkflow(ctx, connect.NewRequest(createReq))
@@ -291,8 +362,18 @@ func (r *AccessWorkflowResource) Read(ctx context.Context, req resource.ReadRequ
 	}
 
 	if res.Msg.Workflow.Validation != nil {
+		var regexValidations []RegexValidation
+
+		for _, r := range res.Msg.Workflow.Validation.ReasonRegex {
+			regexValidations = append(regexValidations, RegexValidation{
+				RegexPattern: types.StringValue(r.RegexPattern),
+				ErrorMessage: types.StringValue(r.ErrorMessage),
+			})
+		}
+
 		state.Validation = &Validations{
-			HasReason: types.BoolValue(res.Msg.Workflow.Validation.HasReason),
+			HasReason:   types.BoolValue(res.Msg.Workflow.Validation.HasReason),
+			ReasonRegex: regexValidations,
 		}
 	}
 
@@ -301,6 +382,14 @@ func (r *AccessWorkflowResource) Read(ctx context.Context, req resource.ReadRequ
 			ExtensionDuration: types.Int64Value(res.Msg.Workflow.ExtensionConditions.ExtensionDurationSeconds.Seconds),
 			MaxExtensions:     types.Int64Value(int64(res.Msg.Workflow.ExtensionConditions.MaximumNumberOfExtensions)),
 		}
+	}
+
+	state.ApprovalSteps = nil
+	for _, step := range res.Msg.Workflow.ApprovalSteps {
+		state.ApprovalSteps = append(state.ApprovalSteps, ApprovalStep{
+			Name: types.StringValue(step.Name),
+			When: types.StringValue(step.When),
+		})
 	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
@@ -346,8 +435,19 @@ func (r *AccessWorkflowResource) Update(ctx context.Context, req resource.Update
 	}
 
 	if data.Validation != nil {
+		var regexValidations []*accessv1alpha1.RegexValidation
 
-		updateReq.Workflow.Validation = &configv1alpha1.ValidationConfig{HasReason: data.Validation.HasReason.ValueBool()}
+		for _, r := range data.Validation.ReasonRegex {
+			regexValidations = append(regexValidations, &accessv1alpha1.RegexValidation{
+				RegexPattern: r.RegexPattern.ValueString(),
+				ErrorMessage: r.ErrorMessage.ValueString(),
+			})
+		}
+
+		updateReq.Workflow.Validation = &configv1alpha1.ValidationConfig{
+			HasReason:   data.Validation.HasReason.ValueBool(),
+			ReasonRegex: regexValidations,
+		}
 	}
 
 	// set default duration to access duration by default
@@ -375,6 +475,13 @@ func (r *AccessWorkflowResource) Update(ctx context.Context, req resource.Update
 			cond.MaximumNumberOfExtensions = int32(data.ExtensionConditions.MaxExtensions.ValueInt64())
 		}
 		updateReq.Workflow.ExtensionConditions = &cond
+	}
+
+	for _, step := range data.ApprovalSteps {
+		updateReq.Workflow.ApprovalSteps = append(updateReq.Workflow.ApprovalSteps, &configv1alpha1.ApprovalStep{
+			Name: step.Name.ValueString(),
+			When: step.When.ValueString(),
+		})
 	}
 
 	res, err := r.client.UpdateAccessWorkflow(ctx, connect.NewRequest(updateReq))
