@@ -31,7 +31,7 @@ type SlackAlertModel struct {
 	SendDirectMessagesToApprovers       types.Bool   `tfsdk:"send_direct_message_to_approvers"`
 	DisableInteractivityHandlers        types.Bool   `tfsdk:"disable_interactivity_handlers"`
 	NotifyExpiryInSeconds               types.Int64  `tfsdk:"notify_expiry_in_seconds"`
-	DisableAlertForAutoApprovedRequests types.Bool   `tfsdk:"disable_alert_for_autoapproved_requests"`
+	DisableAlertForAutoApprovedRequests types.Bool   `tfsdk:"disable_channel_message_for_autoapproved_requests"`
 }
 
 // AccessRuleResource is the data source implementation.
@@ -122,8 +122,8 @@ func (r *SlackAlertResource) Schema(ctx context.Context, req resource.SchemaRequ
 				MarkdownDescription: "The duration before access expiration at which Slack will notify the user about the upcoming expiration.",
 				Optional:            true,
 			},
-			"disable_alert_for_autoapproved_requests": schema.BoolAttribute{
-				MarkdownDescription: "Disable sending notifications for auto approved requests.",
+			"disable_channel_message_for_autoapproved_requests": schema.BoolAttribute{
+				MarkdownDescription: "Disable sending notifications to the access channel for auto approved requests.",
 				Optional:            true,
 				Computed:            true,
 				Default:             booldefault.StaticBool(false),
