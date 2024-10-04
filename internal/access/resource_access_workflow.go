@@ -25,7 +25,7 @@ import (
 
 type Validations struct {
 	HasReason   types.Bool        `tfsdk:"has_reason"`
-	ReasonRegex []RegexValidation `tfsdk:"regex"`
+	ReasonRegex []RegexValidation `tfsdk:"reason_regex"`
 }
 
 type RegexValidation struct {
@@ -37,7 +37,10 @@ type ExtensionConditions struct {
 	MaxExtensions     types.Int64 `tfsdk:"maximum_number_of_extensions"`
 	ExtensionDuration types.Int64 `tfsdk:"extension_duration_seconds"`
 }
-
+type ApprovalStep struct {
+	Name types.String `tfsdk:"name"`
+	When types.String `tfsdk:"when"`
+}
 type AccessWorkflowModel struct {
 	ID                        types.String         `tfsdk:"id"`
 	Name                      types.String         `tfsdk:"name"`
@@ -50,6 +53,7 @@ type AccessWorkflowModel struct {
 	DefaultDuration           types.Int64          `tfsdk:"default_duration_seconds"`
 	Validation                *Validations         `tfsdk:"validation"`
 	ExtensionConditions       *ExtensionConditions `tfsdk:"extension_conditions"`
+	ApprovalSteps             []ApprovalStep       `tfsdk:"approval_steps"`
 }
 
 // AccessRuleResource is the data source implementation.
@@ -147,7 +151,7 @@ func (r *AccessWorkflowResource) Schema(ctx context.Context, req resource.Schema
 						Computed:            true,
 						Default:             booldefault.StaticBool(false),
 					},
-					"regex": schema.ListNestedAttribute{
+					"reason_regex": schema.ListNestedAttribute{
 						MarkdownDescription: "Regex validation requirements for the reason",
 						Optional:            true,
 
@@ -178,6 +182,23 @@ func (r *AccessWorkflowResource) Schema(ctx context.Context, req resource.Schema
 					"extension_duration_seconds": schema.Int64Attribute{
 						MarkdownDescription: "Specifies the duration for each extension. Defaults to the value of access_duration_seconds if not provided.",
 						Required:            true,
+					},
+				},
+			},
+			"approval_steps": schema.ListNestedAttribute{
+				MarkdownDescription: "Define the requirements for grant approval, each step must be completed by a distict principal, steps can be completed in any order.",
+				Optional:            true,
+
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+						"name": schema.StringAttribute{
+							MarkdownDescription: "The name of the approval step.",
+							Required:            true,
+						},
+						"when": schema.StringAttribute{
+							MarkdownDescription: "The Cedar when expression to evaluate a review for a match.",
+							Required:            true,
+						},
 					},
 				},
 			},
@@ -281,6 +302,13 @@ func (r *AccessWorkflowResource) Create(ctx context.Context, req resource.Create
 			cond.MaximumNumberOfExtensions = int32(data.ExtensionConditions.MaxExtensions.ValueInt64())
 		}
 		createReq.ExtensionConditions = &cond
+	}
+
+	for _, step := range data.ApprovalSteps {
+		createReq.ApprovalSteps = append(createReq.ApprovalSteps, &configv1alpha1.ApprovalStep{
+			Name: step.Name.ValueString(),
+			When: step.When.ValueString(),
+		})
 	}
 
 	res, err := r.client.CreateAccessWorkflow(ctx, connect.NewRequest(createReq))
@@ -387,6 +415,14 @@ func (r *AccessWorkflowResource) Read(ctx context.Context, req resource.ReadRequ
 		}
 	}
 
+	state.ApprovalSteps = nil
+	for _, step := range res.Msg.Workflow.ApprovalSteps {
+		state.ApprovalSteps = append(state.ApprovalSteps, ApprovalStep{
+			Name: types.StringValue(step.Name),
+			When: types.StringValue(step.When),
+		})
+	}
+
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }
 
@@ -482,6 +518,13 @@ func (r *AccessWorkflowResource) Update(ctx context.Context, req resource.Update
 			cond.MaximumNumberOfExtensions = int32(data.ExtensionConditions.MaxExtensions.ValueInt64())
 		}
 		updateReq.Workflow.ExtensionConditions = &cond
+	}
+
+	for _, step := range data.ApprovalSteps {
+		updateReq.Workflow.ApprovalSteps = append(updateReq.Workflow.ApprovalSteps, &configv1alpha1.ApprovalStep{
+			Name: step.Name.ValueString(),
+			When: step.When.ValueString(),
+		})
 	}
 
 	res, err := r.client.UpdateAccessWorkflow(ctx, connect.NewRequest(updateReq))

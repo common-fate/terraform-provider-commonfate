@@ -176,6 +176,9 @@ func (p *CommonFateProvider) Resources(_ context.Context) []func() resource.Reso
 		aws.NewAWSResourceScannerResource,
 		NewEcsProxyResource,
 		NewRDSDatabaseResourceResource,
+		aws.NewAWSEKSIntegrationResource,
+		aws.NewAWSEKSClusterResource,
+		aws.NewAWSEKSAccessEntryResource,
 	}
 }
 
@@ -343,7 +346,6 @@ func NewAuth0IntegrationResource() resource.Resource {
 	return &auth0.Auth0IntegrationResource{}
 }
 
-
 func NewEcsProxyResource() resource.Resource {
 	return &proxy.ECSProxyResource{}
 }
@@ -351,7 +353,6 @@ func NewEcsProxyResource() resource.Resource {
 func NewEcsProxyDatasource() datasource.DataSource {
 	return &proxy.ECSProxyDatasource{}
 }
-
 
 func NewRDSDatabaseResourceResource() resource.Resource {
 	return &proxy.RDSDatabaseResource{}
