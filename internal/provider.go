@@ -12,6 +12,7 @@ import (
 	"github.com/common-fate/terraform-provider-commonfate/internal/entra"
 	"github.com/common-fate/terraform-provider-commonfate/internal/gcp"
 	"github.com/common-fate/terraform-provider-commonfate/internal/generic"
+	"github.com/common-fate/terraform-provider-commonfate/internal/jira"
 	"github.com/common-fate/terraform-provider-commonfate/internal/logs"
 	"github.com/common-fate/terraform-provider-commonfate/internal/okta"
 	"github.com/common-fate/terraform-provider-commonfate/internal/opsgenie"
@@ -147,6 +148,7 @@ func (p *CommonFateProvider) Resources(_ context.Context) []func() resource.Reso
 		NewAWSIDCIntegrationResource,
 		NewSlackIntegrationResource,
 		NewPagerDutyIntegrationResource,
+		NewJiraIntegrationResource,
 		NewAWSAccountSelectorResource,
 		NewAWSIDCAccountAvailabilitiesResource,
 		NewOpsGenieIntegrationResource,
@@ -257,6 +259,9 @@ func NewSlackIntegrationResource() resource.Resource {
 
 func NewPagerDutyIntegrationResource() resource.Resource {
 	return &pagerduty.PagerDutyIntegrationResource{}
+}
+func NewJiraIntegrationResource() resource.Resource {
+	return &jira.JiraIntegrationResource{}
 }
 func NewAWSIDCAccountAvailabilitiesResource() resource.Resource {
 	return &aws.AWSIDCAccountAvailabilitiesResource{}
