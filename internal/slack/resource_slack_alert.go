@@ -176,12 +176,12 @@ func (r *SlackAlertResource) Create(ctx context.Context, req resource.CreateRequ
 	}
 
 	createSlackAlert := &configv1alpha1.CreateSlackAlertRequest{
-		WorkflowId:                     data.WorkflowID.ValueString(),
-		SlackWorkspaceId:               data.SlackWorkspaceID.ValueString(),
-		UseWebConsoleForApproveAction:  data.UseWebConsoleForApprovalAction.ValueBool(),
-		SendDirectMessagesToApprovers:  data.SendDirectMessagesToApprovers.ValueBool(),
-		DisableInteractivityHandlers:   data.DisableInteractivityHandlers.ValueBool(),
-		DisableForAutoApprovedRequests: data.DisableAlertForAutoApprovedRequests.ValueBool(),
+		WorkflowId:                                   data.WorkflowID.ValueString(),
+		SlackWorkspaceId:                             data.SlackWorkspaceID.ValueString(),
+		UseWebConsoleForApproveAction:                data.UseWebConsoleForApprovalAction.ValueBool(),
+		SendDirectMessagesToApprovers:                data.SendDirectMessagesToApprovers.ValueBool(),
+		DisableInteractivityHandlers:                 data.DisableInteractivityHandlers.ValueBool(),
+		DisableChannelMessageForAutoapprovedRequests: data.DisableAlertForAutoApprovedRequests.ValueBool(),
 	}
 
 	if !data.SlackChannelID.IsNull() {
@@ -258,7 +258,7 @@ func (r *SlackAlertResource) Read(ctx context.Context, req resource.ReadRequest,
 		UseWebConsoleForApprovalAction:      types.BoolPointerValue(&res.Msg.Alert.UseWebConsoleForApproveAction),
 		SendDirectMessagesToApprovers:       types.BoolPointerValue(&res.Msg.Alert.SendDirectMessagesToApprovers),
 		DisableInteractivityHandlers:        types.BoolPointerValue(&res.Msg.Alert.DisableInteractivityHandlers),
-		DisableAlertForAutoApprovedRequests: types.BoolPointerValue(&res.Msg.Alert.DisableForAutoApprovedRequests),
+		DisableAlertForAutoApprovedRequests: types.BoolPointerValue(&res.Msg.Alert.DisableChannelMessageForAutoapprovedRequests),
 	}
 
 	if res.Msg.Alert.NotifyExpiryInSeconds != nil {
@@ -308,13 +308,13 @@ func (r *SlackAlertResource) Update(ctx context.Context, req resource.UpdateRequ
 
 	updateSlackAlert := &configv1alpha1.UpdateSlackAlertRequest{
 		Alert: &configv1alpha1.SlackAlert{
-			Id:                             data.ID.ValueString(),
-			WorkflowId:                     data.WorkflowID.ValueString(),
-			SlackWorkspaceId:               data.SlackWorkspaceID.ValueString(),
-			UseWebConsoleForApproveAction:  data.UseWebConsoleForApprovalAction.ValueBool(),
-			SendDirectMessagesToApprovers:  data.SendDirectMessagesToApprovers.ValueBool(),
-			DisableInteractivityHandlers:   data.DisableInteractivityHandlers.ValueBool(),
-			DisableForAutoApprovedRequests: data.DisableAlertForAutoApprovedRequests.ValueBool(),
+			Id:                            data.ID.ValueString(),
+			WorkflowId:                    data.WorkflowID.ValueString(),
+			SlackWorkspaceId:              data.SlackWorkspaceID.ValueString(),
+			UseWebConsoleForApproveAction: data.UseWebConsoleForApprovalAction.ValueBool(),
+			SendDirectMessagesToApprovers: data.SendDirectMessagesToApprovers.ValueBool(),
+			DisableInteractivityHandlers:  data.DisableInteractivityHandlers.ValueBool(),
+			DisableChannelMessageForAutoapprovedRequests: data.DisableAlertForAutoApprovedRequests.ValueBool(),
 		},
 	}
 
