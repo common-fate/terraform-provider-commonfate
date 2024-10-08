@@ -131,7 +131,7 @@ func (r *JiraIntegrationResource) Create(ctx context.Context, req resource.Creat
 				Jira: &integrationv1alpha1.Jira{
 					ClientId:               data.ClientID.ValueString(),
 					ClientSecretSecretPath: data.ClientSecretSecretPath.ValueString(),
-					CloudId:                data.ClientID.ValueString(),
+					CloudId:                data.CloudID.ValueString(),
 					IssueFilterJql:         data.IssueFilterJQL.ValueString(),
 				},
 			},
@@ -236,7 +236,7 @@ func (r *JiraIntegrationResource) Update(ctx context.Context, req resource.Updat
 					Jira: &integrationv1alpha1.Jira{
 						ClientId:               data.ClientID.ValueString(),
 						ClientSecretSecretPath: data.ClientSecretSecretPath.ValueString(),
-						CloudId:                data.ClientID.ValueString(),
+						CloudId:                data.CloudID.ValueString(),
 						IssueFilterJql:         data.IssueFilterJQL.ValueString(),
 					},
 				},
