@@ -19,7 +19,6 @@ Registers a Jira integration
 
 - `client_id` (String) The Jira application Client ID
 - `client_secret_secret_path` (String) Path to secret for Client Secret
-- `cloud_id` (String) The Atlassian cloud id for your tenant
 - `issue_filter_jql` (String) The JQL expression to filter issues shown for use as context in request reasons
 - `name` (String) The name of the integration: use a short label which is descriptive of the organization you're connecting to
 
