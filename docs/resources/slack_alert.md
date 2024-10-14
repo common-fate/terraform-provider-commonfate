@@ -34,6 +34,7 @@ resource "commonfate-slack_alert" "demo" {
 
 ### Optional
 
+- `disable_channel_message_for_autoapproved_requests` (Boolean) Disable sending notifications to the access channel for auto approved requests.
 - `disable_interactivity_handlers` (Boolean) Disables all webhook handlers for the Slack integration.
 - `integration_id` (String) The ID for the integration set up to slack.
 - `notify_expiry_in_seconds` (Number) The duration before access expiration at which Slack will notify the user about the upcoming expiration.
