@@ -23,8 +23,6 @@ type JiraIntegrationModel struct {
 	Name                   types.String `tfsdk:"name"`
 	ClientID               types.String `tfsdk:"client_id"`
 	ClientSecretSecretPath types.String `tfsdk:"client_secret_secret_path"`
-	CloudID                types.String `tfsdk:"cloud_id"`
-	IssueFilterJQL         types.String `tfsdk:"issue_filter_jql"`
 }
 
 type JiraIntegrationResource struct {
@@ -88,10 +86,6 @@ func (r *JiraIntegrationResource) Schema(ctx context.Context, req resource.Schem
 				MarkdownDescription: "Path to secret for Client Secret",
 				Required:            true,
 			},
-			"cloud_id": schema.StringAttribute{
-				MarkdownDescription: "The Atlassian cloud id for your tenant",
-				Required:            true,
-			},
 			"issue_filter_jql": schema.StringAttribute{
 				MarkdownDescription: "The JQL expression to filter issues shown for use as context in request reasons",
 				Required:            true,
@@ -131,8 +125,6 @@ func (r *JiraIntegrationResource) Create(ctx context.Context, req resource.Creat
 				Jira: &integrationv1alpha1.Jira{
 					ClientId:               data.ClientID.ValueString(),
 					ClientSecretSecretPath: data.ClientSecretSecretPath.ValueString(),
-					CloudId:                data.CloudID.ValueString(),
-					IssueFilterJql:         data.IssueFilterJQL.ValueString(),
 				},
 			},
 		},
@@ -200,8 +192,6 @@ func (r *JiraIntegrationResource) Read(ctx context.Context, req resource.ReadReq
 		Name:                   types.StringValue(res.Msg.Integration.Name),
 		ClientID:               types.StringValue(integ.ClientId),
 		ClientSecretSecretPath: types.StringValue(integ.ClientSecretSecretPath),
-		CloudID:                types.StringValue(integ.CloudId),
-		IssueFilterJQL:         types.StringValue(integ.IssueFilterJql),
 	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
@@ -236,8 +226,6 @@ func (r *JiraIntegrationResource) Update(ctx context.Context, req resource.Updat
 					Jira: &integrationv1alpha1.Jira{
 						ClientId:               data.ClientID.ValueString(),
 						ClientSecretSecretPath: data.ClientSecretSecretPath.ValueString(),
-						CloudId:                data.CloudID.ValueString(),
-						IssueFilterJql:         data.IssueFilterJQL.ValueString(),
 					},
 				},
 			},
