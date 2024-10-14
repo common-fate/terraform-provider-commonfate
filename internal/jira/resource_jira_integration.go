@@ -23,7 +23,6 @@ type JiraIntegrationModel struct {
 	Name                   types.String `tfsdk:"name"`
 	ClientID               types.String `tfsdk:"client_id"`
 	ClientSecretSecretPath types.String `tfsdk:"client_secret_secret_path"`
-	IssueFilterJQL         types.String `tfsdk:"issue_filter_jql"`
 }
 
 type JiraIntegrationResource struct {
@@ -126,7 +125,6 @@ func (r *JiraIntegrationResource) Create(ctx context.Context, req resource.Creat
 				Jira: &integrationv1alpha1.Jira{
 					ClientId:               data.ClientID.ValueString(),
 					ClientSecretSecretPath: data.ClientSecretSecretPath.ValueString(),
-					IssueFilterJql:         data.IssueFilterJQL.ValueString(),
 				},
 			},
 		},
@@ -194,7 +192,6 @@ func (r *JiraIntegrationResource) Read(ctx context.Context, req resource.ReadReq
 		Name:                   types.StringValue(res.Msg.Integration.Name),
 		ClientID:               types.StringValue(integ.ClientId),
 		ClientSecretSecretPath: types.StringValue(integ.ClientSecretSecretPath),
-		IssueFilterJQL:         types.StringValue(integ.IssueFilterJql),
 	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
@@ -229,7 +226,6 @@ func (r *JiraIntegrationResource) Update(ctx context.Context, req resource.Updat
 					Jira: &integrationv1alpha1.Jira{
 						ClientId:               data.ClientID.ValueString(),
 						ClientSecretSecretPath: data.ClientSecretSecretPath.ValueString(),
-						IssueFilterJql:         data.IssueFilterJQL.ValueString(),
 					},
 				},
 			},
