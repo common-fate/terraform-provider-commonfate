@@ -1,5 +1,13 @@
 # @common-fate/terraform-provider-commonfate
 
+## 2.27.0
+
+### Minor Changes
+
+- 494417a: Add Jira Integration
+- 89ea58b: Adds support for configuring approval steps on a workflow, which enables multi approval requirements for Grants.
+- 703a0f9: Add workflow expiry options for closing requests automatically
+
 ## 2.26.1
 
 ### Patch Changes
