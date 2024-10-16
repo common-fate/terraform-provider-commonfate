@@ -22,16 +22,15 @@ import (
 )
 
 type SlackAlertModel struct {
-	ID                                  types.String `tfsdk:"id"`
-	WorkflowID                          types.String `tfsdk:"workflow_id"`
-	SlackIntegrationID                  types.String `tfsdk:"integration_id"`
-	SlackChannelID                      types.String `tfsdk:"slack_channel_id"`
-	SlackWorkspaceID                    types.String `tfsdk:"slack_workspace_id"`
-	UseWebConsoleForApprovalAction      types.Bool   `tfsdk:"use_web_console_for_approval_action"`
-	SendDirectMessagesToApprovers       types.Bool   `tfsdk:"send_direct_message_to_approvers"`
-	DisableInteractivityHandlers        types.Bool   `tfsdk:"disable_interactivity_handlers"`
-	NotifyExpiryInSeconds               types.Int64  `tfsdk:"notify_expiry_in_seconds"`
-	DisableAlertForAutoApprovedRequests types.Bool   `tfsdk:"disable_channel_message_for_autoapproved_requests"`
+	ID                             types.String `tfsdk:"id"`
+	WorkflowID                     types.String `tfsdk:"workflow_id"`
+	SlackIntegrationID             types.String `tfsdk:"integration_id"`
+	SlackChannelID                 types.String `tfsdk:"slack_channel_id"`
+	SlackWorkspaceID               types.String `tfsdk:"slack_workspace_id"`
+	UseWebConsoleForApprovalAction types.Bool   `tfsdk:"use_web_console_for_approval_action"`
+	SendDirectMessagesToApprovers  types.Bool   `tfsdk:"send_direct_message_to_approvers"`
+	DisableInteractivityHandlers   types.Bool   `tfsdk:"disable_interactivity_handlers"`
+	NotifyExpiryInSeconds          types.Int64  `tfsdk:"notify_expiry_in_seconds"`
 }
 
 // AccessRuleResource is the data source implementation.
@@ -122,12 +121,6 @@ func (r *SlackAlertResource) Schema(ctx context.Context, req resource.SchemaRequ
 				MarkdownDescription: "The duration before access expiration at which Slack will notify the user about the upcoming expiration.",
 				Optional:            true,
 			},
-			"disable_channel_message_for_autoapproved_requests": schema.BoolAttribute{
-				MarkdownDescription: "Disable sending notifications to the access channel for auto approved requests.",
-				Optional:            true,
-				Computed:            true,
-				Default:             booldefault.StaticBool(false),
-			},
 		},
 		MarkdownDescription: `Links a Slack message being send to a particular channel or workspace based on actions made against a workflow.`,
 	}
@@ -176,12 +169,11 @@ func (r *SlackAlertResource) Create(ctx context.Context, req resource.CreateRequ
 	}
 
 	createSlackAlert := &configv1alpha1.CreateSlackAlertRequest{
-		WorkflowId:                                   data.WorkflowID.ValueString(),
-		SlackWorkspaceId:                             data.SlackWorkspaceID.ValueString(),
-		UseWebConsoleForApproveAction:                data.UseWebConsoleForApprovalAction.ValueBool(),
-		SendDirectMessagesToApprovers:                data.SendDirectMessagesToApprovers.ValueBool(),
-		DisableInteractivityHandlers:                 data.DisableInteractivityHandlers.ValueBool(),
-		DisableChannelMessageForAutoapprovedRequests: data.DisableAlertForAutoApprovedRequests.ValueBool(),
+		WorkflowId:                    data.WorkflowID.ValueString(),
+		SlackWorkspaceId:              data.SlackWorkspaceID.ValueString(),
+		UseWebConsoleForApproveAction: data.UseWebConsoleForApprovalAction.ValueBool(),
+		SendDirectMessagesToApprovers: data.SendDirectMessagesToApprovers.ValueBool(),
+		DisableInteractivityHandlers:  data.DisableInteractivityHandlers.ValueBool(),
 	}
 
 	if !data.SlackChannelID.IsNull() {
@@ -252,13 +244,12 @@ func (r *SlackAlertResource) Read(ctx context.Context, req resource.ReadRequest,
 		ID:         types.StringValue(res.Msg.Alert.Id),
 		WorkflowID: types.StringValue(res.Msg.Alert.WorkflowId),
 		// ensure that if channel ID is not provided that it doesn't show an update is going to happen
-		SlackChannelID:                      types.StringPointerValue(grab.If(res.Msg.Alert.SlackChannelId == "", nil, &res.Msg.Alert.SlackChannelId)),
-		SlackWorkspaceID:                    types.StringValue(res.Msg.Alert.SlackWorkspaceId),
-		SlackIntegrationID:                  types.StringPointerValue(res.Msg.Alert.IntegrationId),
-		UseWebConsoleForApprovalAction:      types.BoolPointerValue(&res.Msg.Alert.UseWebConsoleForApproveAction),
-		SendDirectMessagesToApprovers:       types.BoolPointerValue(&res.Msg.Alert.SendDirectMessagesToApprovers),
-		DisableInteractivityHandlers:        types.BoolPointerValue(&res.Msg.Alert.DisableInteractivityHandlers),
-		DisableAlertForAutoApprovedRequests: types.BoolPointerValue(&res.Msg.Alert.DisableChannelMessageForAutoapprovedRequests),
+		SlackChannelID:                 types.StringPointerValue(grab.If(res.Msg.Alert.SlackChannelId == "", nil, &res.Msg.Alert.SlackChannelId)),
+		SlackWorkspaceID:               types.StringValue(res.Msg.Alert.SlackWorkspaceId),
+		SlackIntegrationID:             types.StringPointerValue(res.Msg.Alert.IntegrationId),
+		UseWebConsoleForApprovalAction: types.BoolPointerValue(&res.Msg.Alert.UseWebConsoleForApproveAction),
+		SendDirectMessagesToApprovers:  types.BoolPointerValue(&res.Msg.Alert.SendDirectMessagesToApprovers),
+		DisableInteractivityHandlers:   types.BoolPointerValue(&res.Msg.Alert.DisableInteractivityHandlers),
 	}
 
 	if res.Msg.Alert.NotifyExpiryInSeconds != nil {
@@ -314,7 +305,6 @@ func (r *SlackAlertResource) Update(ctx context.Context, req resource.UpdateRequ
 			UseWebConsoleForApproveAction: data.UseWebConsoleForApprovalAction.ValueBool(),
 			SendDirectMessagesToApprovers: data.SendDirectMessagesToApprovers.ValueBool(),
 			DisableInteractivityHandlers:  data.DisableInteractivityHandlers.ValueBool(),
-			DisableChannelMessageForAutoapprovedRequests: data.DisableAlertForAutoApprovedRequests.ValueBool(),
 		},
 	}
 
