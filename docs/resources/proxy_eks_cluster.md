@@ -18,12 +18,26 @@ Registers a EKS Cluster database with a Common Fate Proxy.
 ### Required
 
 - `aws_account_id` (String) The AWS account id the database is in
+- `cluster_name` (String) The name of the cluster.
 - `name` (String) A unique name for the resource
 - `proxy_id` (String) The ID of the proxy in the same account as the database.
 - `region` (String) The region the database is in
+- `users` (Attributes List) A list of users that exist in the database (see [below for nested schema](#nestedatt--users))
+
+### Optional
+
+- `cluster_access_role_name` (String) The name of the access role used by the proxy to access the eks cluster.
 
 ### Read-Only
 
 - `id` (String) The internal resource
+
+<a id="nestedatt--users"></a>
+### Nested Schema for `users`
+
+Required:
+
+- `name` (String) The name for the user
+- `service_account_name` (String) The service account name to impersonate in the cluster
 
 
