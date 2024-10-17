@@ -86,10 +86,6 @@ func (r *JiraIntegrationResource) Schema(ctx context.Context, req resource.Schem
 				MarkdownDescription: "Path to secret for Client Secret",
 				Required:            true,
 			},
-			"issue_filter_jql": schema.StringAttribute{
-				MarkdownDescription: "The JQL expression to filter issues shown for use as context in request reasons",
-				Required:            true,
-			},
 		},
 		MarkdownDescription: `Registers a Jira integration`,
 	}

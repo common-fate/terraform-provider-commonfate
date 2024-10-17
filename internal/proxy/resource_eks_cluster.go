@@ -19,11 +19,19 @@ import (
 )
 
 type EKSClusterModel struct {
-	ID           types.String `tfsdk:"id"`
-	Name         types.String `tfsdk:"name"`
-	Region       types.String `tfsdk:"region"`
-	AWSAccountID types.String `tfsdk:"aws_account_id"`
-	ProxyId      types.String `tfsdk:"proxy_id"`
+	ID                    types.String  `tfsdk:"id"`
+	Name                  types.String  `tfsdk:"name"`
+	Region                types.String  `tfsdk:"region"`
+	AWSAccountID          types.String  `tfsdk:"aws_account_id"`
+	ProxyId               types.String  `tfsdk:"proxy_id"`
+	ClusterName           types.String  `tfsdk:"cluster_name"`
+	ClusterAccessRoleName types.String  `tfsdk:"cluster_access_role_name"`
+	Users                 []ClusterUser `tfsdk:"users"`
+}
+
+type ClusterUser struct {
+	Name               types.String `tfsdk:"name"`
+	ServiceAccountName types.String `tfsdk:"service_account_name"`
 }
 
 type EKSClusterResource struct {
@@ -94,6 +102,31 @@ func (r *EKSClusterResource) Schema(ctx context.Context, req resource.SchemaRequ
 				MarkdownDescription: "The ID of the proxy in the same account as the database.",
 				Required:            true,
 			},
+			"cluster_name": schema.StringAttribute{
+				MarkdownDescription: "The name of the cluster.",
+				Required:            true,
+			},
+			"cluster_access_role_name": schema.StringAttribute{
+				MarkdownDescription: "The name of the access role used by the proxy to access the eks cluster.",
+				Required:            false,
+				Optional:            true,
+			},
+			"users": schema.ListNestedAttribute{
+				MarkdownDescription: "A list of users that exist in the database",
+				Required:            true,
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+						"name": schema.StringAttribute{
+							MarkdownDescription: "The name for the user",
+							Required:            true,
+						},
+						"service_account_name": schema.StringAttribute{
+							MarkdownDescription: "The service account name to impersonate in the cluster",
+							Required:            true,
+						},
+					},
+				},
+			},
 		},
 		MarkdownDescription: `Registers a EKS Cluster database with a Common Fate Proxy.`,
 	}
@@ -124,9 +157,18 @@ func (r *EKSClusterResource) Create(ctx context.Context, req resource.CreateRequ
 	}
 
 	resource := &integrationv1alpha1.AWSEKSCluster{
-		Name:    data.Name.ValueString(),
-		Region:  data.Region.ValueString(),
-		Account: data.AWSAccountID.ValueString(),
+		Name:                  data.Name.ValueString(),
+		Region:                data.Region.ValueString(),
+		Account:               data.AWSAccountID.ValueString(),
+		ClusterName:           data.ClusterName.ValueString(),
+		ClusterAccessRoleName: data.ClusterAccessRoleName.ValueStringPointer(),
+	}
+	for _, user := range data.Users {
+		newUser := &integrationv1alpha1.AWSEKSClusterUser{
+			Name:               user.Name.ValueString(),
+			ServiceAccountName: user.ServiceAccountName.ValueString(),
+		}
+		resource.Users = append(resource.Users, newUser)
 	}
 
 	createReq := integrationv1alpha1.CreateProxyEksClusterResourceRequest{
@@ -216,9 +258,18 @@ func (r *EKSClusterResource) Update(ctx context.Context, req resource.UpdateRequ
 	}
 
 	resource := &integrationv1alpha1.AWSEKSCluster{
-		Name:    data.Name.ValueString(),
-		Region:  data.Region.ValueString(),
-		Account: data.AWSAccountID.ValueString(),
+		Name:                  data.Name.ValueString(),
+		Region:                data.Region.ValueString(),
+		Account:               data.AWSAccountID.ValueString(),
+		ClusterName:           data.ClusterName.ValueString(),
+		ClusterAccessRoleName: data.ClusterAccessRoleName.ValueStringPointer(),
+	}
+	for _, user := range data.Users {
+		newUser := &integrationv1alpha1.AWSEKSClusterUser{
+			Name:               user.Name.ValueString(),
+			ServiceAccountName: user.ServiceAccountName.ValueString(),
+		}
+		resource.Users = append(resource.Users, newUser)
 	}
 
 	updateReq := integrationv1alpha1.UpdateProxyEksClusterResourceRequest{
