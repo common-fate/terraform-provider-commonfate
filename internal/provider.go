@@ -179,9 +179,6 @@ func (p *CommonFateProvider) Resources(_ context.Context) []func() resource.Reso
 		NewEcsProxyResource,
 		NewRDSDatabaseResourceResource,
 		NewProxyEKSClusterResourceResource,
-		aws.NewAWSEKSIntegrationResource,
-		aws.NewAWSEKSClusterResource,
-		aws.NewAWSEKSAccessEntryResource,
 	}
 }
 

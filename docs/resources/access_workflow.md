@@ -45,12 +45,14 @@ resource "commonfate-access_workflow" "workflow-demo" {
 
 ### Optional
 
-- `activation_expiry` (Number) The amount of time after access is activated before the request will be expired
+- `activation_expiry` (Number) The amount of time after access is approved to be activated before the request will be expired
 - `approval_steps` (Attributes List) Define the requirements for grant approval, each step must be completed by a distict principal, steps can be completed in any order. (see [below for nested schema](#nestedatt--approval_steps))
 - `default_duration_seconds` (Number) The default duration of the access workflow
 - `extension_conditions` (Attributes) Configuration for extending access (see [below for nested schema](#nestedatt--extension_conditions))
 - `name` (String) A unique name for the workflow so you know how to identify it.
 - `priority` (Number) The priority that governs whether the policy will be used. If a different policy with a higher priority and the same role exists that one will be used over another.
+- `requested_to_activate_expiry` (Number) The amount of time after a request is made and activated before the request will be expired
+- `requested_to_approved_expiry` (Number) The amount of time after a request is made and approved before the request will be expired
 - `try_extend_after_seconds` (Number, Deprecated) The amount of time after access is activated that extending access can be attempted. As a starting point we recommend setting this to half of the `access_duration_seconds`.
 - `validation` (Attributes) Validation requirements to be set with this workflow (see [below for nested schema](#nestedatt--validation))
 
