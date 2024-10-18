@@ -18,33 +18,29 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-type EKSClusterModel struct {
-	ID                    types.String `tfsdk:"id"`
-	Name                  types.String `tfsdk:"name"`
-	Region                types.String `tfsdk:"region"`
-	AWSAccountID          types.String `tfsdk:"aws_account_id"`
-	ProxyId               types.String `tfsdk:"proxy_id"`
-	ClusterName           types.String `tfsdk:"cluster_name"`
-	ClusterAccessRoleName types.String `tfsdk:"cluster_access_role_name"`
+type EKSServiceAccountModel struct {
+	ID                 types.String `tfsdk:"id"`
+	Name               types.String `tfsdk:"name"`
+	ServiceAccountName types.String `tfsdk:"service_account_name"`
 }
 
-type EKSClusterResource struct {
+type EKSServiceAccountResource struct {
 	client integrationv1alpha1connect.ProxyServiceClient
 }
 
 var (
-	_ resource.Resource                = &EKSClusterResource{}
-	_ resource.ResourceWithConfigure   = &EKSClusterResource{}
-	_ resource.ResourceWithImportState = &EKSClusterResource{}
+	_ resource.Resource                = &EKSServiceAccountResource{}
+	_ resource.ResourceWithConfigure   = &EKSServiceAccountResource{}
+	_ resource.ResourceWithImportState = &EKSServiceAccountResource{}
 )
 
 // Metadata returns the data source type name.
-func (r *EKSClusterResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_proxy_eks_cluster"
+func (r *EKSServiceAccountResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_proxy_eks_service_account"
 }
 
 // Configure adds the provider configured client to the data source.
-func (r *EKSClusterResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *EKSServiceAccountResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -65,13 +61,12 @@ func (r *EKSClusterResource) Configure(_ context.Context, req resource.Configure
 
 // GetSchema defines the schema for the data source.
 // schema is based off the governance api
-func (r *EKSClusterResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *EKSServiceAccountResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description: `Access Workflows are used to describe how long access should be applied. Created Workflows can be referenced in other resources created.
-`,
+		Description: `Access Workflows are used to describe how long access should be applied. Created Workflows can be referenced in other resources created.`,
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
-				MarkdownDescription: "The internal resource",
+				MarkdownDescription: "The internal resource identifier",
 				Computed:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -79,38 +74,20 @@ func (r *EKSClusterResource) Schema(ctx context.Context, req resource.SchemaRequ
 			},
 
 			"name": schema.StringAttribute{
-				MarkdownDescription: "A unique name for the resource",
+				MarkdownDescription: "A display name for the service account",
 				Required:            true,
 			},
 
-			"region": schema.StringAttribute{
-				MarkdownDescription: "The region the database is in",
+			"service_account_name": schema.StringAttribute{
+				MarkdownDescription: "The name of the service account in the cluster",
 				Required:            true,
-			},
-			"aws_account_id": schema.StringAttribute{
-				MarkdownDescription: "The AWS account id the database is in",
-				Required:            true,
-			},
-
-			"proxy_id": schema.StringAttribute{
-				MarkdownDescription: "The ID of the proxy in the same account as the database.",
-				Required:            true,
-			},
-			"cluster_name": schema.StringAttribute{
-				MarkdownDescription: "The name of the cluster.",
-				Required:            true,
-			},
-			"cluster_access_role_name": schema.StringAttribute{
-				MarkdownDescription: "The name of the access role used by the proxy to access the eks cluster.",
-				Required:            false,
-				Optional:            true,
 			},
 		},
-		MarkdownDescription: `Registers a EKS Cluster with a Common Fate Proxy.`,
+		MarkdownDescription: `Registers a EKS Service Account with a Common Fate Proxy.`,
 	}
 }
 
-func (r *EKSClusterResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+func (r *EKSServiceAccountResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 
 	if r.client == nil {
 		resp.Diagnostics.AddError(
@@ -120,7 +97,7 @@ func (r *EKSClusterResource) Create(ctx context.Context, req resource.CreateRequ
 
 		return
 	}
-	var data *EKSClusterModel
+	var data *EKSServiceAccountModel
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -134,24 +111,20 @@ func (r *EKSClusterResource) Create(ctx context.Context, req resource.CreateRequ
 		return
 	}
 
-	resource := &integrationv1alpha1.AWSEKSCluster{
-		Name:                  data.Name.ValueString(),
-		Region:                data.Region.ValueString(),
-		Account:               data.AWSAccountID.ValueString(),
-		ClusterName:           data.ClusterName.ValueString(),
-		ClusterAccessRoleName: data.ClusterAccessRoleName.ValueStringPointer(),
+	resource := &integrationv1alpha1.AWSEKSServiceAccount{
+		Name:               data.Name.ValueString(),
+		ServiceAccountName: data.ServiceAccountName.ValueString(),
 	}
 
-	createReq := integrationv1alpha1.CreateProxyEksClusterResourceRequest{
-		ProxyId:    data.ProxyId.ValueString(),
-		EksCluster: resource,
+	createReq := integrationv1alpha1.CreateProxyEksServiceAccountResourceRequest{
+		ServiceAccount: resource,
 	}
 
-	res, err := r.client.CreateProxyEksClusterResource(ctx, connect.NewRequest(&createReq))
+	res, err := r.client.CreateProxyEksServiceAccountResource(ctx, connect.NewRequest(&createReq))
 
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to Create Resource: EKS Cluster",
+			"Unable to Create Resource: EKS Service Account",
 			"An unexpected error occurred while communicating with Common Fate API. "+
 				"Please report this issue to the provider developers.\n\n"+
 				"JSON Error: "+err.Error(),
@@ -169,7 +142,7 @@ func (r *EKSClusterResource) Create(ctx context.Context, req resource.CreateRequ
 }
 
 // Read refreshes the Terraform state with the latest data.
-func (r *EKSClusterResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+func (r *EKSServiceAccountResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	if r.client == nil {
 		resp.Diagnostics.AddError(
 			"Unconfigured HTTP Client",
@@ -178,13 +151,13 @@ func (r *EKSClusterResource) Read(ctx context.Context, req resource.ReadRequest,
 
 		return
 	}
-	var state EKSClusterModel
+	var state EKSServiceAccountModel
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
 
 	// read the state from the client
-	res, err := r.client.GetProxyEksClusterResource(ctx, connect.NewRequest(&integrationv1alpha1.GetProxyEksClusterResourceRequest{
+	res, err := r.client.GetProxyEksServiceAccountResource(ctx, connect.NewRequest(&integrationv1alpha1.GetProxyEksServiceAccountResourceRequest{
 		Id: state.ID.ValueString(),
 	}))
 	if connect.CodeOf(err) == connect.CodeNotFound {
@@ -205,7 +178,7 @@ func (r *EKSClusterResource) Read(ctx context.Context, req resource.ReadRequest,
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }
 
-func (r *EKSClusterResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *EKSServiceAccountResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	if r.client == nil {
 		resp.Diagnostics.AddError(
 			"Unconfigured HTTP Client",
@@ -214,7 +187,7 @@ func (r *EKSClusterResource) Update(ctx context.Context, req resource.UpdateRequ
 
 		return
 	}
-	var data *EKSClusterModel
+	var data *EKSServiceAccountModel
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -228,25 +201,21 @@ func (r *EKSClusterResource) Update(ctx context.Context, req resource.UpdateRequ
 		return
 	}
 
-	resource := &integrationv1alpha1.AWSEKSCluster{
-		Name:                  data.Name.ValueString(),
-		Region:                data.Region.ValueString(),
-		Account:               data.AWSAccountID.ValueString(),
-		ClusterName:           data.ClusterName.ValueString(),
-		ClusterAccessRoleName: data.ClusterAccessRoleName.ValueStringPointer(),
+	resource := &integrationv1alpha1.AWSEKSServiceAccount{
+		Name:               data.Name.ValueString(),
+		ServiceAccountName: data.ServiceAccountName.ValueString(),
 	}
 
-	updateReq := integrationv1alpha1.UpdateProxyEksClusterResourceRequest{
-		Id:         data.ID.ValueString(),
-		ProxyId:    data.ProxyId.ValueString(),
-		EksCluster: resource,
+	updateReq := integrationv1alpha1.UpdateProxyEksServiceAccountResourceRequest{
+		Id:             data.ID.ValueString(),
+		ServiceAccount: resource,
 	}
 
-	res, err := r.client.UpdateProxyEksClusterResource(ctx, connect.NewRequest(&updateReq))
+	res, err := r.client.UpdateProxyEksServiceAccountResource(ctx, connect.NewRequest(&updateReq))
 
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to Update Resource: EKS Cluster",
+			"Unable to Update Resource: EKS Service Account",
 			"An unexpected error occurred while communicating with Common Fate API. "+
 				"Please report this issue to the provider developers.\n\n"+
 				"JSON Error: "+err.Error(),
@@ -263,14 +232,14 @@ func (r *EKSClusterResource) Update(ctx context.Context, req resource.UpdateRequ
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *EKSClusterResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+func (r *EKSServiceAccountResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	if r.client == nil {
 		resp.Diagnostics.AddError(
 			"Unconfigured HTTP Client",
 			"Expected configured HTTP client. Please report this issue to the provider developers.",
 		)
 	}
-	var data *EKSClusterModel
+	var data *EKSServiceAccountModel
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -283,7 +252,7 @@ func (r *EKSClusterResource) Delete(ctx context.Context, req resource.DeleteRequ
 		return
 	}
 
-	_, err := r.client.DeleteProxyEksClusterResource(ctx, connect.NewRequest(&integrationv1alpha1.DeleteProxyEksClusterResourceRequest{
+	_, err := r.client.DeleteProxyEksServiceAccountResource(ctx, connect.NewRequest(&integrationv1alpha1.DeleteProxyEksServiceAccountResourceRequest{
 		Id: data.ID.ValueString(),
 	}))
 
@@ -299,7 +268,7 @@ func (r *EKSClusterResource) Delete(ctx context.Context, req resource.DeleteRequ
 	}
 }
 
-func (r *EKSClusterResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *EKSServiceAccountResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	// Retrieve import ID and save to id attribute
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }

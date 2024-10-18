@@ -179,6 +179,7 @@ func (p *CommonFateProvider) Resources(_ context.Context) []func() resource.Reso
 		NewEcsProxyResource,
 		NewRDSDatabaseResourceResource,
 		NewProxyEKSClusterResourceResource,
+		NewProxyEKSServiceAccountResourceResource,
 	}
 }
 
@@ -362,4 +363,7 @@ func NewRDSDatabaseResourceResource() resource.Resource {
 }
 func NewProxyEKSClusterResourceResource() resource.Resource {
 	return &proxy.EKSClusterResource{}
+}
+func NewProxyEKSServiceAccountResourceResource() resource.Resource {
+	return &proxy.EKSServiceAccountResource{}
 }
