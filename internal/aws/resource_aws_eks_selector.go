@@ -72,8 +72,6 @@ func (r *AWSEKSSelectorResource) Configure(_ context.Context, req resource.Confi
 	r.client = client
 }
 
-// GetSchema defines the schema for the data source.
-// schema is based off the governance api
 func (r *AWSEKSSelectorResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 
 	resp.Schema = schema.Schema{
