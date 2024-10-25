@@ -36,7 +36,6 @@ func (s AWSEKSSelector) ToAPI() *configv1alpha1.Selector {
 	}
 }
 
-// AWSEKSSelectorResource is the data source implementation.
 type AWSEKSSelectorResource struct {
 	client *configsvc.Client
 }
@@ -47,12 +46,10 @@ var (
 	_ resource.ResourceWithImportState = &AWSEKSSelectorResource{}
 )
 
-// Metadata returns the data source type name.
 func (r *AWSEKSSelectorResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_aws_eks_selector"
 }
 
-// Configure adds the provider configured client to the data source.
 func (r *AWSEKSSelectorResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return

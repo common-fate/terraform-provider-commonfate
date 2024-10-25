@@ -36,12 +36,10 @@ var (
 	_ resource.ResourceWithImportState = &AWSEKSAvailabilityResource{}
 )
 
-// Metadata returns the data source type name.
 func (r *AWSEKSAvailabilityResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_eks_availability"
 }
 
-// Configure adds the provider configured client to the data source.
 func (r *AWSEKSAvailabilityResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
@@ -61,8 +59,6 @@ func (r *AWSEKSAvailabilityResource) Configure(_ context.Context, req resource.C
 	r.client = client
 }
 
-// GetSchema defines the schema for the data source.
-// schema is based off the governance api
 func (r *AWSEKSAvailabilityResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 
 	resp.Schema = schema.Schema{
