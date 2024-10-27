@@ -84,7 +84,7 @@ func (r *AWSEKSAvailabilityResource) Schema(ctx context.Context, req resource.Sc
 				Required:            true,
 			},
 			"aws_eks_cluster_id": schema.StringAttribute{
-				MarkdownDescription: "The role to make available. Should be an AWS::EKS::Cluster id.",
+				MarkdownDescription: "The EKS target to make available. Should be an AWS::EKS::Cluster id.",
 				Required:            true,
 			},
 			"aws_identity_store_id": schema.StringAttribute{
