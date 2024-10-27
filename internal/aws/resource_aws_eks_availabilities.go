@@ -17,7 +17,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-type AWSEKSAvailability struct {
+type AWSEKSAvailabilities struct {
 	ID                     types.String `tfsdk:"id"`
 	WorkflowID             types.String `tfsdk:"workflow_id"`
 	AWSEKSServiceAccountID types.String `tfsdk:"aws_eks_service_account_id"`
@@ -26,21 +26,21 @@ type AWSEKSAvailability struct {
 	RolePriority           types.Int64  `tfsdk:"role_priority"`
 }
 
-type AWSEKSAvailabilityResource struct {
+type AWSEKSAvailabilitiesResource struct {
 	client *configsvc.Client
 }
 
 var (
-	_ resource.Resource                = &AWSEKSAvailabilityResource{}
-	_ resource.ResourceWithConfigure   = &AWSEKSAvailabilityResource{}
-	_ resource.ResourceWithImportState = &AWSEKSAvailabilityResource{}
+	_ resource.Resource                = &AWSEKSAvailabilitiesResource{}
+	_ resource.ResourceWithConfigure   = &AWSEKSAvailabilitiesResource{}
+	_ resource.ResourceWithImportState = &AWSEKSAvailabilitiesResource{}
 )
 
-func (r *AWSEKSAvailabilityResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_eks_availability"
+func (r *AWSEKSAvailabilitiesResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_eks_availabilities"
 }
 
-func (r *AWSEKSAvailabilityResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *AWSEKSAvailabilitiesResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -59,7 +59,7 @@ func (r *AWSEKSAvailabilityResource) Configure(_ context.Context, req resource.C
 	r.client = client
 }
 
-func (r *AWSEKSAvailabilityResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *AWSEKSAvailabilitiesResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 
 	resp.Schema = schema.Schema{
 		Description: "A specifier to make a single AWS EKS resource available for selection under a particular Access Workflow",
@@ -96,7 +96,7 @@ func (r *AWSEKSAvailabilityResource) Schema(ctx context.Context, req resource.Sc
 	}
 }
 
-func (r *AWSEKSAvailabilityResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+func (r *AWSEKSAvailabilitiesResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 
 	if r.client == nil {
 		resp.Diagnostics.AddError(
@@ -106,7 +106,7 @@ func (r *AWSEKSAvailabilityResource) Create(ctx context.Context, req resource.Cr
 
 		return
 	}
-	var data *AWSEKSAvailability
+	var data *AWSEKSAvailabilities
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -162,7 +162,7 @@ func (r *AWSEKSAvailabilityResource) Create(ctx context.Context, req resource.Cr
 }
 
 // Read refreshes the Terraform state with the latest data.
-func (r *AWSEKSAvailabilityResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+func (r *AWSEKSAvailabilitiesResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	if r.client == nil {
 		resp.Diagnostics.AddError(
 			"Unconfigured HTTP Client",
@@ -171,7 +171,7 @@ func (r *AWSEKSAvailabilityResource) Read(ctx context.Context, req resource.Read
 
 		return
 	}
-	var state AWSEKSAvailability
+	var state AWSEKSAvailabilities
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
@@ -204,14 +204,14 @@ func (r *AWSEKSAvailabilityResource) Read(ctx context.Context, req resource.Read
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }
 
-func (r *AWSEKSAvailabilityResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *AWSEKSAvailabilitiesResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	if r.client == nil {
 		resp.Diagnostics.AddError(
 			"Unconfigured HTTP Client",
 			"Expected configured HTTP client. Please report this issue to the provider developers.",
 		)
 	}
-	var data AWSEKSAvailability
+	var data AWSEKSAvailabilities
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -251,16 +251,16 @@ func (r *AWSEKSAvailabilityResource) Update(ctx context.Context, req resource.Up
 
 	if connectErr, ok := err.(*connect.Error); ok && connectErr.Code() == connect.CodeNotFound {
 		resp.Diagnostics.AddError(
-			"AWS EKS Availability Not Found",
-			"The requested AWS EKS Availability no longer exists. "+
+			"AWS EKS Availabilities Not Found",
+			"The requested AWS EKS Availabilities no longer exists. "+
 				"It may have been deleted or otherwise removed.\n"+
-				"Please create a new Availability.",
+				"Please create a new Availabilities.",
 		)
 
 		return
 	} else if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to update AWS EKS Availability",
+			"Unable to update AWS EKS Availabilities",
 			"An unexpected error occurred while communicating with Common Fate API. "+
 				"Please report this issue to the provider developers.\n\n"+
 				"JSON Error: "+err.Error(),
@@ -276,14 +276,14 @@ func (r *AWSEKSAvailabilityResource) Update(ctx context.Context, req resource.Up
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *AWSEKSAvailabilityResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+func (r *AWSEKSAvailabilitiesResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	if r.client == nil {
 		resp.Diagnostics.AddError(
 			"Unconfigured HTTP Client",
 			"Expected configured HTTP client. Please report this issue to the provider developers.",
 		)
 	}
-	var data *AWSEKSAvailability
+	var data *AWSEKSAvailabilities
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -312,7 +312,7 @@ func (r *AWSEKSAvailabilityResource) Delete(ctx context.Context, req resource.De
 	}
 }
 
-func (r *AWSEKSAvailabilityResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *AWSEKSAvailabilitiesResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	// Retrieve import ID and save to id attribute
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
