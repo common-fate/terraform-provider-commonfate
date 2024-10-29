@@ -1,5 +1,11 @@
 # @common-fate/terraform-provider-commonfate
 
+## 2.27.1
+
+### Patch Changes
+
+- d6a2c55: Fix unused field from Jira integration resource
+
 ## 2.27.0
 
 ### Minor Changes

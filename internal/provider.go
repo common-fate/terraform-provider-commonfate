@@ -180,6 +180,9 @@ func (p *CommonFateProvider) Resources(_ context.Context) []func() resource.Reso
 		NewRDSDatabaseResourceResource,
 		NewProxyEKSClusterResourceResource,
 		NewProxyEKSServiceAccountResourceResource,
+		NewAWSEKSSelectorResource,
+		NewAWSEKSAvailabilitiesResource,
+		NewAWSEKSAvailabilityResource,
 	}
 }
 
@@ -290,6 +293,17 @@ func NewAWSRDSDatabaseAvailabilitiesResource() resource.Resource {
 func NewAWSRDSDatabaseAvailabilityResource() resource.Resource {
 	return &aws.AWSRDSDatabaseAvailabilityResource{}
 }
+
+func NewAWSEKSSelectorResource() resource.Resource {
+	return &aws.AWSEKSSelectorResource{}
+}
+func NewAWSEKSAvailabilitiesResource() resource.Resource {
+	return &aws.AWSEKSAvailabilitiesResource{}
+}
+func NewAWSEKSAvailabilityResource() resource.Resource {
+	return &aws.AWSEKSAvailabilityResource{}
+}
+
 func NewAWSIDCGroupAvailabilitiesResource() resource.Resource {
 	return &aws.AWSIDCGroupAvailabilitiesResource{}
 }
