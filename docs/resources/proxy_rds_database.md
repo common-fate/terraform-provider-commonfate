@@ -42,6 +42,7 @@ Required:
 
 Optional:
 
+- `default_local_port` (Number) The default local port to use for the user when running `granted rds proxy`
 - `endpoint` (String) Override default endpoint behaviour by specifying a endpoint on a per user basis.
 
 
