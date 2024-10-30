@@ -13,6 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -40,6 +41,7 @@ type DatabaseUser struct {
 	UserName                  types.String `tfsdk:"username"`
 	PasswordSecretsManagerARN types.String `tfsdk:"password_secrets_manager_arn"`
 	Endpoint                  types.String `tfsdk:"endpoint"`
+	DefaultLocalPort          types.Int64  `tfsdk:"default_local_port"`
 }
 
 // AccessRuleResource is the data source implementation.
@@ -148,6 +150,12 @@ func (r *RDSDatabaseResource) Schema(ctx context.Context, req resource.SchemaReq
 							MarkdownDescription: "Override default endpoint behaviour by specifying a endpoint on a per user basis.",
 							Optional:            true,
 						},
+						"default_local_port": schema.Int64Attribute{
+							MarkdownDescription: "The default local port to use for the user when running `granted rds proxy`",
+							Optional:            true,
+							Default:             int64default.StaticInt64(0),
+							Computed:            true,
+						},
 					},
 				},
 			},
@@ -195,6 +203,7 @@ func (r *RDSDatabaseResource) Create(ctx context.Context, req resource.CreateReq
 			Name:                      user.Name.ValueString(),
 			Username:                  user.UserName.ValueString(),
 			PasswordSecretsManagerArn: user.PasswordSecretsManagerARN.ValueString(),
+			DefaultLocalPort:          uint32(user.DefaultLocalPort.ValueInt64()),
 		}
 
 		if user.Endpoint.ValueString() != "" {
@@ -262,8 +271,25 @@ func (r *RDSDatabaseResource) Read(ctx context.Context, req resource.ReadRequest
 	}
 
 	// refresh state
-
-	state.ID = types.StringValue(res.Msg.Id)
+	state = RDSDatabaseModel{
+		ID:           types.StringValue(res.Msg.Id),
+		InstanceID:   types.StringValue(res.Msg.RdsDatabase.InstanceId),
+		Name:         types.StringValue(res.Msg.RdsDatabase.Name),
+		Engine:       types.StringValue(res.Msg.RdsDatabase.Engine),
+		Endpoint:     types.StringValue(res.Msg.RdsDatabase.Endpoint),
+		Region:       types.StringValue(res.Msg.RdsDatabase.Region),
+		AWSAccountID: types.StringValue(res.Msg.RdsDatabase.Account),
+		Database:     types.StringValue(res.Msg.RdsDatabase.Database),
+		ProxyId:      types.StringValue(res.Msg.ProxyId),
+	}
+	for _, user := range res.Msg.RdsDatabase.Users {
+		state.Users = append(state.Users, DatabaseUser{
+			Name:                      types.StringValue(user.Name),
+			UserName:                  types.StringValue(user.Username),
+			PasswordSecretsManagerARN: types.StringValue(user.PasswordSecretsManagerArn),
+			DefaultLocalPort:          types.Int64Value(int64(user.DefaultLocalPort)),
+		})
+	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }
@@ -308,6 +334,7 @@ func (r *RDSDatabaseResource) Update(ctx context.Context, req resource.UpdateReq
 			Name:                      user.Name.ValueString(),
 			Username:                  user.UserName.ValueString(),
 			PasswordSecretsManagerArn: user.PasswordSecretsManagerARN.ValueString(),
+			DefaultLocalPort:          uint32(user.DefaultLocalPort.ValueInt64()),
 		}
 
 		if user.Endpoint.ValueString() != "" {
