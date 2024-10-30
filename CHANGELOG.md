@@ -1,5 +1,15 @@
 # @common-fate/terraform-provider-commonfate
 
+## 2.28.0
+
+### Minor Changes
+
+- 7da8aa4: Adds EKS Proxy resources
+
+### Patch Changes
+
+- c4057c8: Add strongly typed availability and selector resources for EKS.
+
 ## 2.27.1
 
 ### Patch Changes
