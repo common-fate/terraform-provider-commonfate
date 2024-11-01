@@ -178,6 +178,8 @@ func (p *CommonFateProvider) Resources(_ context.Context) []func() resource.Reso
 		aws.NewAWSResourceScannerResource,
 		NewEcsProxyResource,
 		NewRDSDatabaseResourceResource,
+		NewProxyEKSClusterResourceResource,
+		NewProxyEKSServiceAccountResourceResource,
 		NewAWSEKSSelectorResource,
 		NewAWSEKSAvailabilitiesResource,
 		NewAWSEKSAvailabilityResource,
@@ -372,4 +374,10 @@ func NewEcsProxyDatasource() datasource.DataSource {
 
 func NewRDSDatabaseResourceResource() resource.Resource {
 	return &proxy.RDSDatabaseResource{}
+}
+func NewProxyEKSClusterResourceResource() resource.Resource {
+	return &proxy.EKSClusterResource{}
+}
+func NewProxyEKSServiceAccountResourceResource() resource.Resource {
+	return &proxy.EKSServiceAccountResource{}
 }
