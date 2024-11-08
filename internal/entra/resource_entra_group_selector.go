@@ -95,7 +95,7 @@ func (r *EntraGroupSelectorResource) Schema(ctx context.Context, req resource.Sc
 			},
 
 			"when": schema.StringAttribute{
-				MarkdownDescription: "A Cedar expression with the criteria to match groups on, e.g: `resource.name contains \"production\"",
+				MarkdownDescription: "A Cedar expression with the criteria to match groups on, e.g: `resource.name like \"*production*\"",
 				Required:            true,
 			},
 		},

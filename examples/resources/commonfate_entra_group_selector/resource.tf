@@ -11,6 +11,6 @@ resource "commonfate_entra_group_selector" "name_contains" {
   name      = "Select Production Entra Groups"
   tenant_id = "00551d20-529d-478f-b1cb-fb04a2653e97"
   when      = <<EOF
-  resource.name contains "production"
+  resource.name like "*production*
   EOF
 }
