@@ -11,6 +11,6 @@ resource "commonfate_okta_group_selector" "name_contains" {
   name            = "Select Production Okta Groups"
   organization_id = "dev-12345678"
   when            = <<EOF
-  resource.name like "*production*
+  resource.name like "*production*"
   EOF
 }
