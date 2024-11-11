@@ -37,7 +37,7 @@ resource "commonfate_entra_group_selector" "name_contains" {
 
 - `id` (String) The ID of the selector
 - `tenant_id` (String) The Entra Tenant ID
-- `when` (String) A Cedar expression with the criteria to match groups on, e.g: `resource.name like "*production*"
+- `when` (String) A Cedar expression with the criteria to match groups on, e.g: `resource.name like "*production*"`
 
 ### Optional
 
