@@ -25,7 +25,7 @@ resource "commonfate_entra_group_selector" "name_contains" {
   name      = "Select Production Entra Groups"
   tenant_id = "00551d20-529d-478f-b1cb-fb04a2653e97"
   when      = <<EOF
-  resource.name contains "production"
+  resource.name like "*production*"
   EOF
 }
 ```
@@ -37,7 +37,7 @@ resource "commonfate_entra_group_selector" "name_contains" {
 
 - `id` (String) The ID of the selector
 - `tenant_id` (String) The Entra Tenant ID
-- `when` (String) A Cedar expression with the criteria to match groups on, e.g: `resource.name contains "production"
+- `when` (String) A Cedar expression with the criteria to match groups on, e.g: `resource.name like "*production*"`
 
 ### Optional
 

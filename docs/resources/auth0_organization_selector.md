@@ -19,7 +19,7 @@ A Selector to match Auth0 Organizations with a criteria based on the 'when' fiel
 
 - `auth0_tenant_id` (String) The Auth0 Tenant ID
 - `id` (String) The ID of the selector
-- `when` (String) A Cedar expression with the criteria to match groups on, e.g: `resource.name contains "production"
+- `when` (String) A Cedar expression with the criteria to match groups on, e.g: `resource.name like "*production*"`
 
 ### Optional
 
