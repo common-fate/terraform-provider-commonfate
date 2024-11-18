@@ -185,6 +185,9 @@ func (p *CommonFateProvider) Resources(_ context.Context) []func() resource.Reso
 		NewAWSEKSAvailabilitiesResource,
 		NewAWSEKSAvailabilityResource,
 		NewSnowflakeIntegrationResource,
+		NewSnowflakeAccountAvailabilityResource,
+		NewSnowflakeDatabaseAvailabilitiesResource,
+		NewSnowflakeDatabaseSelectorResource,
 	}
 }
 
@@ -385,4 +388,13 @@ func NewProxyEKSServiceAccountResourceResource() resource.Resource {
 }
 func NewSnowflakeIntegrationResource() resource.Resource {
 	return &snowflake.SnowflakeIntegrationResource{}
+}
+func NewSnowflakeAccountAvailabilityResource() resource.Resource {
+	return &snowflake.SnowflakeAccountAvailabilityResource{}
+}
+func NewSnowflakeDatabaseAvailabilitiesResource() resource.Resource {
+	return &snowflake.SnowflakeDatabaseAvailabilitiesResource{}
+}
+func NewSnowflakeDatabaseSelectorResource() resource.Resource {
+	return &snowflake.SnowflakeDatabaseSelectorResource{}
 }
