@@ -24,8 +24,9 @@ import (
 )
 
 type Validations struct {
-	HasReason   types.Bool        `tfsdk:"has_reason"`
-	ReasonRegex []RegexValidation `tfsdk:"reason_regex"`
+	HasReason     types.Bool        `tfsdk:"has_reason"`
+	ReasonRegex   []RegexValidation `tfsdk:"reason_regex"`
+	HasJiraTicket types.Bool        `tfsdk:"has_jira_ticket"`
 }
 
 type RegexValidation struct {
@@ -168,6 +169,12 @@ func (r *AccessWorkflowResource) Schema(ctx context.Context, req resource.Schema
 							},
 						},
 					},
+					"has_jira_ticket": schema.BoolAttribute{
+						MarkdownDescription: "Whether a jira ticket is required for this workflow",
+						Optional:            true,
+						Computed:            true,
+						Default:             booldefault.StaticBool(false),
+					},
 				},
 			},
 			"extension_conditions": schema.SingleNestedAttribute{
@@ -273,8 +280,9 @@ func (r *AccessWorkflowResource) Create(ctx context.Context, req resource.Create
 		}
 
 		createReq.Validation = &configv1alpha1.ValidationConfig{
-			HasReason:   data.Validation.HasReason.ValueBool(),
-			ReasonRegex: regexValidations,
+			HasReason:     data.Validation.HasReason.ValueBool(),
+			ReasonRegex:   regexValidations,
+			HasJiraTicket: data.Validation.HasJiraTicket.ValueBool(),
 		}
 	}
 
@@ -403,8 +411,9 @@ func (r *AccessWorkflowResource) Read(ctx context.Context, req resource.ReadRequ
 		}
 
 		state.Validation = &Validations{
-			HasReason:   types.BoolValue(res.Msg.Workflow.Validation.HasReason),
-			ReasonRegex: regexValidations,
+			HasReason:     types.BoolValue(res.Msg.Workflow.Validation.HasReason),
+			ReasonRegex:   regexValidations,
+			HasJiraTicket: types.BoolValue(res.Msg.Workflow.Validation.HasJiraTicket),
 		}
 	}
 
@@ -488,8 +497,9 @@ func (r *AccessWorkflowResource) Update(ctx context.Context, req resource.Update
 		}
 
 		updateReq.Workflow.Validation = &configv1alpha1.ValidationConfig{
-			HasReason:   data.Validation.HasReason.ValueBool(),
-			ReasonRegex: regexValidations,
+			HasReason:     data.Validation.HasReason.ValueBool(),
+			ReasonRegex:   regexValidations,
+			HasJiraTicket: data.Validation.HasJiraTicket.ValueBool(),
 		}
 	}
 
