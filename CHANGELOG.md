@@ -1,5 +1,15 @@
 # @common-fate/terraform-provider-commonfate
 
+## 2.29.0
+
+### Minor Changes
+
+- 51007fa: Add Snowflake integration
+
+### Patch Changes
+
+- 4f4b6d5: Fix docs which referred to an invalid cedar when expression example for resource.name containing a substring
+
 ## 2.28.0
 
 ### Minor Changes
