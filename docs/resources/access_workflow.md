@@ -83,6 +83,7 @@ Required:
 
 Optional:
 
+- `has_jira_ticket` (Boolean) Whether a jira ticket is required for this workflow
 - `has_reason` (Boolean) Whether a reason is required for this workflow
 - `reason_regex` (Attributes List) Regex validation requirements for the reason (see [below for nested schema](#nestedatt--validation--reason_regex))
 
