@@ -1,5 +1,11 @@
 # @common-fate/terraform-provider-commonfate
 
+## 2.29.1
+
+### Patch Changes
+
+- a9e6218: Add has_jira_ticket to workflow validation block
+
 ## 2.29.0
 
 ### Minor Changes
