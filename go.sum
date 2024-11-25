@@ -44,6 +44,8 @@ github.com/common-fate/sdk v1.68.0 h1:Dh4C7oDlmiHRmeDI4TkVkQtM/eAoFqJERo2nKGG/Od
 github.com/common-fate/sdk v1.68.0/go.mod h1:OrXhzB2Y1JSrKGHrb4qRmY+6MF2M3MFb+3edBnessXo=
 github.com/common-fate/sdk v1.70.1-0.20241122042851-f058c24acb42 h1:d6Pdla8OFHzCVK0FwyN2EOj8Q6AnpagqvVOAU0mV3/s=
 github.com/common-fate/sdk v1.70.1-0.20241122042851-f058c24acb42/go.mod h1:OrXhzB2Y1JSrKGHrb4qRmY+6MF2M3MFb+3edBnessXo=
+github.com/common-fate/sdk v1.71.0 h1:SA+KZdbkOWBR6SrTculoUlALAGj6ftULdUPgr3Yw7RY=
+github.com/common-fate/sdk v1.71.0/go.mod h1:OrXhzB2Y1JSrKGHrb4qRmY+6MF2M3MFb+3edBnessXo=
 github.com/cyphar/filepath-securejoin v0.2.4 h1:Ugdm7cg7i6ZK6x3xDF1oEu1nfkyfH53EtKeQYTC3kyg=
 github.com/cyphar/filepath-securejoin v0.2.4/go.mod h1:aPGpWjXOXUn2NCNjFvBE6aRxGGx79pTxQpKOJNYHHl4=
 github.com/danieljoos/wincred v1.1.2 h1:QLdCxFs1/Yl4zduvBdcHB8goaYk9RARS2SgLLRuAyr0=
