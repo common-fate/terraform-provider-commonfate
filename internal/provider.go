@@ -19,6 +19,7 @@ import (
 	"github.com/common-fate/terraform-provider-commonfate/internal/pagerduty"
 	"github.com/common-fate/terraform-provider-commonfate/internal/proxy"
 	"github.com/common-fate/terraform-provider-commonfate/internal/slack"
+	"github.com/common-fate/terraform-provider-commonfate/internal/snowflake"
 	"github.com/common-fate/terraform-provider-commonfate/internal/webhook"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
@@ -183,6 +184,10 @@ func (p *CommonFateProvider) Resources(_ context.Context) []func() resource.Reso
 		NewAWSEKSSelectorResource,
 		NewAWSEKSAvailabilitiesResource,
 		NewAWSEKSAvailabilityResource,
+		NewSnowflakeIntegrationResource,
+		NewSnowflakeAccountAvailabilityResource,
+		NewSnowflakeDatabaseAvailabilitiesResource,
+		NewSnowflakeDatabaseSelectorResource,
 	}
 }
 
@@ -380,4 +385,16 @@ func NewProxyEKSClusterResourceResource() resource.Resource {
 }
 func NewProxyEKSServiceAccountResourceResource() resource.Resource {
 	return &proxy.EKSServiceAccountResource{}
+}
+func NewSnowflakeIntegrationResource() resource.Resource {
+	return &snowflake.SnowflakeIntegrationResource{}
+}
+func NewSnowflakeAccountAvailabilityResource() resource.Resource {
+	return &snowflake.SnowflakeAccountAvailabilityResource{}
+}
+func NewSnowflakeDatabaseAvailabilitiesResource() resource.Resource {
+	return &snowflake.SnowflakeDatabaseAvailabilitiesResource{}
+}
+func NewSnowflakeDatabaseSelectorResource() resource.Resource {
+	return &snowflake.SnowflakeDatabaseSelectorResource{}
 }

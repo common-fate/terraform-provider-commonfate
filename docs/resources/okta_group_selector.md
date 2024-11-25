@@ -25,7 +25,7 @@ resource "commonfate_okta_group_selector" "name_contains" {
   name            = "Select Production Okta Groups"
   organization_id = "dev-12345678"
   when            = <<EOF
-  resource.name contains "production"
+  resource.name like "*production*"
   EOF
 }
 ```
@@ -37,7 +37,7 @@ resource "commonfate_okta_group_selector" "name_contains" {
 
 - `id` (String) The ID of the selector
 - `organization_id` (String) The Okta Organization ID
-- `when` (String) A Cedar expression with the criteria to match groups on, e.g: `resource.name contains "production"
+- `when` (String) A Cedar expression with the criteria to match groups on, e.g: `resource.name like "*production*"`
 
 ### Optional
 

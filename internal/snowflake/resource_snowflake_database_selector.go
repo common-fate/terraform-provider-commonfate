@@ -1,4 +1,4 @@
-package auth0
+package snowflake
 
 import (
 	"context"
@@ -16,44 +16,44 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-type Auth0OrganizationSelector struct {
-	ID       types.String `tfsdk:"id"`
-	Name     types.String `tfsdk:"name"`
-	TenantID types.String `tfsdk:"auth0_tenant_id"`
-	When     types.String `tfsdk:"when"`
+type SnowflakeDatabaseSelector struct {
+	ID        types.String `tfsdk:"id"`
+	Name      types.String `tfsdk:"name"`
+	AccountID types.String `tfsdk:"snowflake_account_id"`
+	When      types.String `tfsdk:"when"`
 }
 
-func (s Auth0OrganizationSelector) ToAPI() *configv1alpha1.Selector {
+func (s SnowflakeDatabaseSelector) ToAPI() *configv1alpha1.Selector {
 	return &configv1alpha1.Selector{
 		Id:           s.ID.ValueString(),
 		Name:         s.Name.ValueString(),
-		ResourceType: "Auth0::Organization",
+		ResourceType: "Snowflake::Database",
 		BelongingTo: &entityv1alpha1.EID{
-			Type: "Auth0::Tenant",
-			Id:   s.TenantID.ValueString(),
+			Type: "Snowflake::Account",
+			Id:   s.AccountID.ValueString(),
 		},
 		When: s.When.ValueString(),
 	}
 }
 
 // AccessRuleResource is the data source implementation.
-type Auth0OrganizationSelectorResource struct {
+type SnowflakeDatabaseSelectorResource struct {
 	client *configsvc.Client
 }
 
 var (
-	_ resource.Resource                = &Auth0OrganizationSelectorResource{}
-	_ resource.ResourceWithConfigure   = &Auth0OrganizationSelectorResource{}
-	_ resource.ResourceWithImportState = &Auth0OrganizationSelectorResource{}
+	_ resource.Resource                = &SnowflakeDatabaseSelectorResource{}
+	_ resource.ResourceWithConfigure   = &SnowflakeDatabaseSelectorResource{}
+	_ resource.ResourceWithImportState = &SnowflakeDatabaseSelectorResource{}
 )
 
 // Metadata returns the data source type name.
-func (r *Auth0OrganizationSelectorResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_auth0_organization_selector"
+func (r *SnowflakeDatabaseSelectorResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_snowflake_database_selector"
 }
 
 // Configure adds the provider configured client to the data source.
-func (r *Auth0OrganizationSelectorResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *SnowflakeDatabaseSelectorResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -74,10 +74,10 @@ func (r *Auth0OrganizationSelectorResource) Configure(_ context.Context, req res
 
 // GetSchema defines the schema for the data source.
 // schema is based off the governance api
-func (r *Auth0OrganizationSelectorResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *SnowflakeDatabaseSelectorResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 
 	resp.Schema = schema.Schema{
-		Description: "A Selector to match Auth0 Organizations with a criteria based on the 'when' field.",
+		Description: "A Selector to match Snowflake Databases with a criteria based on the 'when' field.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				MarkdownDescription: "The ID of the selector",
@@ -85,25 +85,25 @@ func (r *Auth0OrganizationSelectorResource) Schema(ctx context.Context, req reso
 			},
 
 			"name": schema.StringAttribute{
-				MarkdownDescription: "The unique name of the selector. Call this something memorable and relevant to the resources being selected. For example: `prod-data-eng`",
+				MarkdownDescription: "The unique name of the selector. Call this something memorable and relevant to the resources being selected. For example: `prod-database-eng`",
 				Optional:            true,
 			},
 
-			"auth0_tenant_id": schema.StringAttribute{
-				MarkdownDescription: "The Auth0 Tenant ID",
+			"snowflake_account_id": schema.StringAttribute{
+				MarkdownDescription: "The Snowflake Account ID",
 				Required:            true,
 			},
 
 			"when": schema.StringAttribute{
-				MarkdownDescription: "A Cedar expression with the criteria to match groups on, e.g: `resource.name like \"*production*\"`",
+				MarkdownDescription: "A Cedar expression with the criteria to match resources on, e.g: `resource.tag_keys contains \"production\"`",
 				Required:            true,
 			},
 		},
-		MarkdownDescription: `A Selector to match Auth0 Organizations with a criteria based on the 'when' field.`,
+		MarkdownDescription: `A Selector to match Snowflake Databases with a criteria based on the 'when' field.`,
 	}
 }
 
-func (r *Auth0OrganizationSelectorResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+func (r *SnowflakeDatabaseSelectorResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 
 	if r.client == nil {
 		resp.Diagnostics.AddError(
@@ -113,7 +113,7 @@ func (r *Auth0OrganizationSelectorResource) Create(ctx context.Context, req reso
 
 		return
 	}
-	var data *Auth0OrganizationSelector
+	var data *SnowflakeDatabaseSelector
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -153,7 +153,7 @@ func (r *Auth0OrganizationSelectorResource) Create(ctx context.Context, req reso
 }
 
 // Read refreshes the Terraform state with the latest data.
-func (r *Auth0OrganizationSelectorResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+func (r *SnowflakeDatabaseSelectorResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	if r.client == nil {
 		resp.Diagnostics.AddError(
 			"Unconfigured HTTP Client",
@@ -162,7 +162,7 @@ func (r *Auth0OrganizationSelectorResource) Read(ctx context.Context, req resour
 
 		return
 	}
-	var state Auth0OrganizationSelector
+	var state SnowflakeDatabaseSelector
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
@@ -184,20 +184,20 @@ func (r *Auth0OrganizationSelectorResource) Read(ctx context.Context, req resour
 	}
 
 	state.Name = types.StringValue(res.Msg.Selector.Name)
-	state.TenantID = types.StringValue(res.Msg.Selector.BelongingTo.Id)
+	state.AccountID = types.StringValue(res.Msg.Selector.BelongingTo.Id)
 	state.When = types.StringValue(res.Msg.Selector.When)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }
 
-func (r *Auth0OrganizationSelectorResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *SnowflakeDatabaseSelectorResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	if r.client == nil {
 		resp.Diagnostics.AddError(
 			"Unconfigured HTTP Client",
 			"Expected configured HTTP client. Please report this issue to the provider developers.",
 		)
 	}
-	var data Auth0OrganizationSelector
+	var data SnowflakeDatabaseSelector
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -233,14 +233,14 @@ func (r *Auth0OrganizationSelectorResource) Update(ctx context.Context, req reso
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *Auth0OrganizationSelectorResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+func (r *SnowflakeDatabaseSelectorResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	if r.client == nil {
 		resp.Diagnostics.AddError(
 			"Unconfigured HTTP Client",
 			"Expected configured HTTP client. Please report this issue to the provider developers.",
 		)
 	}
-	var data *Auth0OrganizationSelector
+	var data *SnowflakeDatabaseSelector
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -269,7 +269,7 @@ func (r *Auth0OrganizationSelectorResource) Delete(ctx context.Context, req reso
 	}
 }
 
-func (r *Auth0OrganizationSelectorResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *SnowflakeDatabaseSelectorResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	// Retrieve import ID and save to id attribute
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
